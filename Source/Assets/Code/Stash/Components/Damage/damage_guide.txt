@@ -1,0 +1,54 @@
+
+Setting up Physics2D layers:
+
+- Make the following layers: PlayerHitBox, EnemyHitBox, AnyHitBox, PlayerHurtBox, EnemyHurtBox, AnyHurtBox.
+- PlayerHitBox collides with EnemyHurtBox and AnyHurtBox.
+- EnemyHitBox collides with PlayerHurtBox and AnyHurtBox.
+- AnyHitBox collides with PlayerHurtBox, EnemyHurtBox and AnyHurtBox.
+
+Receiving damage:
+
+- Attach the ReceivesDamage component to the gameObject (preferrably at the root of the gameObject).
+- Receive damage by calling receivesDamage.receiveDamage(AttackInfo ai).
+- The gameObject can have components that receive these events:
+	void PreReceiveDamage(AttackInfo ai) { } - sent just before damage is subtracted from health.  The AttackInfo ai can be modified here (such as setting ai.damage to 0 to cancel taking damage)
+    void OnReceiveDamage(AttackInfo ai) { } - sent just after receiving damage.
+
+Creating Hurtboxes for receiving damage:
+
+- Complete the above steps to get a ReceivesDamage component on the root gameObject.
+- For each hurtbox:
+	- Create a child gameObject.
+	- Make Collider2D trigger(s) in the child to represent the hurtbox.
+	- Set the layer to PlayerHurtBox, EnemyHurtBox, or AnyHurtBox.
+	- Attach the HurtObject component.
+- Receive damage by calling hurtObject.receiveDamage(AttackInfo ai).
+	- Hurtbox will then call receiveDamage(AttackInfo ai) of the parent's ReceivesDamage component.
+- HurtObjects can be disabled to disable receiving damage.
+
+Dealing damage (direct way):
+
+- Call receiveDamage(AttackInfo ai) of a gameObject's ReceivesDamage component.
+
+Dealing damage with hitboxes:
+
+- For each hitbox:
+	- Create a child gameObject (or not, but this is recommended).
+	- Make Collider2D trigger(s) in the child to represent the hitbox.
+	- Set the layer to PlayerHitBox, EnemyHitBox, or AnyHitBox.
+	- Attach the HitObject component.
+- Whenever a HitObject collides with a HurtObject (using OnTriggerStay2D), hitObject will call hurtObject's receiveDamage(AttackInfo ai).
+- HitObjects can be disabled to disable dealing damage.
+- HitObjects will store the HurtObjects (specifically unique HurtObject ID's) it collided with in a "hurt record".
+	- If a HurtObject is already in the hurt record, it will not be collided with.
+	- HurtObjects are automatically removed from the hurt record on OnTriggerExit2D event (but this may be unreliable).
+	- The hurt record can be cleared manually by calling hitObject.hurtRecordClear().
+
+Dealing damage with hitboxes and receiving messages for it:
+
+- Follow the above steps to create hitboxes.
+- Attach the DealsDamage component to the root gameObject.
+- Hitboxes will now call dealsDamage.dealDamage(HurtObject hurtObject, AttackInfo ai) instead of dealing damage directly.
+- The gameObject can have component that receive these events:
+	void PreDealDamage(AttackInfo ai) { } - sent before dealing damage (and before PreReceiveDamage is sent).  The AttackInfo ai can be modified here for custom tweaking.
+	void OnDealDamage(AttackInfo ai) { } - sent on dealing damage (after OnReceiveDamage is sent).
