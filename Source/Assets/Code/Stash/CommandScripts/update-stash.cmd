@@ -1,10 +1,10 @@
-:: Uses KDiff3 to update this Stash folder from a destination 
+:: Uses KDiff3 to update code here from the Stash folder in BaseUnityProject.
 
 @echo OFF
 setlocal
 
 :: Absolute directory to update the Stash folder from:
-set SOURCE_DIRECTORY=D:\Mark\Gamedev\Projects\UnityCodeStash\Stash
+set SOURCE_DIRECTORY=D:\Mark\Gamedev\Projects\Unity Projects\BaseUnityProject\Source\Assets\Code\Stash
 
 :: The relative directory of this Stash folder:
 set DESTINATION_DIRECTORY=../.

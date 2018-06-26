@@ -12,12 +12,12 @@ public class M {
     public const float EPSILON = .0001f;
 
     /// <summary>
-    /// Calculates x mod y for floats.  Always returns a positive value.
+    /// Calculates the "floor mod", i.e. a mod b where the result has the same sign as b.
     /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    public static float fmod(float x, float y) {
-        return x - Mathf.Floor(x / y) * y;
+    /// <param name="a">The dividend.</param>
+    /// <param name="b">The divisor.</param>
+    public static float fmod(float a, float b) {
+        return a - Mathf.Floor(a / b) * b;
     }
 
     /// <summary>

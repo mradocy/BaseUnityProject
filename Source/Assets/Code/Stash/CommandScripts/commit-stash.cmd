@@ -1,4 +1,4 @@
-:: Uses KDiff3 to commit this Stash folder to a destination 
+:: Uses KDiff3 to commit code in the Stash folder to BaseUnityProject.
 
 @echo OFF
 setlocal
@@ -7,7 +7,7 @@ setlocal
 set SOURCE_DIRECTORY=../.
 
 :: Absolute directory to merge the Stash folder into into:
-set DESTINATION_DIRECTORY=D:\Mark\Gamedev\Projects\UnityCodeStash\Stash
+set DESTINATION_DIRECTORY=D:\Mark\Gamedev\Projects\Unity Projects\BaseUnityProject\Source\Assets\Code\Stash
 
 :: The (only) types of files to merge.
 set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;
