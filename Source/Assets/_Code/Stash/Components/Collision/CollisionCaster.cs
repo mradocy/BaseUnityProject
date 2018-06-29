@@ -5,7 +5,7 @@ using System;
 
 /// <summary>
 /// Provides collision tools without modifying anything.
-/// Performs short shape casts to check collision with nearby objects.
+/// Performs short shape casts to check collision with nearby objects.  Triggers are not detected.
 /// Shapes are defined by non-trigger colliders attached to the gameObject and its children.
 /// </summary>
 public class CollisionCaster : MonoBehaviour {
@@ -379,6 +379,11 @@ public class CollisionCaster : MonoBehaviour {
     /// <param name="originOffset">Offset to apply to the origins of the casts (in global space) just before performing the cast.</param>
     private void checkCasts(Vector2 directionVec, Direction normalRestriction, out int totalResults, float castDistance, Vector2 originOffset) {
 
+        // disable casts hitting triggers
+        bool prevQueriesHitTriggers = Physics2D.queriesHitTriggers;
+        Physics2D.queriesHitTriggers = false;
+
+        
         totalResults = 0;
 
         foreach (Collider2D c2d in colliders) {
@@ -424,6 +429,10 @@ public class CollisionCaster : MonoBehaviour {
             }
 
         }
+
+
+        // reset casts hitting triggers
+        Physics2D.queriesHitTriggers = prevQueriesHitTriggers;
 
     }
 
