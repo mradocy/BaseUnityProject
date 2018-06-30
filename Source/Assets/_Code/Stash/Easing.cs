@@ -147,6 +147,35 @@ public class Easing {
     }
 
     /// <summary>
+    /// Gradually changes a value towards a desired goal over time.
+    /// Taken from decompiled code for the Unity function of the same name.
+    /// </summary>
+    /// <param name="current">The current position.</param>
+    /// <param name="target">The position we are trying to reach.</param>
+    /// <param name="currentVelocity">The current velocity, this value is modified by the function every time you call it.</param>
+    /// <param name="smoothTime">Approximately the time it will take to reach the target. A smaller value will reach the target faster.</param>
+    /// <param name="maxSpeed">Clamps the maximum speed.</param>
+    /// <param name="deltaTime">The time since the last call to this function.</param>
+    public static float smoothDamp(float current, float target, ref float currentVelocity, float smoothTime, float maxSpeed, float deltaTime) {
+        smoothTime = Mathf.Max(0.0001f, smoothTime);
+        float num = 2f / smoothTime;
+        float num2 = num * deltaTime;
+        float num3 = 1f / (1f + num2 + 0.48f * num2 * num2 + 0.235f * num2 * num2 * num2);
+        float num4 = current - target;
+        float num6 = maxSpeed * smoothTime;
+        num4 = Mathf.Clamp(num4, -num6, num6);
+        target = current - num4;
+        float num7 = (currentVelocity + num * num4) * deltaTime;
+        currentVelocity = (currentVelocity - num * num7) * num3;
+        float ret = target + (num4 + num7) * num3;
+        if (target - current > 0f == ret > target) {
+            ret = target;
+            currentVelocity = (ret - target) / deltaTime;
+        }
+        return ret;
+    }
+
+    /// <summary>
     /// (THIS HAS NOT BEEN TESTED YET) Eases one value to another using a numeric spring.  To be called each frame.
     /// More info: http://allenchou.net/2015/04/game-math-numeric-springing-examples/
     /// </summary>
