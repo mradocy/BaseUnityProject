@@ -10,10 +10,10 @@ How to create a new Unity Project:
 
 * Go to Github.com and create a new repository.
 
-* ? Make the repository private
+* (Optional) Make the repository private
 * Use the default Unity .gitignore.
 
-* Copy the repository path (using HTTPS).  It should look like https://github.com/[username]/[project name].git
+* Copy the repository path (using HTTPS).  It should look like https://github.com/[username]/[project_name].git
 
 * Open SourceTree as an administrator.
 
@@ -29,7 +29,7 @@ How to create a new Unity Project:
 
 * Clone the repo that was just created in Github.
 
-* Set the destination directory to somewhere in the Projects folder.  e.g. if it's a unity project, set the destination to D:\Mark\Gamedev\Projects\Unity Projects\[project name].
+* Set the destination directory to somewhere in the Projects folder.  e.g. if it's a unity project, set the destination to D:\Mark\Gamedev\Projects\Unity Projects\[project_name].
 	* The folder must exist and be empty.
 
 ## PART 2: Copying the Base Unity Project
@@ -40,4 +40,4 @@ How to create a new Unity Project:
 
 * Run create-base-unity-project.cmd.  It will use KDiff3 to copy the files from BaseUnityProject to the new Unity project.
 
-- create-base-unity-project.cmd can then be deleted from the new Unity project.
+* create-base-unity-project.cmd can then be deleted from the new Unity project.
