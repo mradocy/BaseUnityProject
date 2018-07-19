@@ -16,7 +16,7 @@ set SOURCE_DIRECTORY=D:\Mark\Gamedev\Projects\Unity Projects\BaseUnityProject
 set DESTINATION_DIRECTORY=.
 
 :: Directories to ignore:
-set DIRECTORY_ANTI_PATTERNS=Testing;CVS;.deps;.svn;.hg;.git;.vs;Library;library;Temp;temp;Obj;obj;
+set DIRECTORY_ANTI_PATTERNS=Testing;CVS;.deps;.svn;.hg;.git;.vs;Library;library;Temp;temp;Obj;obj;ActionLogs;actionLogs
 
 :: Files to ignore:
 set FILE_ANTI_PATTERNS=Testing.meta;README.txt;README.txt.meta;*.sln;*.csproj;*.unityproj
