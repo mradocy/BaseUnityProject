@@ -278,7 +278,7 @@ public class CollisionCaster : MonoBehaviour {
     public static int layerMaskFromLayer(int layer) {
         int mask = 0;
         for (int i = 0; i < 32; i++) {
-            if (!Physics.GetIgnoreLayerCollision(layer, i)) mask = mask | (1 << i);
+            if (!Physics2D.GetIgnoreLayerCollision(layer, i)) mask = mask | (1 << i);
         }
         return mask;
     }
