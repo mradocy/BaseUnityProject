@@ -26,6 +26,14 @@ call kdiff3 "%SOURCE_DIRECTORY%" "%~dp0%DESTINATION_DIRECTORY%" -m --cs "FilePat
 
 
 
+:: Ensure folders in Assets have been created (empty folders aren't saved in git)
+if not exist "%~dp0Source\Assets\_Fonts" mkdir "%~dp0Source\Assets\_Fonts"
+if not exist "%~dp0Source\Assets\_Materials" mkdir "%~dp0Source\Assets\_Materials"
+if not exist "%~dp0Source\Assets\_Prefabs" mkdir "%~dp0Source\Assets\_Prefabs"
+if not exist "%~dp0Source\Assets\_Sprites" mkdir "%~dp0Source\Assets\_Sprites"
+
+
+
 :: more info on cmd scripts:
 :: - http://steve-jansen.github.io/guides/windows-batch-scripting/index.html
 :: - call /?
