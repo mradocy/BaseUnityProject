@@ -52,12 +52,15 @@ public class PolygonMesh : MonoBehaviour {
                     return;
                 }
             }
-            Vector2[] path = pc2d.GetPath(0);
-            Vector2[] pathPoints = new Vector2[path.Length];
-            for (int i = 0; i < path.Length; i++) {
-                pathPoints[i] = path[i] + pc2d.offset;
+            List<Vector2[]> paths = new List<Vector2[]>();
+            for (int i = 0; i < pc2d.pathCount; i++) {
+                Vector2[] path = pc2d.GetPath(i);
+                paths.Add(new Vector2[path.Length]);
+                for (int j = 0; j < path.Length; j++) {
+                    paths[i][j] = path[j] + pc2d.offset;
+                }
             }
-            setMeshFilter(pathPoints);
+            setMeshFilter(paths.ToArray());
             break;
 
         case PointsMode.BOX_COLLIDER_2D:
@@ -99,11 +102,32 @@ public class PolygonMesh : MonoBehaviour {
     }
 
     void setMeshFilter(Vector2[] points) {
-        if (points == null || points.Length < 2) {
+        if (points == null) {
+            clearMesh();
+            return;
+        }
+        List<Vector2[]> paths = new List<Vector2[]>();
+        paths.Add(points);
+        setMeshFilter(paths.ToArray());
+    }
+
+    void setMeshFilter(Vector2[][] paths) {
+        // clear mesh if too few points
+        if (paths == null) {
+            clearMesh();
+            return;
+        }
+        int numPoints = 0;
+        for (int i = 0; i < paths.Length; i++) {
+            if (paths[i] == null) continue;
+            numPoints += paths[i].Length;
+        }
+        if (numPoints < 3) {
             clearMesh();
             return;
         }
 
+        // select mesh
         Mesh mesh;
         if (Application.isPlaying) {
             mesh = meshFilter.mesh;
@@ -111,31 +135,61 @@ public class PolygonMesh : MonoBehaviour {
         } else {
             mesh = new Mesh();
         }
-
-        Vector3[] vertices = new Vector3[points.Length];
-        Vector2[] uvs = new Vector2[points.Length];
+        
+        // set vertices and find bounds
+        Vector3[] vertices = new Vector3[numPoints];
         float xMin = float.MaxValue;
         float xMax = float.MinValue;
         float yMin = float.MaxValue;
         float yMax = float.MinValue;
-        for (int i = 0; i < points.Length; i++) {
-            Vector2 pt = points[i];
-            vertices[i] = pt;
-            xMin = Mathf.Min(xMin, pt.x);
-            xMax = Mathf.Max(xMax, pt.x);
-            yMin = Mathf.Min(yMin, pt.y);
-            yMax = Mathf.Max(yMax, pt.y);
+        int pointCount = 0;
+        for (int i = 0; i < paths.Length; i++) {
+            if (paths[i] == null || paths[i].Length < 3) continue;
+            for (int j=0; j < paths[i].Length; j++) {
+                Vector2 pt = paths[i][j];
+                vertices[pointCount] = pt;
+                xMin = Mathf.Min(xMin, pt.x);
+                xMax = Mathf.Max(xMax, pt.x);
+                yMin = Mathf.Min(yMin, pt.y);
+                yMax = Mathf.Max(yMax, pt.y);
+                pointCount++;
+            }
         }
-        for (int i = 0; i < points.Length; i++) {
-            Vector2 pt = points[i];
-            uvs[i].x = (pt.x - xMin) / (xMax - xMin);
-            uvs[i].y = (pt.y - yMin) / (yMax - yMin);
-        }
-
         mesh.vertices = vertices;
-        mesh.uv = uvs;
-        mesh.triangles = new Triangulator(points).Triangulate();
 
+        // set uvs point positions relative to the bounds
+        Vector2[] uvs = new Vector2[numPoints];
+        pointCount = 0;
+        for (int i = 0; i < paths.Length; i++) {
+            if (paths[i] == null || paths[i].Length < 3) continue;
+            for (int j = 0; j < paths[i].Length; j++) {
+                Vector2 pt = paths[i][j];
+                uvs[pointCount].x = (pt.x - xMin) / (xMax - xMin);
+                uvs[pointCount].y = (pt.y - yMin) / (yMax - yMin);
+                pointCount++;
+            }
+        }
+        mesh.uv = uvs;
+
+        // create triangles from paths
+        List<int> allTris = new List<int>();
+        pointCount = 0;
+        for (int i=0; i < paths.Length; i++) {
+            if (paths[i] == null || paths[i].Length < 3) continue;
+
+            Triangulator triangulator = new Triangulator(paths[i]);
+            int[] tris = triangulator.Triangulate();
+            for (int j=0; j < tris.Length; j++) {
+                tris[j] += pointCount;
+            }
+
+            allTris.AddRange(tris);
+
+            pointCount += paths[i].Length;
+        }
+        mesh.triangles = allTris.ToArray();
+
+        // finalize mesh
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         meshFilter.mesh = mesh;
