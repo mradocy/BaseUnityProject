@@ -30,7 +30,7 @@ How to create a new Unity Project:
 * Clone the repo that was just created in Github.
 
 * Set the destination directory to somewhere in the Projects folder.
-	* e.g. if it's a unity project, set the destination to D:\Mark\Gamedev\Projects\Unity Projects\[project_name].
+	* e.g. if it's a unity project, set the destination to D:\Mark\Gamedev\Projects\Unity Projects\ [project_name].
 	* The folder must exist and be empty.
 
 ## PART 2: Copying the Base Unity Project
