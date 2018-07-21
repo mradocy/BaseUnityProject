@@ -22,7 +22,7 @@ set DIRECTORY_ANTI_PATTERNS=Testing;CVS;.deps;.svn;.hg;.git;.vs;Library;library;
 set FILE_ANTI_PATTERNS=Testing.meta;README.txt;README.txt.meta;*.sln;*.csproj;*.unityproj
 
 :: Calling KDiff3 (make sure KDiff3 is installed and contained in %PATH%)
-call kdiff3 "%SOURCE_DIRECTORY%" "%~dp0%DESTINATION_DIRECTORY%" -m --cs "FilePattern=*.*" --cs "DirAntiPattern=%DIRECTORY_ANTI_PATTERNS%" --cs "FileAntiPattern=%FILE_ANTI_PATTERNS%"
+call kdiff3 "%SOURCE_DIRECTORY%" "%~dp0%DESTINATION_DIRECTORY%" -m --cs "FilePattern=*.*" --cs "DirAntiPattern=%DIRECTORY_ANTI_PATTERNS%" --cs "FileAntiPattern=%FILE_ANTI_PATTERNS%" --cs "CreateBakFiles=0"
 
 
 
