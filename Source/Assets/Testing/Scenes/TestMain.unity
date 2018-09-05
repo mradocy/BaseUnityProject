@@ -114,6 +114,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shortName: 2
   superUltraMegaLongName: 0
+  referencingCamFromScene: {fileID: 1401832268}
 --- !u!4 &147093038
 Transform:
   m_ObjectHideFlags: 0

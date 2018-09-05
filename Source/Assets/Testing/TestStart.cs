@@ -9,6 +9,9 @@ public class TestStart : MonoBehaviour {
     [LongLabel, Tooltip("Works with Tooltip")]
     public int superUltraMegaLongName = 0;
 
+    [HeaderScene]
+    public Camera referencingCamFromScene;
+
 
     [System.Serializable]
     public class IntDictionary : SerializableDictionary<string, int> { }
