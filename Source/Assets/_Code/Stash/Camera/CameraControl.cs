@@ -104,7 +104,7 @@ public class CameraControl : MonoBehaviour {
     /// </summary>
     public bool hitPaused {
         get {
-            return PauseManager.state == PauseManager.State.HIT_PAUSE;
+            return PauseManager.isPausedForReason(PauseManager.Reason.HIT_PAUSE);
         }
     }
 
@@ -118,9 +118,9 @@ public class CameraControl : MonoBehaviour {
             if (hitPauseDuration - hitPauseTime > duration)
                 return;
         }
-        if (!PauseManager.paused) {
+        if (!PauseManager.isPausedForReason(PauseManager.Reason.HIT_PAUSE)) {
             // start hit pause
-            PauseManager.beginState(PauseManager.State.HIT_PAUSE);
+            PauseManager.pause(PauseManager.Reason.HIT_PAUSE);
             hitPauseTime = 0;
             hitPauseDuration = duration;
         }
@@ -454,7 +454,7 @@ public class CameraControl : MonoBehaviour {
             hitPauseTime += Time.unscaledDeltaTime;
             if (hitPauseTime >= hitPauseDuration) {
                 // end hit pause
-                PauseManager.resume();
+                PauseManager.resume(PauseManager.Reason.HIT_PAUSE);
             }
         }
 
