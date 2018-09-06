@@ -42,3 +42,5 @@ How to create a new Unity Project:
 * Run create-base-unity-project.cmd.  It will use KDiff3 to copy the files from BaseUnityProject to the new Unity project.
 
 * create-base-unity-project.cmd can then be deleted from the new Unity project.
+
+* (optional?) Source can then be renamed to the project name?
