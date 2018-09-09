@@ -154,8 +154,8 @@ public class UDeb {
     public static bool windowVisible { get; private set; }
 
     private const int WINDOW_MARGIN = 20;
-    private const int WINDOW_WIDTH = 600;
-    private const int WINDOW_HEIGHT = 500;
+    private const int WINDOW_WIDTH = 500;
+    private const int WINDOW_HEIGHT = 300;
     private static Rect windowRect = new Rect(WINDOW_MARGIN, WINDOW_MARGIN, WINDOW_WIDTH, WINDOW_HEIGHT);
     private static Rect titleBarRect = new Rect(0, 0, 10000, 20);
 
@@ -207,7 +207,9 @@ public class UDeb {
             // send line to be interpreted
             string line = commandStr.Substring(0, index).Trim();
             if (line != "") {
-                commandEvent(splitCommandLine(line));
+                if (commandEvent != null) {
+                    commandEvent(splitCommandLine(line));
+                }
             }
 
             // trim line out
