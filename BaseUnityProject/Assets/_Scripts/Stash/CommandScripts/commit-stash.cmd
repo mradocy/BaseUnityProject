@@ -7,7 +7,7 @@ setlocal
 set SOURCE_DIRECTORY=../.
 
 :: Absolute directory to merge the Stash folder into into:
-set DESTINATION_DIRECTORY=D:\Mark\Gamedev\Projects\Unity Projects\BaseUnityProject\Source\Assets\_Scripts\Stash
+set DESTINATION_DIRECTORY=D:\Mark\Gamedev\Projects\Unity Projects\BaseUnityProject\BaseUnityProject\Assets\_Scripts\Stash
 
 :: The (only) types of files to merge.
 set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;
