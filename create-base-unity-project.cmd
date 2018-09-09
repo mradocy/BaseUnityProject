@@ -5,11 +5,6 @@
 @echo OFF
 setlocal
 
-:: Creating empty directories that should be there, despite not being backed up in version control
-if not exist "%~dp0Builds" mkdir "%~dp0Builds"
-
-
-
 :: Absolute directory containing the BaseUnityProject:
 set SOURCE_DIRECTORY=D:\Mark\Gamedev\Projects\Unity Projects\BaseUnityProject
 
@@ -37,8 +32,13 @@ call kdiff3 "%SOURCE_DIRECTORY%" "%~dp0%DESTINATION_DIRECTORY%" -m --cs "FilePat
 ren "%SOURCE_UNITY_PROJECT_NAME%" "%UNITY_PROJECT_NAME%"
 
 
+:: Create empty directories that should be there (empty folders aren't saved in vcs)
+if not exist ".\Builds" mkdir ".\Builds"
+if not exist ".\Presentation" mkdir ".\Presentation"
+if not exist ".\Workbench" mkdir ".\Workbench"
+if not exist ".\Ideas" mkdir ".\Ideas"
 
-:: Ensure folders in Assets have been created (empty folders aren't saved in git)
+:: Create empty directories in Assets that should be there (empty folders aren't saved in vcs)
 if not exist "%UNITY_PROJECT_NAME%\Assets\_Fonts" mkdir "%UNITY_PROJECT_NAME%\Assets\_Fonts"
 if not exist "%UNITY_PROJECT_NAME%\Assets\_Materials" mkdir "%UNITY_PROJECT_NAME%\Assets\_Materials"
 if not exist "%UNITY_PROJECT_NAME%\Assets\_Prefabs" mkdir "%UNITY_PROJECT_NAME%\Assets\_Prefabs"
