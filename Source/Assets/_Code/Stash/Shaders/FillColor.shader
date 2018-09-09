@@ -1,11 +1,13 @@
 ﻿// Blends a texture with the given Color, by the amount given by ColorAmount.
+// Alpha value of the given Color is ignored.  Instead, use the given Alpha value to set transparency.
 Shader "Custom/FillColor" {
 
     // fields that can be accessed in Unity.  More info: https://docs.unity3d.com/Manual/SL-PropertiesInPrograms.html
     Properties {
         _MainTex("Texture", 2D) = "white" {}
         _Color("Color", Color) = (1,1,1,1)
-        _ColorAmount("Color Amount", Range(0, 1)) = 1.0
+        _ColorAmount("Color Amount", Range(0, 1)) = 0
+        _Alpha("Alpha", Range(0, 1)) = 1
     }
 
     SubShader {
@@ -47,6 +49,7 @@ Shader "Custom/FillColor" {
             sampler2D _MainTex;
             fixed4 _Color;
             float _ColorAmount;
+            float _Alpha;
 
             // vertex function that "builds the object"; takes an iterated vertex point and adjusts its position, returning in a form that will be passed to the fragment function 
             v2f vert(appdata v) {
@@ -61,8 +64,11 @@ Shader "Custom/FillColor" {
                 float2 uv = IN.uv;
                 fixed4 color = tex2D(_MainTex, uv);
 
-                // sample: fade to color
+                // fade to color
                 color.rgb = lerp(color.rgb, _Color.rgb, _ColorAmount);
+
+                // alpha
+                color.a *= _Alpha;
 
                 return color;
 

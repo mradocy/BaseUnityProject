@@ -116,7 +116,16 @@ public class Easing {
         return (a - b) / 2 * (t * (t - 2) - 1) + a;
     }
 
-
+    /// <summary>
+    /// Alternates between a and b with a sine wave.  t is able to go beyond the bounds.
+    /// </summary>
+    /// <param name="phaseShift">If true, value will be a at t = 0 (phase shifted -PI/2).  If false, value will be (a + b) / 2 at t = 0.</param>
+    public static float sineWave(float a, float b, float t, float period = 1, bool phaseShift = true) {
+        t /= period;
+        if (phaseShift) t -= .25f;
+        return a + (b - a) * (Mathf.Sin(t * Mathf.PI * 2) + 1) / 2;
+    }
+    
     /// <summary>
     /// Given a bezier curve defined by a start point p0, control point, and end point p2, find the point on the curve at t in [0,1]
     /// </summary>

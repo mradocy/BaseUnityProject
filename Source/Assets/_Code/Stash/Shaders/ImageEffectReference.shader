@@ -6,7 +6,7 @@
         _WaveFrequency("Wave Frequency", Float) = 5
         _WaveMagnitude("Wave Magnitude", Float) = .05
         _Color("Color", Color) = (1,1,1,1)
-        _ColorAmount("Color Amount", Range(0, 1)) = 1.0
+        _ColorAmount("Color Amount", Range(0, 1)) = 0
         _MeshWidth("Mesh Width", Float) = 0
         _MeshHeight("Mesh Height", Float) = 0
         _MeshPxWidth("Mesh Pixel Width", Float) = 0

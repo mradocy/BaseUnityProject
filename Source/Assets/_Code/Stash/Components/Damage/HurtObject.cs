@@ -10,7 +10,7 @@ public class HurtObject : MonoBehaviour {
     /// <summary>
     /// The position of the hurtObject.  Can be used to determine the heading of an attack.
     /// </summary>
-    public Vector2 position {
+    public virtual Vector2 position {
         get {
             return transform.position;
         }
@@ -21,7 +21,7 @@ public class HurtObject : MonoBehaviour {
     /// </summary>
     /// <param name="ai">AttackInfo describing the attack.</param>
     public void receiveDamage(AttackInfo ai) {
-        if (!enabled) {
+        if (!isActiveAndEnabled) {
             ai.damage = 0;
             return;
         }
@@ -30,8 +30,8 @@ public class HurtObject : MonoBehaviour {
 
         if (receivesDamage == null) {
             ai.damage = 0;
-            ai.result = AttackInfo.Result.NO_RECEIVES_DAMAGE;
         } else {
+            setAttackInfo(ai);
             receivesDamage.receiveDamage(ai);
         }
 
@@ -41,6 +41,19 @@ public class HurtObject : MonoBehaviour {
     /// ID assigned to a HurtObject.  No HurtObject has the same globalHurtID.
     /// </summary>
     public int globalHurtID { get; private set; }
+
+    #region Can Be Overridden
+
+    /// <summary>
+    /// Called when about to receive damage.  Passes an AttackInfo by reference to be filled with information about the attack (such as damage).
+    /// Can be overridden.
+    /// </summary>
+    /// <param name="ai">Passed in AttackInfo.  The hitObject and hurtObject properties are already set.</param>
+    protected virtual void setAttackInfo(AttackInfo ai) {
+        
+    }
+
+    #endregion
 
     void Awake() {
         receivesDamage = GetComponent<ReceivesDamage>();
@@ -75,7 +88,6 @@ public class HurtObject : MonoBehaviour {
     /// Gets a hurtObject from its globalHurtID.  Returns null if the hurtObject doesn't exist (e.g. it was destroyed).
     /// </summary>
     /// <param name="globalID">The hurtObject's globalHurtID.</param>
-    /// <returns></returns>
     public static HurtObject getHurtObject(int globalHurtID) {
         if (!allHurtObjects.ContainsKey(globalHurtID)) return null;
         return allHurtObjects[globalHurtID];
