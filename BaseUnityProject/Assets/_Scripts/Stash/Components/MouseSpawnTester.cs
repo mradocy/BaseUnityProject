@@ -16,7 +16,7 @@ public class MouseSpawnTester : MonoBehaviour {
     
     void Update() {
 
-        if (!UDeb.debug)
+        if (!UDeb.enabled)
             return;
 
         if (!enabled) return;

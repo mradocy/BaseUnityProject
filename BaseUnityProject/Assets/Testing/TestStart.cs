@@ -50,8 +50,13 @@ public class TestStart : MonoBehaviour {
         list.Resize(6);
 
         Debug.Log(list.ToStringElements());
-        
 
+
+        ShowcaseMode.resetGame += showcaseResetFunc;
+    }
+
+    void showcaseResetFunc() {
+        Debug.Log("Showcase mode reset code pressed");
     }
 
     void Update() {

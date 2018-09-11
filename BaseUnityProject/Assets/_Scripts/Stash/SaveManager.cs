@@ -540,7 +540,7 @@ public class SaveManager {
     private static string saveFuncContent = "";
     private static SaveCallback saveFuncCallback = null;
     private static bool debugForceSaveStatusEquals(SaveStatus saveStatus) {
-        if (!UDeb.debug) return false;
+        if (!UDeb.enabled) return false;
         return saveStatus == debugForceSaveStatus;
     }
 
@@ -578,7 +578,7 @@ public class SaveManager {
     private static List<string> deleteFuncFilePaths = new List<string>();
     private static DeleteCallback deleteFuncCallback = null;
     private static bool debugForceDeleteStatusEquals(DeleteStatus deleteStatus) {
-        if (!UDeb.debug) return false;
+        if (!UDeb.enabled) return false;
         return deleteStatus == debugForceDeleteStatus;
     }
 
@@ -632,7 +632,7 @@ public class SaveManager {
     private static string loadFuncContent = "";
     private static LoadCallback loadFuncCallback = null;
     private static bool debugForceLoadStatusEquals(LoadStatus loadStatus) {
-        if (!UDeb.debug) return false;
+        if (!UDeb.enabled) return false;
         return loadStatus == debugForceLoadStatus;
     }
 

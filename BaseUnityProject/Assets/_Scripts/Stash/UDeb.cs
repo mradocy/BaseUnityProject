@@ -12,13 +12,13 @@ public class UDeb {
     /// <summary>
     /// When false, all calls to UDeb do nothing.
     /// </summary>
-    public static bool debug {
+    public static bool enabled {
         get {
-    #if RELEASE // note: scripting define symbols can be set in Unity's player settings.
-            return false;
-    #else
-            return true;
-    #endif
+#if RELEASE // note: scripting define symbols can be set in Unity's player settings.
+        return false;
+#else
+        return true;
+#endif
         }
     }
     
@@ -54,7 +54,7 @@ public class UDeb {
     /// Gets if the given key was pressed this frame.  Returns false if debug == false.
     /// </summary>
     public static bool keyPressed(KeyCode keyCode) {
-        if (!debug)
+        if (!enabled)
             return false;
         return Input.GetKeyDown(keyCode);
     }
@@ -62,7 +62,7 @@ public class UDeb {
     /// Gets if the given key is being held this frame.  Returns false if debug == false.
     /// </summary>
     public static bool keyHeld(KeyCode keyCode) {
-        if (!debug)
+        if (!enabled)
             return false;
         return Input.GetKey(keyCode);
     }
@@ -190,7 +190,7 @@ public class UDeb {
 
     private static void Update() {
 
-        if (!debug)
+        if (!enabled)
             return;
 
         // show screen
@@ -219,7 +219,7 @@ public class UDeb {
     }
 
     private static void OnGUI() {
-        if (!debug)
+        if (!enabled)
             return;
         if (!windowVisible)
             return;
@@ -232,7 +232,7 @@ public class UDeb {
     #region Private
 
     private static void postFunc(int line, string str) {
-        if (!debug)
+        if (!enabled)
             return;
         if (line < 0)
             return;

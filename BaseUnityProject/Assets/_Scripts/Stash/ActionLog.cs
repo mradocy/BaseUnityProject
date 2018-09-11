@@ -47,7 +47,7 @@ public static class ActionLog {
     /// </summary>
     public static bool enabled {
         get {
-            return UDeb.debug;
+            return UDeb.enabled;
         }
     }
 

@@ -616,7 +616,7 @@ public class CameraControl : MonoBehaviour {
     /// Can move camera around.
     /// </summary>
     void debugUpdate() {
-        if (!UDeb.debug) return;
+        if (!UDeb.enabled) return;
         
         bool canMoveCamera = true;
         if (canMoveCamera) {
