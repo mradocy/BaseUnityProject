@@ -6,7 +6,7 @@ public class Level : MonoBehaviour {
     
     public int width = 10;
     public int height = 5;
-
+    
     public int x {
         get {
             return Mathf.RoundToInt(transform.localPosition.x);
