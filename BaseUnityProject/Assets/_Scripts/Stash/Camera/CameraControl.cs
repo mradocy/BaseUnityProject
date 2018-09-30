@@ -650,7 +650,8 @@ public class CameraControl : MonoBehaviour {
                 cameraSize -= mouseScroll * .1f * cameraSize;
             }
 
-            UDeb.post(0, "position: " + cameraPos.ToString() + " size: " + cameraSize);
+            UDeb.post("camera position", cameraPos.ToString());
+            UDeb.post("camera size", cameraSize);
 
         }
 

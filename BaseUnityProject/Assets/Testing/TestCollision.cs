@@ -34,7 +34,7 @@ public class TestCollision : MonoBehaviour {
 
         if (collisionCaster.touch(CollisionCaster.Direction.DOWN)) {
             c = Color.red;
-            UDeb.post(0, collisionCaster.touchNormal(CollisionCaster.Direction.DOWN));
+            UDeb.post("touch down normal", collisionCaster.touchNormal(CollisionCaster.Direction.DOWN));
         } else if (collisionCaster.touch(CollisionCaster.Direction.UP)) {
             c = Color.green;
         } else if (collisionCaster.touch(CollisionCaster.Direction.LEFT)) {

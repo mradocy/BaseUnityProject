@@ -36,24 +36,16 @@ public class TestStart : MonoBehaviour {
     void Awake() {
 
         SaveManager.initialize(new SaveData());
-
-        //SaveManager.debugForceSaveStatus = SaveManager.SaveStatus.PROBLEM_WRITING_TO_FILE;
-        //SaveManager.debugForceDeleteStatus = SaveManager.DeleteStatus.PROBLEM_DELETING_FILE;
-        //SaveManager.debugForceLoadStatus = SaveManager.LoadStatus.PROBLEM_READING_FROM_FILE;
         
-
-        UDeb.commandEvent += udebCommand;
-
-
-
-        List<int?> list = new List<int?>(new int?[] {0, 1, 2});
-        list.Resize(6);
-
-        Debug.Log(list.ToStringElements());
-
-
+        
+        
         ShowcaseMode.resetGame += showcaseResetFunc;
 
+
+        // testing UDeb
+        UDeb.registerFunction("Test Function 0", udebTestFunction0);
+        UDeb.registerFunction("Test Function 1", udebTestFunction1, "def");
+        UDeb.registerFunction("Test Function 2", udebTestFunction2);
 
     }
 
@@ -63,59 +55,31 @@ public class TestStart : MonoBehaviour {
 
     void Update() {
         
-        if (UDeb.num1Pressed) {
-            SaveManager.save(0, saveCallback);
-        }
-
-        if (UDeb.num2Pressed) {
-            SaveManager.data<SaveData>().integer++;
-            SaveManager.data<SaveData>().intDic["integer"] = SaveManager.data<SaveData>().integer;
-            Debug.Log("integer = " + SaveManager.data<SaveData>().intDic["integer"]);
-        }
-
-        if (UDeb.num3Pressed) {
-            SaveManager.deleteAll(deleteCallback);
-        }
-
-        if (UDeb.num4Pressed) {
-            SaveManager.load(0, loadCallback);
-        }
-
-
-
-        // testing UDeb2
-        UDeb2.post("stringProp", "string val");
-        exposedProp = UDeb2.expose("exposed prop", exposedProp);
-        exposedNum = UDeb2.expose("exposed num", exposedNum, -999, 999);
-        exposedInt = UDeb2.expose("exposed int", exposedInt, -4, 12);
-        UDeb2.post("int post", -555);
-        UDeb2.post("float post", 8.11234f);
-        UDeb2.post("bool post", true);
-        exposedBool = UDeb2.expose("exposed bool", exposedBool);
+        // testing UDeb
+        UDeb.post("stringProp", "string val");
+        exposedProp = UDeb.expose("exposed prop", exposedProp);
+        exposedNum = UDeb.expose("exposed num", exposedNum, -999, 999);
+        exposedInt = UDeb.expose("exposed int", exposedInt, -4, 12);
+        UDeb.post("int post", -555);
+        UDeb.post("float post", 8.11234f);
+        UDeb.post("bool post", true);
+        exposedBool = UDeb.expose("exposed bool", exposedBool);
 
     }
-
-    void saveCallback(SaveManager.SaveStatus status) {
-        string logStr = "save complete.  Status: " + status + ".  fileIndex = " + SaveManager.fileIndex + ".  Currently " + SaveManager.getAvailableSaveFiles().Length + " save files available.";
-        Debug.Log(logStr);
-        UDeb.post(0, logStr);
-    }
-
-    void deleteCallback(SaveManager.DeleteStatus status) {
-        Debug.Log("delete complete.  Status: " + status);
-    }
-
-    void loadCallback(SaveManager.LoadStatus status) {
-        Debug.Log("load complete.  Status: " + status + ".  fileIndex = " + SaveManager.fileIndex + ".  integer = " + SaveManager.data<SaveData>().integer);
-    }
-
-    void udebCommand(string[] args) {
-        Debug.Log("received command: " + args[0]);
-    }
-
+    
     string exposedProp = "val 1";
     float exposedNum = 50;
     int exposedInt = 6;
     bool exposedBool = false;
+
+    void udebTestFunction0() {
+        Debug.Log("udeb test function 0 called");
+    }
+    void udebTestFunction1(string arg) {
+        Debug.Log("udeb test function 1 called with arg " + arg);
+    }
+    void udebTestFunction2(string arg0, string arg1) {
+        Debug.Log("2 args!  0: " + arg0 + " 1: " + arg1);
+    }
 
 }
