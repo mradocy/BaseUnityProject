@@ -53,6 +53,8 @@ public class TestStart : MonoBehaviour {
 
 
         ShowcaseMode.resetGame += showcaseResetFunc;
+
+
     }
 
     void showcaseResetFunc() {
@@ -79,6 +81,18 @@ public class TestStart : MonoBehaviour {
             SaveManager.load(0, loadCallback);
         }
 
+
+
+        // testing UDeb2
+        UDeb2.post("stringProp", "string val");
+        exposedProp = UDeb2.expose("exposed prop", exposedProp);
+        exposedNum = UDeb2.expose("exposed num", exposedNum, -999, 999);
+        exposedInt = UDeb2.expose("exposed int", exposedInt, -4, 12);
+        UDeb2.post("int post", -555);
+        UDeb2.post("float post", 8.11234f);
+        UDeb2.post("bool post", true);
+        exposedBool = UDeb2.expose("exposed bool", exposedBool);
+
     }
 
     void saveCallback(SaveManager.SaveStatus status) {
@@ -98,5 +112,10 @@ public class TestStart : MonoBehaviour {
     void udebCommand(string[] args) {
         Debug.Log("received command: " + args[0]);
     }
+
+    string exposedProp = "val 1";
+    float exposedNum = 50;
+    int exposedInt = 6;
+    bool exposedBool = false;
 
 }
