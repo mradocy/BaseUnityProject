@@ -43,6 +43,7 @@ if not exist "%UNITY_PROJECT_NAME%\Assets\_Fonts" mkdir "%UNITY_PROJECT_NAME%\As
 if not exist "%UNITY_PROJECT_NAME%\Assets\_Materials" mkdir "%UNITY_PROJECT_NAME%\Assets\_Materials"
 if not exist "%UNITY_PROJECT_NAME%\Assets\_Prefabs" mkdir "%UNITY_PROJECT_NAME%\Assets\_Prefabs"
 if not exist "%UNITY_PROJECT_NAME%\Assets\_Sprites" mkdir "%UNITY_PROJECT_NAME%\Assets\_Sprites"
+if not exist "%UNITY_PROJECT_NAME%\Assets\_Testing" mkdir "%UNITY_PROJECT_NAME%\Assets\_Testing"
 
 
 

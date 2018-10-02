@@ -314,7 +314,7 @@ public static class UDeb {
     #region Private Posting and Exposing Values
 
     private const int WINDOW_MARGIN = 20;
-    private const int WINDOW_WIDTH = 250;
+    private const int WINDOW_WIDTH = 300;
     private const int WINDOW_HEIGHT = 100;
     private const int LABEL_WIDTH = 100;
     private const int EXPOSED_NUM_WIDTH = 45;
@@ -502,7 +502,7 @@ public static class UDeb {
     #region Private Registering Functions
 
     private const int FUNCTION_WINDOW_MARGIN = 20;
-    private const int FUNCTION_WINDOW_WIDTH = 250;
+    private const int FUNCTION_WINDOW_WIDTH = 300;
     private const int FUNCTION_WINDOW_HEIGHT = 100;
     private static Rect functionWindowRect = new Rect(WINDOW_MARGIN + WINDOW_WIDTH + FUNCTION_WINDOW_MARGIN, FUNCTION_WINDOW_MARGIN, FUNCTION_WINDOW_WIDTH, FUNCTION_WINDOW_HEIGHT);
     private static Rect functionTitleBarRect = new Rect(0, 0, 10000, 20);
