@@ -4,7 +4,7 @@ Shader "Custom/SpritesDefault" {
     
     Properties {
         _MainTex("Sprite Texture", 2D) = "white" {}
-        _Color("Tint", Color) = (1,1,1,1)
+        _Color("Color", Color) = (1,1,1,1)
         [MaterialToggle] PixelSnap("Pixel snap", Float) = 0
         [KeywordEnum(Repeat, Clamp)] _WrapX("Wrap X", Float) = 0
         [KeywordEnum(Repeat, Clamp)] _WrapY("Wrap Y", Float) = 0

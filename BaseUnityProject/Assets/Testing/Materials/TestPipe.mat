@@ -97,6 +97,14 @@ Material:
         second: 0
       data:
         first:
+          name: _WrapX
+        second: 0
+      data:
+        first:
+          name: _WrapY
+        second: 1
+      data:
+        first:
           name: _Parallax
         second: 0.02
       data:
@@ -131,14 +139,6 @@ Material:
         first:
           name: _Metallic
         second: 0
-      data:
-        first:
-          name: _WrapX
-        second: 0
-      data:
-        first:
-          name: _WrapY
-        second: 1
     m_Colors:
       data:
         first:
