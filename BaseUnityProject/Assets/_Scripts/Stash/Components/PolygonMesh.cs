@@ -19,6 +19,14 @@ public class PolygonMesh : MonoBehaviour {
     [Tooltip("For setting the points manually (pointsMode is MANUAL_LOCAL or MANUAL_GLOBAL)")]
     public Vector2[] manualPoints;
 
+    [Header("Texture dimensions")]
+    [Tooltip("If true, the values below will determine the material's texture's tiling and offset.  This will be applied in-game.")]
+    public bool setTextureDimensions = false;
+    [Tooltip("If setTextureDimensions == true, the inverse of this becomes the material's texture scale x.")]
+    public float textureWidth = 1;
+    [Tooltip("If setTextureDimensions == true, the inverse of this becomes the material's texture scale y.")]
+    public float textureHeight = 1;
+
     public enum PointsMode {
         MANUAL_LOCAL,
         MANUAL_GLOBAL,
@@ -79,8 +87,17 @@ public class PolygonMesh : MonoBehaviour {
             setMeshFilter(boxPoints);
             break;
         }
-        
+
+        if (Application.isPlaying) {
+            updateTextureDimensions();
+        }
+
     }
+
+    public float meshXMin { get; private set; }
+    public float meshXMax { get; private set; }
+    public float meshYMin { get; private set; }
+    public float meshYMax { get; private set; }
 
     void Awake() {
         meshFilter = gameObject.GetComponent<MeshFilter>();
@@ -99,6 +116,11 @@ public class PolygonMesh : MonoBehaviour {
 
         mesh.Clear();
         meshFilter.mesh = mesh;
+
+        meshXMin = 0;
+        meshXMax = 0;
+        meshYMin = 0;
+        meshYMax = 0;
     }
 
     void setMeshFilter(Vector2[] points) {
@@ -138,20 +160,20 @@ public class PolygonMesh : MonoBehaviour {
         
         // set vertices and find bounds
         Vector3[] vertices = new Vector3[numPoints];
-        float xMin = float.MaxValue;
-        float xMax = float.MinValue;
-        float yMin = float.MaxValue;
-        float yMax = float.MinValue;
+        meshXMin = float.MaxValue;
+        meshXMax = float.MinValue;
+        meshYMin = float.MaxValue;
+        meshYMax = float.MinValue;
         int pointCount = 0;
         for (int i = 0; i < paths.Length; i++) {
             if (paths[i] == null || paths[i].Length < 3) continue;
             for (int j=0; j < paths[i].Length; j++) {
                 Vector2 pt = paths[i][j];
                 vertices[pointCount] = pt;
-                xMin = Mathf.Min(xMin, pt.x);
-                xMax = Mathf.Max(xMax, pt.x);
-                yMin = Mathf.Min(yMin, pt.y);
-                yMax = Mathf.Max(yMax, pt.y);
+                meshXMin = Mathf.Min(meshXMin, pt.x);
+                meshXMax = Mathf.Max(meshXMax, pt.x);
+                meshYMin = Mathf.Min(meshYMin, pt.y);
+                meshYMax = Mathf.Max(meshYMax, pt.y);
                 pointCount++;
             }
         }
@@ -164,8 +186,8 @@ public class PolygonMesh : MonoBehaviour {
             if (paths[i] == null || paths[i].Length < 3) continue;
             for (int j = 0; j < paths[i].Length; j++) {
                 Vector2 pt = paths[i][j];
-                uvs[pointCount].x = (pt.x - xMin) / (xMax - xMin);
-                uvs[pointCount].y = (pt.y - yMin) / (yMax - yMin);
+                uvs[pointCount].x = (pt.x - meshXMin) / (meshXMax - meshXMin);
+                uvs[pointCount].y = (pt.y - meshYMin) / (meshYMax - meshYMin);
                 pointCount++;
             }
         }
@@ -195,11 +217,38 @@ public class PolygonMesh : MonoBehaviour {
         meshFilter.mesh = mesh;
     }
 
+    void updateTextureDimensions() {
+
+        // modifying material should only be done in play mode.
+        if (!Application.isPlaying) return;
+
+        if (!setTextureDimensions) return;
+        
+        Material material = GetComponent<MeshRenderer>().material;
+        float scaleX = Mathf.Approximately(textureWidth, 0) ? 1 : (meshXMax - meshXMin) / textureWidth;
+        float scaleY = Mathf.Approximately(textureHeight, 0) ? 1 : (meshYMax - meshYMin) / textureHeight;
+        
+        //// applying texture scale
+        //float scaleX = Mathf.Approximately(textureWidth, 0) ? 1 : length / textureWidth;
+        //if (textureScaleFit) {
+        //    bool sign = scaleX > 0;
+        //    scaleX = Mathf.Round(scaleX);
+        //    if (scaleX == 0)
+        //        scaleX = sign ? 1 : -1;
+        //}
+        material.mainTextureScale = new Vector2(scaleX, scaleY);
+
+    }
+
     void Start() {
         updateMesh();
     }
     
     void Update() {
+
+        // inspector properties bounds
+        textureWidth = Mathf.Max(.001f, textureWidth);
+        textureHeight = Mathf.Max(.001f, textureHeight);
 
         if (!Application.isPlaying ||
             updateEachFrame)
