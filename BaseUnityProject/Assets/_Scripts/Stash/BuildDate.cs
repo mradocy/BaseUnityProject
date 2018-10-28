@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 
 [assembly: AssemblyVersion("1.0.*")] // using * automatically sets version.Build to number of days after 1/1/2000.  More here: http://luminaryapps.com/blog/showing-the-build-date-in-a-unity-app/
-public class BuildDate {
+public static class BuildDate {
     
     /// <summary>
     /// Gets the date this game was built.
