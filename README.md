@@ -6,32 +6,18 @@ Anything in the Testing folder will NOT be copied over to a new project.  Files 
 
 How to create a new Unity Project:
 
+
 ## PART 1: Git Setup
 
-* Go to Github.com and create a new repository.
+* Open Github Desktop.  File -> New Repository
+	* Make sure projects folder makes sense.
+	* Use a default .gitignore if applicable (e.g. Unity, Visual Studio, etc.)
 
-* (Optional) Make the repository private
-* Use the default Unity .gitignore.
+* Click 'Publish repository'
+	* Optional: check 'Keep this code private'
 
-* Copy the repository path (using HTTPS).  It should look like https://github.com/[username]/[project_name].git
+Note: If having connections issues, try this: https://github.com/desktop/desktop/issues/4817#issuecomment-393141777
 
-* Open SourceTree as an administrator.
-
-* Open a new tab and go to Remote repositories.
-
-* If there's a problem with getting repositories, do the following:
-* Right-click [username] and select Edit Account	
-	* Ensure the following values are used in the Edit Hosting Account window:
-		* Hosting Service: GitHub
-		* Preferred Protocol: HTTPS
-		* Authentication: OAuth
-		* (try pressing Refresh OAuth Token if there's a problem with authentication)
-
-* Clone the repo that was just created in Github.
-
-* Set the destination directory to somewhere in the Projects folder.
-	* e.g. if it's a unity project, set the destination to D:\ [user] \Gamedev\Projects\Unity Projects\ [project_name].
-	* The folder must exist and be empty.
 
 ## PART 2: Copying the Base Unity Project
 
