@@ -5,14 +5,30 @@
 @echo OFF
 setlocal
 
-:: Absolute directory containing the BaseUnityProject:
-set SOURCE_DIRECTORY=D:\Mark\Gamedev\Projects\Unity Projects\BaseUnityProject
+:: Confirm GAMEDEV_PROJECTS is defined
+if not defined GAMEDEV_PROJECTS (
+	echo User environment variable GAMEDEV_PROJECTS not defined.  Try running Tools\setup.cmd.
+	pause
+	goto END
+)
 
 :: Name of the source's Unity project (the folder that gets opened in Unity):
 set SOURCE_UNITY_PROJECT_NAME=BaseUnityProject
 
+:: Absolute directory containing the BaseUnityProject:
+set SOURCE_DIRECTORY=%GAMEDEV_PROJECTS%\Unity Projects\%SOURCE_UNITY_PROJECT_NAME%
+
 :: The relative directory of this folder:
-set DESTINATION_DIRECTORY=.
+set DESTINATION_DIRECTORY=%~dp0.
+
+:: ensure that destination directory only contains 1 file (this command script)
+set numFiles=0
+for /f "delims=" %%a in ('dir /b "%DESTINATION_DIRECTORY%"') do set /a numFiles+=1
+if %numFiles% GTR 1 (
+	echo This command script should only run in an empty folder.
+	pause
+	goto END
+)
 
 :: Directories to ignore:
 set DIRECTORY_ANTI_PATTERNS=Testing;Sandbox;CVS;.deps;.svn;.hg;.git;.vs;Library;library;Temp;temp;Obj;obj;ActionLogs;actionLogs
@@ -25,8 +41,20 @@ for %%I in (.) do set UNITY_PROJECT_NAME=%%~nI%%~xI
 
 
 :: Calling KDiff3 (make sure KDiff3 is installed and contained in %PATH%)
-call kdiff3 "%SOURCE_DIRECTORY%" "%~dp0%DESTINATION_DIRECTORY%" -m --cs "FilePattern=*.*" --cs "DirAntiPattern=%DIRECTORY_ANTI_PATTERNS%" --cs "FileAntiPattern=%FILE_ANTI_PATTERNS%" --cs "CreateBakFiles=0"
+:: KDiff3 command line: http://kdiff3.sourceforge.net/doc/documentation.html
+call KDiff3 "%SOURCE_DIRECTORY%" "%DESTINATION_DIRECTORY%" -m --cs "FilePattern=*.*" --cs "DirAntiPattern=%DIRECTORY_ANTI_PATTERNS%" --cs "FileAntiPattern=%FILE_ANTI_PATTERNS%" --cs "CreateBakFiles=0"
 
+:: Error handling KDiff3
+if %ERRORLEVEL% NEQ 0 (
+	echo Could not run KDiff3.  Has it been installed and added to the system path?
+	pause
+	goto END
+)
+if not exist "%SOURCE_UNITY_PROJECT_NAME%" (
+	echo "%SOURCE_UNITY_PROJECT_NAME%" not copied over.  KDiff3 execution may have been terminated.
+	pause
+	goto END
+)
 
 :: Rename unity project
 ren "%SOURCE_UNITY_PROJECT_NAME%" "%UNITY_PROJECT_NAME%"
@@ -45,10 +73,8 @@ if not exist "%UNITY_PROJECT_NAME%\Assets\_Prefabs" mkdir "%UNITY_PROJECT_NAME%\
 if not exist "%UNITY_PROJECT_NAME%\Assets\_Sprites" mkdir "%UNITY_PROJECT_NAME%\Assets\_Sprites"
 if not exist "%UNITY_PROJECT_NAME%\Assets\_Testing" mkdir "%UNITY_PROJECT_NAME%\Assets\_Testing"
 
+:: Delete this command script
+(goto) 2>nul & del "%~f0"
 
 
-:: more info on cmd scripts:
-:: - http://steve-jansen.github.io/guides/windows-batch-scripting/index.html
-:: - call /?
-:: - use %~dp0 to get the directory of this file.
-:: - KDiff3 command line: http://kdiff3.sourceforge.net/doc/documentation.html
+:END

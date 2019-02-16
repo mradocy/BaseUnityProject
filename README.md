@@ -25,6 +25,4 @@ Note: If having connections issues, try this: https://github.com/desktop/desktop
 
 * Copy create-base-unity-project.cmd (located at the root of BaseUnityProject) into the root project folder.
 
-* Run create-base-unity-project.cmd.  It will use KDiff3 to copy the files from BaseUnityProject to the new Unity project.
-
-* create-base-unity-project.cmd can then be deleted from the new Unity project.
+* Run create-base-unity-project.cmd.  It will use KDiff3 to copy the files from BaseUnityProject to the new Unity project.  This file will then delete itself.
