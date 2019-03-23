@@ -8,7 +8,7 @@ pushd "%~dp0"
 set SOURCE_DIRECTORY=..\.
 
 :: Absolute directory to merge the Stash folder into into:
-set DESTINATION_DIRECTORY=%GAMEDEV_PROJECTS%\Unity Projects\BaseUnityProject\BaseUnityProject\Assets\_Scripts\Stash
+set DESTINATION_DIRECTORY=%GAMEDEV_SOURCE%\Unity Projects\BaseUnityProject\BaseUnityProject\Assets\_Scripts\Stash
 
 :: The (only) types of files to merge.
 set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;

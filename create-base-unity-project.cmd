@@ -5,9 +5,9 @@
 @echo OFF
 setlocal
 
-:: Confirm GAMEDEV_PROJECTS is defined
-if not defined GAMEDEV_PROJECTS (
-	echo User environment variable GAMEDEV_PROJECTS not defined.  Try running Tools\setup.cmd.
+:: Confirm GAMEDEV_SOURCE is defined
+if not defined GAMEDEV_SOURCE (
+	echo User environment variable GAMEDEV_SOURCE not defined.  Try running Tools\setup.cmd.
 	pause
 	goto END
 )
@@ -16,7 +16,7 @@ if not defined GAMEDEV_PROJECTS (
 set SOURCE_UNITY_PROJECT_NAME=BaseUnityProject
 
 :: Absolute directory containing the BaseUnityProject:
-set SOURCE_DIRECTORY=%GAMEDEV_PROJECTS%\Unity Projects\%SOURCE_UNITY_PROJECT_NAME%
+set SOURCE_DIRECTORY=%GAMEDEV_SOURCE%\Unity Projects\%SOURCE_UNITY_PROJECT_NAME%
 
 :: The relative directory of this folder:
 set DESTINATION_DIRECTORY=%~dp0.
