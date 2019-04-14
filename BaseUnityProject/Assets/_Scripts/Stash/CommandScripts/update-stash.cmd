@@ -5,7 +5,7 @@ setlocal
 pushd "%~dp0"
 
 :: Absolute directory to update the Stash folder from:
-set SOURCE_DIRECTORY=%GAMEDEV_SOURCE%\Unity Projects\BaseUnityProject\BaseUnityProject\Assets\_Scripts\Stash
+set SOURCE_DIRECTORY=%GAMEDEV_SOURCE_UNITY%\BaseUnityProject\BaseUnityProject\Assets\_Scripts\Stash
 
 :: The relative directory of this Stash folder:
 set DESTINATION_DIRECTORY=..\.
