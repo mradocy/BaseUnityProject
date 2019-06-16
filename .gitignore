@@ -1,3 +1,7 @@
+# Allow specified plugins
+!Ookii.Dialogs.dll
+!System.Windows.Forms.dll
+
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -24,6 +28,7 @@ ExportedObj/
 *.svd
 *.pdb
 *.opendb
+*.VC.db
 
 # Unity3D generated meta files
 *.pidb.meta
