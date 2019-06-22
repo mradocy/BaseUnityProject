@@ -45,6 +45,12 @@ namespace Core.Unity.StateMachine {
             this._id = ID;
         }
 
+        /// <summary>
+        /// Called immediately after all states in the state machine are registered and the owner is available.
+        /// This will only be called once for each state.
+        /// </summary>
+        protected abstract void OnRegistered();
+
         protected abstract void OnBegin();
         
         protected abstract void Update();
@@ -56,6 +62,10 @@ namespace Core.Unity.StateMachine {
         #endregion
 
         #region IState Implementation
+
+        void IState.OnRegistered() {
+            this.OnRegistered();
+        }
 
         void IState.OnBegin() {
             this.OnBegin();

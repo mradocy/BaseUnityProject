@@ -49,6 +49,9 @@ namespace Core.Unity.StateMachine {
 
             this._owner = owner;
             this.RegisterStates();
+            foreach (IState state in this._states.Values) {
+                state.OnRegistered();
+            }
             this.ChangeState(initialState);
         }
 
