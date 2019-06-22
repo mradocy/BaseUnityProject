@@ -43,6 +43,33 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
+        /// Gets the axis value of an axis action.
+        /// </summary>
+        /// <param name="actionId">Id of the action.</param>
+        /// <returns>Axis value.</returns>
+        public static float GetAxis(int actionId) {
+            return Player.GetAxis(actionId);
+        }
+
+        /// <summary>
+        /// Gets if the given button action was pressed this frame.
+        /// </summary>
+        /// <param name="actionId">Id of the action.</param>
+        /// <returns>Pressed</returns>
+        public static bool GetPressed(int actionId) {
+            return Player.GetButtonDown(actionId);
+        }
+
+        /// <summary>
+        /// Gets if the given button action is currently being held.
+        /// </summary>
+        /// <param name="actionId">Id of the action.</param>
+        /// <returns>Held</returns>
+        public static bool GetHeld(int actionId) {
+            return Player.GetButton(actionId);
+        }
+
+        /// <summary>
         /// Gets keyboard map.
         /// </summary>
         /// <returns>Keyboard map.</returns>
