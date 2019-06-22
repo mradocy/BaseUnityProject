@@ -41,6 +41,12 @@ namespace Core.Unity.StateMachine {
         /// <param name="owner">Reference to the owner of this state machine.</param>
         /// <param name="initialState">The state to start with.</param>
         public void Awake(TOwner owner, TStateId initialState) {
+            if (this._awakeCalled) {
+                Debug.LogError($"Cannot call {nameof(this.Awake)}() more than once.");
+                return;
+            }
+            this._awakeCalled = true;
+
             this._owner = owner;
             this.RegisterStates();
             this.ChangeState(initialState);
@@ -77,6 +83,11 @@ namespace Core.Unity.StateMachine {
             IState state;
             if (this._states.TryGetValue(stateID, out state)) {
                 return state;
+            }
+
+            if (!this._awakeCalled) {
+                Debug.LogError($"State machine cannot be used until {nameof(this.Awake)}() has been called.");
+                return null;
             }
             Debug.LogError($"State \"{stateID}\" could not be found.  Has it been registered?");
             return null;
@@ -147,6 +158,9 @@ namespace Core.Unity.StateMachine {
 
         [System.NonSerialized]
         private Dictionary<TStateId, IState> _states = new Dictionary<TStateId, IState>();
+
+        [System.NonSerialized]
+        private bool _awakeCalled = false;
 
         #endregion
     }
