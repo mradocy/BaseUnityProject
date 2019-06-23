@@ -93,7 +93,8 @@ namespace Core.Unity.Collision {
 
         /// <summary>
         /// If there's ground a given distance below, will snap down to it so they're touching.
-        /// Returns if a snap down occurred.
+        /// <para/>
+        /// Returns true the object was already on the ground or if a snap down occurred.  Returns false if object is not on the ground and couldn't be snapped down.
         /// </summary>
         /// <param name="distance"></param>
         public bool SnapDown(float distance) {
@@ -106,11 +107,13 @@ namespace Core.Unity.Collision {
                 // need to cast with all the colliders for a better diff
                 RaycastHit2D rh2d = _collisionCaster.Cast(Vector2.down, distance, Vector2.zero, Direction.Up);
                 if (rh2d.collider != null) {
+                    // only apply snap down if distance away isn't trivial
                     Vector2 diff = Vector2.down * distance * rh2d.fraction;
-                    if (diff.sqrMagnitude > _collisionCaster.TouchCastDistance * _collisionCaster.TouchCastDistance) { // don't apply if it's so small that it doesn't matter
+                    if (diff.sqrMagnitude > _collisionCaster.TouchCastDistance * _collisionCaster.TouchCastDistance) {
                         transform.position = pos + diff;
-                        return true;
                     }
+
+                    return true;
                 }
             }
 
