@@ -51,6 +51,44 @@ namespace Core.Unity.Collision {
 
         #endregion
 
+        #region Properties
+
+        /// <summary>
+        /// If smoother repositioning should be applied when colliding with sloped surfaces.
+        /// </summary>
+        public bool ProjectReposition {
+            get { return this._projectReposition; }
+            set { this._projectReposition = value; }
+        }
+
+        /// <summary>
+        /// If custom gravity force should be applied.  Note that <see cref="Rigidbody2D"/>'s gravity scale is set to 0 regardless.
+        /// </summary>
+        public bool ApplyGravity {
+            get { return this._applyGravity; }
+            set { this._applyGravity = value; }
+        }
+
+        /// <summary>
+        /// Gravity unique to this object.  <see cref="Rigidbody2D"/>.gravityScale is automatically set to 0.
+        /// </summary>
+        public Vector2 Gravity {
+            get { return this._gravity; }
+            set { this._gravity = value; }
+        }
+
+        /// <summary>
+        /// If touching a platform below, the platform's movement will be added to this object's movement.
+        /// <para/>
+        /// NOTE: must set platform's velocity and angular velocity, this will not work if the platform is being moved with MovePosition() or MoveRotation().
+        /// </summary>
+        public bool MovedByDownPlatform {
+            get { return this._movedByDownPlatform; }
+            set { this._movedByDownPlatform = value; }
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
@@ -136,6 +174,11 @@ namespace Core.Unity.Collision {
             RaycastHit2D touchLeft = this._collisionCaster.TouchResult(Direction.Left);
             RaycastHit2D touchDown = this._collisionCaster.TouchResult(Direction.Down);
 
+            // apply gravity
+            if (this._applyGravity) {
+                v += this._gravity * Time.fixedDeltaTime;
+            }
+
             // zero velocity on touch
             if (this._stopOnTouchRight && touchRight) {
                 v.x = Mathf.Min(0, v.x);
@@ -148,11 +191,6 @@ namespace Core.Unity.Collision {
             }
             if (this._stopOnTouchDown && touchDown) {
                 v.y = Mathf.Max(0, v.y);
-            }
-
-            // custom gravity
-            if (this._applyGravity) {
-                v += this._gravity * Time.fixedDeltaTime;
             }
 
             // apply custom velocity

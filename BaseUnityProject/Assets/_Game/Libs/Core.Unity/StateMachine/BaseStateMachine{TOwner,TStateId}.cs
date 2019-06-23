@@ -97,19 +97,22 @@ namespace Core.Unity.StateMachine {
         }
 
         /// <summary>
-        /// Changes state.
-        /// Nothing happens if the given state is equal to the current state.
+        /// Changes state.  Nothing happens if the given state is equal to the current state.
+        /// <para/>
+        /// Returns if the state has changed.
         /// <see cref="IState.OnEnd()"/> of the current state is called and <see cref="IState.OnBegin"/> of the new state is called.
         /// </summary>
         /// <param name="state">The id of the state to change to.</param>
-        public void ChangeState(TStateId state) {
+        /// <returns>If the state has changed.</returns>
+        public bool ChangeState(TStateId state) {
             if (this.CurrentState.Equals(state)) {
-                return;
+                return false;
             }
             this._currentStateObject?.OnEnd();
             this._currentState = state;
             this._currentStateObject = this.GetStateObject(this.CurrentState);
             this._currentStateObject?.OnBegin();
+            return true;
         }
 
         #endregion
