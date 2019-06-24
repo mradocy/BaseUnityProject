@@ -117,6 +117,11 @@ namespace Core.Unity.Collision {
                 }
             }
 
+            // return true if touching down anyway
+            if (this._collisionCaster.Touch(Direction.Down)) {
+                return true;
+            }
+
             return false;
         }
 
