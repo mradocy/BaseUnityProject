@@ -44,8 +44,8 @@
             
             // "vertex to fragment", struct used to pass information to the fragment function
             struct v2f {
-                float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
+                float2 uv : TEXCOORD0;
             };
             
             // custom fields to be filled by Unity's Shader Lab
@@ -95,7 +95,6 @@
                 color.rgb = lerp(color.rgb, _Color.rgb, _ColorAmount);
 
                 return color;
-                
             }
             
             ENDCG

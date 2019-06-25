@@ -1,11 +1,10 @@
-﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Custom/GrabPassInvert" {
+﻿Shader "Custom/GrabPassReference" {
     
-    // fields that can be accessed in Unity
-    //Properties {
-    //    _MainTex("Texture", 2D) = "white" {}
-    //}
+    // fields that can be accessed in Unity.  More info: https://docs.unity3d.com/Manual/SL-PropertiesInPrograms.html
+    Properties {
+        _WaveFrequency("Wave Frequency", Float) = 5
+        _WaveMagnitude("Wave Magnitude", Float) = .05
+    }
     
     SubShader {
         
@@ -35,35 +34,41 @@ Shader "Custom/GrabPassInvert" {
             
             // "vertex to fragment", struct used to pass information to the fragment function
             struct v2f {
-                float4 grabPos : TEXCOORD0;
-                float4 pos : SV_POSITION;
-                //float2 uv : TEXCOORD0;
-                //float4 vertex : SV_POSITION;
+                float4 vertex : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float4 grabPos : TEXCOORD1;
             };
 			
-			sampler2D _BackgroundTexture; // used by grabPass
-            
             // custom fields to be filled by the Shader Lab
-            //sampler2D _MainTex;
+			sampler2D _BackgroundTexture; // used by grabPass
+            float _WaveFrequency;
+			float _WaveMagnitude;
             
             // vertex function that "builds the object"; takes an iterated vertex point and adjusts its position, returning in a form that will be passed to the fragment function 
             v2f vert(appdata v) {
-                v2f OUT;				
-				// Unity functions to get grabPos
-				OUT.pos = UnityObjectToClipPos(v.vertex);
-				OUT.grabPos = ComputeGrabScreenPos(OUT.pos);
+                v2f OUT;
+				OUT.vertex = UnityObjectToClipPos(v.vertex); // transforms model vertex positions based on the Unity camera
+				OUT.uv = v.uv;
+
+				OUT.grabPos = ComputeGrabScreenPos(OUT.vertex); // gets grab screen position
+
                 return OUT;
             }
             
             // fragment function that "colors the object"; takes an iterated pixel and gets its color
             fixed4 frag(v2f IN) : SV_Target {
                 
+				float4 grabPos = IN.grabPos;
+
+				// sample: sine wavy
+                grabPos.y += sin(IN.uv.x * 6.28 * _WaveFrequency + _Time.y) * _WaveMagnitude;
+
                 // sample: inverts background color
-                fixed4 bgColor = tex2Dproj(_BackgroundTexture, IN.grabPos);
+                fixed4 bgColor = tex2Dproj(_BackgroundTexture, grabPos);
                 fixed4 color = bgColor;
                 color.rgb = 1 - color.rgb;
+
 				return color;
-				
             }
             
             ENDCG
@@ -72,5 +77,4 @@ Shader "Custom/GrabPassInvert" {
     }
     
     Fallback "Sprites/Default"
-    
 }
