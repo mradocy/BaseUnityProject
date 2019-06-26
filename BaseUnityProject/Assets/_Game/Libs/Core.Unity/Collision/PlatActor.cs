@@ -102,8 +102,13 @@ namespace Core.Unity.Collision {
             Vector2 pos = transform.position;
 
             // check raycast from bottom center first
-            Rect rect = this._collisionCaster.GetBounds(.01f);
-            if (Physics2D.Raycast(new Vector2(rect.center.x, rect.yMin), Vector2.down, distance, _collisionCaster.GetUnionLayerMask()).collider != null) {
+            Rect rect = this._collisionCaster.GetBounds(0);
+            bool prevQSIC = Physics2D.queriesStartInColliders;
+            Physics2D.queriesStartInColliders = false;
+            RaycastHit2D raycastResult = Physics2D.Raycast(new Vector2(rect.center.x, rect.yMin), Vector2.down, distance, this._collisionCaster.GetUnionLayerMask());
+            Physics2D.queriesStartInColliders = prevQSIC;
+
+            if (raycastResult.collider != null) {
                 // need to cast with all the colliders for a better diff
                 RaycastHit2D rh2d = _collisionCaster.Cast(Vector2.down, distance, Vector2.zero, Direction.Up);
                 if (rh2d.collider != null) {

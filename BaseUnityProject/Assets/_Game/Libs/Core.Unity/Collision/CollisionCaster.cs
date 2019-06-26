@@ -199,10 +199,10 @@ namespace Core.Unity.Collision {
                     }
                     c0 = M.RotateAroundPoint(c0, Vector2.zero, angleDegrees * Mathf.Deg2Rad) + center;
                     c1 = M.RotateAroundPoint(c1, Vector2.zero, angleDegrees * Mathf.Deg2Rad) + center;
-                    left = Mathf.Min(c0.x, c1.x) - sizeMin;
-                    right = Mathf.Max(c0.x, c1.x) + sizeMin;
-                    down = Mathf.Min(c0.y, c1.y) - sizeMin;
-                    up = Mathf.Max(c0.y, c1.y) + sizeMin;
+                    left = Mathf.Min(c0.x, c1.x) - sizeMin / 2;
+                    right = Mathf.Max(c0.x, c1.x) + sizeMin / 2;
+                    down = Mathf.Min(c0.y, c1.y) - sizeMin / 2;
+                    up = Mathf.Max(c0.y, c1.y) + sizeMin / 2;
 
                 }
             }
