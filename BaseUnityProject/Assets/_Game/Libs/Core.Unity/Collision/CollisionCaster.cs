@@ -62,7 +62,7 @@ namespace Core.Unity.Collision {
         /// </summary>
         public bool Touch(Direction direction) {
             int numResults = 0;
-            this.CheckCasts(direction, out numResults, TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
             return numResults > 0;
         }
 
@@ -71,7 +71,7 @@ namespace Core.Unity.Collision {
         /// </summary>
         public RaycastHit2D[] TouchResults(Direction direction) {
             int numResults = 0;
-            this.CheckCasts(direction, out numResults, TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
             RaycastHit2D[] ret = new RaycastHit2D[numResults];
             Array.Copy(_tempResults, ret, numResults);
             return ret;
@@ -82,7 +82,7 @@ namespace Core.Unity.Collision {
         /// </summary>
         public int TouchResultsNonAlloc(Direction direction, RaycastHit2D[] results) {
             int numResults = 0;
-            this.CheckCasts(direction, out numResults, TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
             Array.Copy(_tempResults, results, numResults);
             return numResults;
         }
@@ -92,7 +92,7 @@ namespace Core.Unity.Collision {
         /// </summary>
         public RaycastHit2D TouchResult(Direction direction) {
             int numResults = 0;
-            this.CheckCasts(direction, out numResults, TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
             if (numResults == 0) {
                 RaycastHit2D noHit = new RaycastHit2D();
                 return noHit;
@@ -107,7 +107,7 @@ namespace Core.Unity.Collision {
         /// </summary>
         public Vector2 TouchNormal(Direction direction) {
             int numResults = 0;
-            this.CheckCasts(direction, out numResults, TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
             if (numResults == 0) {
                 return Vector2.zero;
             }
@@ -322,6 +322,34 @@ namespace Core.Unity.Collision {
         }
 
         /// <summary>
+        /// Tells caster to ignore casts with the given collider.  Unity physics will ignore collisions between this object and the given collider as well.
+        /// </summary>
+        /// <param name="collider2D">Collider to ignore.</param>
+        public void IgnoreCollision(Collider2D collider2D) {
+            if (collider2D == null)
+                return;
+
+            this._ignoreCollisionColliders.Add(collider2D.GetInstanceID());
+            foreach (Collider2D selfCollider in this._colliders) {
+                Physics2D.IgnoreCollision(selfCollider, collider2D, true);
+            }
+        }
+
+        /// <summary>
+        /// Tells caster to stop ignoring casts with the given collider.  Unity physics will unignore collisions between this object and the given collider as well.
+        /// </summary>
+        /// <param name="collider2D">Collider to stop ignoring.</param>
+        public void UnignoreCollision(Collider2D collider2D) {
+            if (collider2D == null)
+                return;
+
+            this._ignoreCollisionColliders.Remove(collider2D.GetInstanceID());
+            foreach (Collider2D selfCollider in this._colliders) {
+                Physics2D.IgnoreCollision(selfCollider, collider2D, false);
+            }
+        }
+
+        /// <summary>
         /// Updates collection of Colliders by searching components of this gameObject and children.
         /// For now only collects BoxCollider2D and CircleCollider2D.
         /// Ignores colliders marked as triggers.
@@ -396,9 +424,9 @@ namespace Core.Unity.Collision {
         /// <summary>
         /// Performs casts using shapes defined by this.colliders.  Stores results in this.tempResults.
         /// </summary>
-        /// <param name="direction"></param>
-        /// <param name="totalResults"></param>
+        /// <param name="directionVec">Direction (vector) of the cast</param>
         /// <param name="normalRestriction">Cast hits will only count if their normal is in this direction.  Set to NONE for all cast hits to count.</param>
+        /// <param name="totalResults"></param>
         /// <param name="originOffset">Offset to apply to the origins of the casts (in global space) just before performing the cast.</param>
         private void CheckCasts(Vector2 directionVec, Direction normalRestriction, out int totalResults, float castDistance, Vector2 originOffset) {
 
@@ -447,14 +475,41 @@ namespace Core.Unity.Collision {
                 }
 
                 for (int i = 0; i < numResults; i++) {
+                    RaycastHit2D castResult = _tempCastResults[i];
+                    if (castResult.collider == null)
+                        continue;
+
                     // skip colliders belonging to this gameObject
-                    if (_tempCastResults[i].collider.gameObject == gameObject) continue;
+                    if (castResult.collider.gameObject == gameObject)
+                        continue;
+
+                    // skip colliders that are being ignored
+                    if (this._ignoreCollisionColliders.Count > 0 &&
+                        this._ignoreCollisionColliders.Contains(castResult.collider.GetInstanceID()))
+                        continue;
+                    
+                    // check one-way platform effector, if used
+                    if (castResult.collider.usedByEffector) {
+                        PlatformEffector2D platformEffector = castResult.collider.GetComponent<PlatformEffector2D>();
+                        if (platformEffector != null && platformEffector.enabled && platformEffector.useOneWay) {
+                            // ignore if cast is not contained in surface arc
+                            float castAngle = Mathf.Atan2(castResult.normal.y, castResult.normal.x) * Mathf.Rad2Deg;
+                            float effectorAngle = platformEffector.rotationalOffset + 90;
+                            float angleDiff = M.Wrap180(effectorAngle - castAngle);
+                            if (Mathf.Abs(angleDiff) >= platformEffector.surfaceArc / 2)
+                                continue;
+
+                            // ignore if colliders were already in the platform
+                            if (castResult.fraction == 0)
+                                continue;
+                        }
+                    }
 
                     if (normalRestriction == Direction.None ||
-                        GetNormalDirection(_tempCastResults[i].normal, this.SlopeAngle) == normalRestriction) {
+                        GetNormalDirection(castResult.normal, this.SlopeAngle) == normalRestriction) {
                         // only count if normal points in given direction
                         if (totalResults < _tempResults.Length) { // failsafe
-                            _tempResults[totalResults] = _tempCastResults[i];
+                            _tempResults[totalResults] = castResult;
                             totalResults++;
                         }
                     }
@@ -521,6 +576,11 @@ namespace Core.Unity.Collision {
 
         private RaycastHit2D[] _tempCastResults = new RaycastHit2D[10];
         private RaycastHit2D[] _tempResults = new RaycastHit2D[10];
+
+        /// <summary>
+        /// List of instance IDs of colliders to ignore when checking casts.
+        /// </summary>
+        private HashSet<int> _ignoreCollisionColliders = new HashSet<int>();
 
         #endregion
 

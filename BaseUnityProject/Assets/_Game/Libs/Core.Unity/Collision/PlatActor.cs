@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Core.Unity.Collision {
 
@@ -130,6 +132,56 @@ namespace Core.Unity.Collision {
             return false;
         }
 
+        /// <summary>
+        /// Gets the one-way platform collider the object is currently touching below.  Returns null if no such object is being touched below.
+        /// <para/>
+        /// To qualify, the collider must be using an enabled <see cref="PlatformEffector2D"/> the uses one way pointed up.
+        /// </summary>
+        /// <returns>Is touching platform.</returns>
+        public Collider2D GetOneWayPlatformBelow() {
+
+            int numResults = this._collisionCaster.TouchResultsNonAlloc(Direction.Down, this._raycastHitResults);
+            if (numResults == 0)
+                return null;
+
+            for (int i=0; i < numResults; i++) {
+                // does the collider use a one-way platform effector?
+                Collider2D collider = this._raycastHitResults[i].collider;
+                if (collider == null)
+                    continue;
+                if (!collider.usedByEffector)
+                    continue;
+                PlatformEffector2D platformEffector = collider.GetComponent<PlatformEffector2D>();
+                if (platformEffector == null || !platformEffector.enabled)
+                    continue;
+                if (!platformEffector.useOneWay)
+                    continue;
+                // does one-way platform effector allow objects to pass from below?
+                float effectorAngle = M.Wrap360(platformEffector.rotationalOffset + 90);
+                if (effectorAngle - platformEffector.surfaceArc / 2 < 0 || effectorAngle + platformEffector.surfaceArc / 2 > 180)
+                    continue;
+                // is touching one-way platform
+                return collider;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Tells the collision caster to ignore collision with the given collider.  Then after the given duration is up, unignore collision with the collider.
+        /// </summary>
+        /// <param name="collider2D">The collider to ignore.</param>
+        /// <param name="duration">The duration to wait until unignoring collision.</param>
+        public void IgnoreCollisionTemporarily(Collider2D collider2D, float duration) {
+            if (collider2D == null)
+                return;
+            if (duration < .001f)
+                return;
+
+            this._collisionCaster.IgnoreCollision(collider2D);
+            this._temporaryIgnoreColliders[collider2D] = Time.fixedTime + duration;
+        }
+
         #endregion
 
         #region Private
@@ -179,6 +231,17 @@ namespace Core.Unity.Collision {
             // only run when playing
             if (!Application.isPlaying)
                 return;
+
+            // unignore temporary ignore colliders
+            if (this._temporaryIgnoreColliders.Keys.Count > 0) {
+                Collider2D[] keys = this._temporaryIgnoreColliders.Keys.ToArray();
+                foreach (Collider2D key in keys) {
+                    if (Time.fixedTime >= this._temporaryIgnoreColliders[key]) {
+                        this._collisionCaster.UnignoreCollision(key);
+                        this._temporaryIgnoreColliders.Remove(key);
+                    }
+                }
+            }
 
             // getting properties
             Vector2 v = _rb2d.velocity;
@@ -246,8 +309,22 @@ namespace Core.Unity.Collision {
             this._rb2d.MovePosition(pos);
         }
 
-        CollisionCaster _collisionCaster;
-        Rigidbody2D _rb2d;
+        /// <summary>
+        /// Reference to the attached <see cref="CollisionCaster"/>.
+        /// </summary>
+        private CollisionCaster _collisionCaster;
+
+        /// <summary>
+        /// Reference to the attached <see cref="Rigidbody2D"/>.
+        /// </summary>
+        private Rigidbody2D _rb2d;
+
+        private RaycastHit2D[] _raycastHitResults = new RaycastHit2D[10];
+
+        /// <summary>
+        /// Dictionary of colliders to ignore temporarily.  Value is the Time.fixedTime when the collider should be unignored.
+        /// </summary>
+        private Dictionary<Collider2D, float> _temporaryIgnoreColliders = new Dictionary<Collider2D, float>();
         #endregion
     }
 }
