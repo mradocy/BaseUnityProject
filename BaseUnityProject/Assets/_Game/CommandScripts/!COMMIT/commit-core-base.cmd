@@ -5,7 +5,7 @@ setlocal
 pushd "%~dp0"
 
 :: Directory of Core.Base in this Unity project.
-set SOURCE_DIRECTORY=..\..\Scripts\Core.Base
+set SOURCE_DIRECTORY=..\..\Libs\Core.Base
 
 :: Directory of the Core.Base project:
 set DESTINATION_DIRECTORY=%GAMEDEV_SOURCE_LIBS%\Core\Core.Base
