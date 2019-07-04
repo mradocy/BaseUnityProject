@@ -1,7 +1,7 @@
 ﻿// Extension of the SpritesDefault shader, while acting as a mask using the stencil buffer
 // http://vinaybourai.com/blog/masking-unity-sprites-with-stencils/
 // Do not generate mip-maps on the sprites.  This will cause weird artifacts with the texture wrapping.
-Shader "Custom/SpritesMask_Ref_2" {
+Shader "Custom/SpritesMasked" {
 
     Properties {
         _MainTex("Sprite Texture", 2D) = "white" {}
@@ -9,6 +9,7 @@ Shader "Custom/SpritesMask_Ref_2" {
         [MaterialToggle] PixelSnap("Pixel snap", Float) = 0
         [KeywordEnum(Repeat, Clamp)] _WrapX("Wrap X", Float) = 0
         [KeywordEnum(Repeat, Clamp)] _WrapY("Wrap Y", Float) = 0
+		[IntRange] _StencilRef ("Stencil Ref", Range(0, 255)) = 2
     }
 
     SubShader {
@@ -26,15 +27,12 @@ Shader "Custom/SpritesMask_Ref_2" {
         ZWrite Off
         Blend One OneMinusSrcAlpha
 
-        // uncomment to hide this mask image
-        //colormask 0
-
         Pass {
 
             // stencil
             Stencil {
-                Ref 2 // value to put in the stencil buffer for a pixel.  int in [1, 255]
-                Comp always // 'always' means pixel will always be drawn and the Ref value will be written to the buffer
+                Ref [_StencilRef] // value to compare against the stencil buffer when deciding to draw a pixel
+                Comp equal // 'equal' means pixel will be drawn only if the Ref value is already in the buffer
                 Pass replace
             }
 
@@ -107,11 +105,7 @@ Shader "Custom/SpritesMask_Ref_2" {
 
                 fixed4 c = SampleSpriteTexture(uv) * IN.color;
                 c.rgb *= c.a;
-
-                // prevents transparent pixels from being including in the max
-                if (c.a < .1)
-                    discard;
-
+                
                 return c;
             }
 
