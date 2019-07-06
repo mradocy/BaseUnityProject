@@ -196,6 +196,7 @@ namespace Core.Unity.Collision {
 
         private void Start() {
             // set script execution order when not playing
+#if UNITY_EDITOR
             if (Application.isEditor && !Application.isPlaying) {
                 UnityEditor.MonoScript thisScript = UnityEditor.MonoScript.FromMonoBehaviour(this);
                 if (UnityEditor.MonoImporter.GetExecutionOrder(thisScript) != SCRIPT_EXECUTION_ORDER) {
@@ -203,6 +204,7 @@ namespace Core.Unity.Collision {
                     Debug.Log("PlatActor script execution order set to " + SCRIPT_EXECUTION_ORDER);
                 }
             }
+#endif
 
             this._collisionCaster = GetComponent<CollisionCaster>();
             this._rb2d = GetComponent<Rigidbody2D>();

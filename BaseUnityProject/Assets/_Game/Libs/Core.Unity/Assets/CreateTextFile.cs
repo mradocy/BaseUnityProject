@@ -5,6 +5,9 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Core.Unity.Assets {
+
+#if UNITY_EDITOR
+
     public static class CreateTextFile {
 
         /// <summary>
@@ -33,6 +36,8 @@ namespace Core.Unity.Assets {
             AssetDatabase.ImportAsset(newFile);
 
         }
-
     }
+
+#endif
+
 }
