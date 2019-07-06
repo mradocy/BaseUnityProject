@@ -31,7 +31,7 @@ namespace Core.Unity.UI {
         /// Launches the given <see cref="ModalWindow"/>.
         /// </summary>
         /// <param name="window">The window to launch.  Must currently not be launched.</param>
-        /// <param name="closeCallbackFunction">Function to call when the launched window closes.</param>
+        /// <param name="closeCallbackFunction">Function to call when the launched window closes.  Can be null.</param>
         public static void Launch(ModalWindow window, UnityAction<ModalWindowCallbackArgs> closeCallbackFunction) {
             // error checking
             if (window == null) {
@@ -56,6 +56,17 @@ namespace Core.Unity.UI {
                 CurrentWindow.enabled = false;
             }
 
+            // handle time scale
+            window._prevTimeScale = Time.timeScale;
+            if (window.ZeroTimeScaleOnLaunch && Time.timeScale != 0) {
+                Time.timeScale = 0;
+                window._restoreTimeScaleOnClose = true;
+
+                // TODO: call event handler?
+            } else {
+                window._restoreTimeScaleOnClose = false;
+            }
+
             // launch created window
             window.IsLaunched = true;
             window._closeCallbackFunction = closeCallbackFunction;
@@ -71,7 +82,7 @@ namespace Core.Unity.UI {
         /// <typeparam name="T">Type of the GameObject's component (must extend <see cref="ModalWindow"/>)</typeparam>
         /// <param name="prefab">The original GameObject to instantiate from.</param>
         /// <param name="transformParent">The Transform to set as the new GameObject's parent.</param>
-        /// <param name="closeCallbackFunction">Function to call when the launched window closes.</param>
+        /// <param name="closeCallbackFunction">Function to call when the launched window closes.  Can be null.</param>
         /// <returns>Created window.</returns>
         public static T CreateAndLaunch<T>(GameObject prefab, Transform transformParent, UnityAction<ModalWindowCallbackArgs> closeCallbackFunction) where T : ModalWindow {
             if (prefab == null) {
@@ -104,7 +115,14 @@ namespace Core.Unity.UI {
         /// Gets if this window should be destroyed when it closes.  The default is true.
         /// Not destroting the window on close may be useful for recycling. 
         /// </summary>
-        public bool DestroyOnClose { get; set; } = true;
+        public virtual bool DestroyOnClose { get; } = true;
+
+        /// <summary>
+        /// Gets if this window should zero the time scale when launched.
+        /// If true, the previous time scale will be brought back when the window closes.
+        /// The default is false.
+        /// </summary>
+        public virtual bool ZeroTimeScaleOnLaunch { get; } = false;
 
         #endregion
 
@@ -127,6 +145,11 @@ namespace Core.Unity.UI {
             _windowStack.RemoveAt(_windowStack.Count - 1);
             if (CurrentWindow != null) {
                 CurrentWindow.enabled = true;
+            }
+
+            // restore time scale
+            if (this._restoreTimeScaleOnClose) {
+                Time.timeScale = this._prevTimeScale;
             }
 
             // call callback function
@@ -152,19 +175,40 @@ namespace Core.Unity.UI {
 
         #endregion
 
-        #region Protected Methods
+        #region Protected Methods to Override
 
         /// <summary>
-        /// Function called when this window gets launched.  Meant to be overridden.
+        /// Function called when this window gets launched.
         /// </summary>
         protected virtual void OnLaunch() { }
 
         /// <summary>
         /// Called by Unity when the script instance is being loaded.
         /// </summary>
-        protected virtual void Awake() {
+        protected virtual void OnAwake() { }
+
+        /// <summary>
+        /// Called by Unity every frame, if the MonoBehaviour is enabled.
+        /// </summary>
+        protected virtual void OnUpdate() { }
+
+        /// <summary>
+        /// Called by Unity when the script instance is being destroyed.
+        /// </summary>
+        protected virtual void OnDerivedDestroy() { }
+
+        #endregion
+
+        #region Protected Methods
+
+        /// <summary>
+        /// Called by Unity when the script instance is being loaded.
+        /// </summary>
+        protected void Awake() {
             // Modal windows are disabled at first.  They become enabled when launched.
             this.enabled = false;
+
+            this.OnAwake();
         }
 
         /// <summary>
@@ -172,12 +216,16 @@ namespace Core.Unity.UI {
         /// </summary>
         protected virtual void Update() {
             this.VerifyEnabled();
+
+            this.OnUpdate();
         }
 
         /// <summary>
         /// Called by Unity when the script instance is being destroyed.
         /// </summary>
         protected virtual void OnDestroy() {
+            this.OnDerivedDestroy();
+
             if (this.IsLaunched) {
                 Debug.LogWarning("A modal window should be closed before being destroyed.");
             }
@@ -210,6 +258,16 @@ namespace Core.Unity.UI {
         private static List<ModalWindow> _windowStack = new List<ModalWindow>();
 
         private UnityAction<ModalWindowCallbackArgs> _closeCallbackFunction = null;
+
+        /// <summary>
+        /// The time scale before the window was launched.
+        /// </summary>
+        private float _prevTimeScale = 1;
+
+        /// <summary>
+        /// If the previous time scale should be set when this window closes.
+        /// </summary>
+        private bool _restoreTimeScaleOnClose = false;
 
         #endregion
     }

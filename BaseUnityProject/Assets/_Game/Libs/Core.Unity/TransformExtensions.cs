@@ -20,5 +20,23 @@ namespace Core.Unity {
             transform.localScale = ls;
         }
 
+        /// <summary>
+        /// Gets the local 2D rotation of this transform, in degrees.
+        /// </summary>
+        /// <param name="transform">This transform.</param>
+        /// <returns>Rotation</returns>
+        public static float GetLocalRotation2D(this Transform transform) {
+            return M.QuatToRot(transform.localRotation);
+        }
+
+        /// <summary>
+        /// Sets the local 2D rotation of this transform.
+        /// </summary>
+        /// <param name="transform">This transform.</param>
+        /// <param name="rotationDegrees">Rotation (degrees) to set.</param>
+        public static void SetLocalRotation2D(this Transform transform, float rotationDegrees) {
+            transform.localRotation = M.RotToQuat(rotationDegrees);
+        }
+
     }
 }
