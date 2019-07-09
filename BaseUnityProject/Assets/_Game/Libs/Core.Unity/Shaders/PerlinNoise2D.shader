@@ -6,19 +6,19 @@ Shader "Custom/PerlinNoise2D" {
 	// fields that can be accessed in Unity.  More info: https://docs.unity3d.com/Manual/SL-PropertiesInPrograms.html
     Properties {
 		// Perlin Noise
-        _offsetX("OffsetX", Float) = 0.0
-        _offsetY("OffsetY", Float) = 0.0      
-        _octaves("Octaves", Int) = 7
-        _lacunarity("Lacunarity", Range(1.0, 5.0)) = 2
-        _gain("Gain", Range(0.0, 1.0)) = 0.5
-        _value("Value", Range(-2.0, 2.0)) = 0.0
-        _amplitude("Amplitude", Range(0.0, 5.0)) = 1.5
-        _frequency("Frequency", Range(0.0, 6.0)) = 2.0
-        _power("Power", Range(0.1, 5.0)) = 1.0
-        _scale("Scale", Float) = 1.0
+        _OffsetX("OffsetX", Float) = 0.0
+        _OffsetY("OffsetY", Float) = 0.0      
+        _Octaves("Octaves", Int) = 7
+        _Lacunarity("Lacunarity", Range(1.0, 5.0)) = 2
+        _Gain("Gain", Range(0.0, 1.0)) = 0.5
+        _Value("Value", Range(-2.0, 2.0)) = 0.0
+        _Amplitude("Amplitude", Range(0.0, 5.0)) = 1.5
+        _Frequency("Frequency", Range(0.0, 6.0)) = 2.0
+        _Power("Power", Range(0.1, 5.0)) = 1.0
+        _Scale("Scale", Float) = 1.0
 
 		// Other
-        _color("Color", Color) = (1.0, 1.0, 1.0, 1.0)  
+        _Color("Color", Color) = (1.0, 1.0, 1.0, 1.0)  
     }
 
     Subshader {
@@ -42,17 +42,17 @@ Shader "Custom/PerlinNoise2D" {
             };
  
 			// Perlin Noise custom fields to be filled by the Shader Lab
-            float _octaves, _lacunarity, _gain, _value, _amplitude, _frequency, _offsetX, _offsetY, _power, _scale;
+            float _Octaves, _Lacunarity, _Gain, _Value, _Amplitude, _Frequency, _OffsetX, _OffsetY, _Power, _Scale;
 
 			// Other custom fields
-            float4 _color;
+            float4 _Color;
             
 			// calculates perlin noise value (in [0, 1]) for the given uv point
             float PerlinNoise2D(float2 uv) {
-                uv = uv * _scale + float2(_offsetX, _offsetY);
-                for (int i = 0; i < _octaves; i++) {
-                    float2 i = floor(uv * _frequency);
-                    float2 f = frac(uv * _frequency);      
+                uv = uv * _Scale + float2(_OffsetX, _OffsetY);
+                for (int i = 0; i < _Octaves; i++) {
+                    float2 i = floor(uv * _Frequency);
+                    float2 f = frac(uv * _Frequency);      
                     float2 t = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
                     float2 a = i + float2(0.0, 0.0);
                     float2 b = i + float2(1.0, 0.0);
@@ -67,12 +67,12 @@ Shader "Custom/PerlinNoise2D" {
                     float C = dot(c, f - float2(0.0, 1.0));
                     float D = dot(d, f - float2(1.0, 1.0));
                     float noise = (lerp(lerp(A, B, t.x), lerp(C, D, t.x), t.y));              
-                    _value += _amplitude * noise;
-                    _frequency *= _lacunarity;
-                    _amplitude *= _gain;
+                    _Value += _Amplitude * noise;
+                    _Frequency *= _Lacunarity;
+                    _Amplitude *= _Gain;
                 }
-                _value = clamp(_value, -1.0, 1.0);
-                return pow(_value * 0.5 + 0.5, _power);
+                _Value = clamp(_Value, -1.0, 1.0);
+                return pow(_Value * 0.5 + 0.5, _Power);
             }
             
 			// vertex function that "builds the object"; takes an iterated vertex point and adjusts its position, returning in a form that will be passed to the fragment function 
@@ -88,7 +88,7 @@ Shader "Custom/PerlinNoise2D" {
                 float2 uv = IN.uv.xy;
                 float c = PerlinNoise2D(uv);
 
-				return fixed4(c, c, c, c) * _color;
+				return fixed4(c, c, c, c) * _Color;
             }
  
             ENDCG

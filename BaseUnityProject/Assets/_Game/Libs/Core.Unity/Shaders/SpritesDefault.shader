@@ -51,9 +51,20 @@ Shader "Custom/SpritesDefault" {
             sampler2D _AlphaTex;
             float _AlphaSplitEnabled;
             fixed4 _Color;
-
             half _WrapX;
             half _WrapY;
+
+
+			fixed4 SampleSpriteTexture(float2 uv) {
+                fixed4 color = tex2D(_MainTex, uv);
+                
+#if UNITY_TEXTURE_ALPHASPLIT_ALLOWED
+                if (_AlphaSplitEnabled)
+                    color.a = tex2D(_AlphaTex, uv).r;
+#endif
+                return color;
+            }
+
 
             v2f vert(appdata_t IN) {
                 v2f OUT;
@@ -66,20 +77,7 @@ Shader "Custom/SpritesDefault" {
 #ifdef PIXELSNAP_ON
                 OUT.vertex = UnityPixelSnap(OUT.vertex);
 #endif
-                
                 return OUT;
-            }
-            
-            
-            
-            fixed4 SampleSpriteTexture(float2 uv) {
-                fixed4 color = tex2D(_MainTex, uv);
-                
-#if UNITY_TEXTURE_ALPHASPLIT_ALLOWED
-                if (_AlphaSplitEnabled)
-                    color.a = tex2D(_AlphaTex, uv).r;
-#endif
-                return color;
             }
             
             fixed4 frag(v2f IN) : SV_Target {
@@ -101,6 +99,5 @@ Shader "Custom/SpritesDefault" {
 
             ENDCG
         }
-        
     }
 }
