@@ -19,9 +19,9 @@ namespace Core.Unity.StateMachine {
         #region Properties
 
         /// <summary>
-        /// ID of this state.
+        /// Gets the ID of this state.
         /// </summary>
-        public TStateID ID { get { return this._id; } }
+        public abstract TStateID ID { get; }
 
         /// <summary>
         /// Reference to the owner of the state machine.
@@ -38,26 +38,30 @@ namespace Core.Unity.StateMachine {
         #region Protected Methods to be Overridden
 
         /// <summary>
-        /// Protected constructor.  Should be extended by a parameterless constructor that gives this state's ID.
-        /// </summary>
-        /// <param name="ID">The id of this state.</param>
-        protected BaseState(TStateID ID) {
-            this._id = ID;
-        }
-
-        /// <summary>
         /// Called immediately after all states in the state machine are registered and the owner is available.
         /// This will only be called once for each state.
         /// </summary>
-        protected abstract void OnRegistered();
+        protected virtual void OnRegistered() { }
 
-        protected abstract void OnBegin();
+        /// <summary>
+        /// Called when the state machine switches to this state.  This will only be called when changing to a different state.
+        /// </summary>
+        protected virtual void OnBegin() { }
         
-        protected abstract void Update();
+        /// <summary>
+        /// Called by the <see cref="StateMachine"/> during Update() method when this is the current state.
+        /// </summary>
+        protected virtual void Update() { }
 
-        protected abstract void FixedUpdate();
+        /// <summary>
+        /// Called by the <see cref="StateMachine"/> during FixedUpdate() method when this is the current state.
+        /// </summary>
+        protected virtual void FixedUpdate() { }
 
-        protected abstract void OnEnd();
+        /// <summary>
+        /// Called when the state machine switches away from this state to a different state.
+        /// </summary>
+        protected virtual void OnEnd() { }
 
         #endregion
 
@@ -107,8 +111,6 @@ namespace Core.Unity.StateMachine {
 
         [System.NonSerialized]
         private bool _initialized = false;
-        [System.NonSerialized]
-        private TStateID _id;
         [System.NonSerialized]
         private TStateMachine _stateMachine;
         [System.NonSerialized]
