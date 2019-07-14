@@ -33,6 +33,11 @@ namespace Core.Unity.StateMachine {
         /// </summary>
         public TStateMachine StateMachine { get { return this._stateMachine; } }
 
+        /// <summary>
+        /// Gets if this state is the current state in the state machine.
+        /// </summary>
+        public bool IsCurrentState { get { return this._stateMachine.CurrentStateObject == this; } }
+
         #endregion
 
         #region Protected Methods to be Overridden
