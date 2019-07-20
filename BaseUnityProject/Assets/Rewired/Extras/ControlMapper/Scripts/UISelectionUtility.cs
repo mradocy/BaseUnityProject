@@ -36,7 +36,7 @@ namespace Rewired.UI.ControlMapper {
             if (Selectable.allSelectableCount > s_reusableAllSelectables.Length) {
                 s_reusableAllSelectables = new Selectable[Selectable.allSelectableCount];
             }
-            selectableCount = Selectable.AllSelectablesNoAlloc(ref s_reusableAllSelectables);
+            selectableCount = Selectable.AllSelectablesNoAlloc(s_reusableAllSelectables);
             allSelectables = s_reusableAllSelectables;
 #else
             allSelectables = Selectable.allSelectables;
