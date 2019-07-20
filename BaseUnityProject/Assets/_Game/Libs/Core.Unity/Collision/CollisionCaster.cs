@@ -197,8 +197,8 @@ namespace Core.Unity.Collision {
                         c0 = new Vector2(-(size.x - sizeMin) / 2, 0);
                         c1 = new Vector2((size.x - sizeMin) / 2, 0);
                     }
-                    c0 = M.RotateAroundPoint(c0, Vector2.zero, angleDegrees * Mathf.Deg2Rad) + center;
-                    c1 = M.RotateAroundPoint(c1, Vector2.zero, angleDegrees * Mathf.Deg2Rad) + center;
+                    c0 = MathUtils.RotateAroundPoint(c0, Vector2.zero, angleDegrees * Mathf.Deg2Rad) + center;
+                    c1 = MathUtils.RotateAroundPoint(c1, Vector2.zero, angleDegrees * Mathf.Deg2Rad) + center;
                     left = Mathf.Min(c0.x, c1.x) - sizeMin / 2;
                     right = Mathf.Max(c0.x, c1.x) + sizeMin / 2;
                     down = Mathf.Min(c0.y, c1.y) - sizeMin / 2;
@@ -495,7 +495,7 @@ namespace Core.Unity.Collision {
                             // ignore if cast is not contained in surface arc
                             float castAngle = Mathf.Atan2(castResult.normal.y, castResult.normal.x) * Mathf.Rad2Deg;
                             float effectorAngle = platformEffector.rotationalOffset + 90;
-                            float angleDiff = M.Wrap180(effectorAngle - castAngle);
+                            float angleDiff = MathUtils.Wrap180(effectorAngle - castAngle);
                             if (Mathf.Abs(angleDiff) >= platformEffector.surfaceArc / 2)
                                 continue;
 

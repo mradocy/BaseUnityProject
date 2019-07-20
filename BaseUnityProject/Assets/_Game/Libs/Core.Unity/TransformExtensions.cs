@@ -26,7 +26,7 @@ namespace Core.Unity {
         /// <param name="transform">This transform.</param>
         /// <returns>Rotation</returns>
         public static float GetLocalRotation2D(this Transform transform) {
-            return M.QuatToRot(transform.localRotation);
+            return MathUtils.QuatToRot(transform.localRotation);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Core.Unity {
         /// <param name="transform">This transform.</param>
         /// <param name="rotationDegrees">Rotation (degrees) to set.</param>
         public static void SetLocalRotation2D(this Transform transform, float rotationDegrees) {
-            transform.localRotation = M.RotToQuat(rotationDegrees);
+            transform.localRotation = MathUtils.RotToQuat(rotationDegrees);
         }
 
     }

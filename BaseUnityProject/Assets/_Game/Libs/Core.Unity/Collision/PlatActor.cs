@@ -157,7 +157,7 @@ namespace Core.Unity.Collision {
                 if (!platformEffector.useOneWay)
                     continue;
                 // does one-way platform effector allow objects to pass from below?
-                float effectorAngle = M.Wrap360(platformEffector.rotationalOffset + 90);
+                float effectorAngle = MathUtils.Wrap360(platformEffector.rotationalOffset + 90);
                 if (effectorAngle - platformEffector.surfaceArc / 2 < 0 || effectorAngle + platformEffector.surfaceArc / 2 > 180)
                     continue;
                 // is touching one-way platform

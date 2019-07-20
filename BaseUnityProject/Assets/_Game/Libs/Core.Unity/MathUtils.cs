@@ -2,10 +2,11 @@
 using System.Collections;
 
 namespace Core.Unity {
+
     /// <summary>
     /// Math class with generic static functions.
     /// </summary>
-    public static class M {
+    public static class MathUtils {
 
         /// <summary>
         /// Epsilon value used for floating point comparisons.
