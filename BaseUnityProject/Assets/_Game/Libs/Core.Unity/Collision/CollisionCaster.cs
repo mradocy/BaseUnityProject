@@ -216,7 +216,7 @@ namespace Core.Unity.Collision {
         }
         
         /// <summary>
-        /// If the left bottom side of the bounds isn't immediately over a platform.
+        /// Gets if the left bottom side of the bounds isn't immediately over a platform.
         /// layerMask of the raycast is a union of the layer masks of all the colliders.
         /// </summary>
         /// <param name="depthCheck">How far down to check if there's a platform (distance of the raycast).</param>
@@ -231,7 +231,7 @@ namespace Core.Unity.Collision {
         }
 
         /// <summary>
-        /// If the right bottom side of the bounds isn't immediately over a platform.
+        /// Gets if the right bottom side of the bounds isn't immediately over a platform.
         /// layerMask of the raycast is a union of the layer masks of all the colliders.
         /// </summary>
         /// <param name="depthCheck">How far down to check if there's a platform (distance of the raycast).</param>

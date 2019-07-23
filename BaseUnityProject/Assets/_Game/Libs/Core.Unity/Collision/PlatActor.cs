@@ -59,24 +59,24 @@ namespace Core.Unity.Collision {
         /// If smoother repositioning should be applied when colliding with sloped surfaces.
         /// </summary>
         public bool ProjectReposition {
-            get { return this._projectReposition; }
-            set { this._projectReposition = value; }
+            get { return _projectReposition; }
+            set { _projectReposition = value; }
         }
 
         /// <summary>
         /// If custom gravity force should be applied.  Note that <see cref="Rigidbody2D"/>'s gravity scale is set to 0 regardless.
         /// </summary>
         public bool ApplyGravity {
-            get { return this._applyGravity; }
-            set { this._applyGravity = value; }
+            get { return _applyGravity; }
+            set { _applyGravity = value; }
         }
 
         /// <summary>
         /// Gravity unique to this object.  <see cref="Rigidbody2D"/>.gravityScale is automatically set to 0.
         /// </summary>
         public Vector2 Gravity {
-            get { return this._gravity; }
-            set { this._gravity = value; }
+            get { return _gravity; }
+            set { _gravity = value; }
         }
 
         /// <summary>
@@ -85,8 +85,8 @@ namespace Core.Unity.Collision {
         /// NOTE: must set platform's velocity and angular velocity, this will not work if the platform is being moved with MovePosition() or MoveRotation().
         /// </summary>
         public bool MovedByDownPlatform {
-            get { return this._movedByDownPlatform; }
-            set { this._movedByDownPlatform = value; }
+            get { return _movedByDownPlatform; }
+            set { _movedByDownPlatform = value; }
         }
 
         #endregion
@@ -104,10 +104,10 @@ namespace Core.Unity.Collision {
             Vector2 pos = transform.position;
 
             // check raycast from bottom center first
-            Rect rect = this._collisionCaster.GetBounds(0);
+            Rect rect = _collisionCaster.GetBounds(0);
             bool prevQSIC = Physics2D.queriesStartInColliders;
             Physics2D.queriesStartInColliders = false;
-            RaycastHit2D raycastResult = Physics2D.Raycast(new Vector2(rect.center.x, rect.yMin), Vector2.down, distance, this._collisionCaster.GetUnionLayerMask());
+            RaycastHit2D raycastResult = Physics2D.Raycast(new Vector2(rect.center.x, rect.yMin), Vector2.down, distance, _collisionCaster.GetUnionLayerMask());
             Physics2D.queriesStartInColliders = prevQSIC;
 
             if (raycastResult.collider != null) {
@@ -125,7 +125,7 @@ namespace Core.Unity.Collision {
             }
 
             // return true if touching down anyway
-            if (this._collisionCaster.Touch(Direction.Down)) {
+            if (_collisionCaster.Touch(Direction.Down)) {
                 return true;
             }
 
@@ -140,13 +140,13 @@ namespace Core.Unity.Collision {
         /// <returns>Is touching platform.</returns>
         public Collider2D GetOneWayPlatformBelow() {
 
-            int numResults = this._collisionCaster.TouchResultsNonAlloc(Direction.Down, this._raycastHitResults);
+            int numResults = _collisionCaster.TouchResultsNonAlloc(Direction.Down, _raycastHitResults);
             if (numResults == 0)
                 return null;
 
             for (int i=0; i < numResults; i++) {
                 // does the collider use a one-way platform effector?
-                Collider2D collider = this._raycastHitResults[i].collider;
+                Collider2D collider = _raycastHitResults[i].collider;
                 if (collider == null)
                     continue;
                 if (!collider.usedByEffector)
@@ -178,8 +178,8 @@ namespace Core.Unity.Collision {
             if (duration < .001f)
                 return;
 
-            this._collisionCaster.IgnoreCollision(collider2D);
-            this._temporaryIgnoreColliders[collider2D] = Time.fixedTime + duration;
+            _collisionCaster.IgnoreCollision(collider2D);
+            _temporaryIgnoreColliders[collider2D] = Time.fixedTime + duration;
         }
 
         #endregion
@@ -191,6 +191,9 @@ namespace Core.Unity.Collision {
             // only run when playing
             if (!Application.isPlaying)
                 return;
+
+            _collisionCaster = GetComponent<CollisionCaster>();
+            _rb2d = GetComponent<Rigidbody2D>();
 
         }
 
@@ -206,8 +209,8 @@ namespace Core.Unity.Collision {
             }
 #endif
 
-            this._collisionCaster = GetComponent<CollisionCaster>();
-            this._rb2d = GetComponent<Rigidbody2D>();
+            _collisionCaster = GetComponent<CollisionCaster>();
+            _rb2d = GetComponent<Rigidbody2D>();
 
             // only run when playing
             if (!Application.isPlaying)
@@ -217,7 +220,7 @@ namespace Core.Unity.Collision {
 
         private void Update() {
             // ensure rb2d's gravityScale is always set to 0.
-            this._rb2d.gravityScale = 0;
+            _rb2d.gravityScale = 0;
 
             // only run when playing
             if (!Application.isPlaying)
@@ -235,55 +238,55 @@ namespace Core.Unity.Collision {
                 return;
 
             // unignore temporary ignore colliders
-            if (this._temporaryIgnoreColliders.Keys.Count > 0) {
-                Collider2D[] keys = this._temporaryIgnoreColliders.Keys.ToArray();
+            if (_temporaryIgnoreColliders.Keys.Count > 0) {
+                Collider2D[] keys = _temporaryIgnoreColliders.Keys.ToArray();
                 foreach (Collider2D key in keys) {
-                    if (Time.fixedTime >= this._temporaryIgnoreColliders[key]) {
-                        this._collisionCaster.UnignoreCollision(key);
-                        this._temporaryIgnoreColliders.Remove(key);
+                    if (Time.fixedTime >= _temporaryIgnoreColliders[key]) {
+                        _collisionCaster.UnignoreCollision(key);
+                        _temporaryIgnoreColliders.Remove(key);
                     }
                 }
             }
 
             // getting properties
             Vector2 v = _rb2d.velocity;
-            RaycastHit2D touchRight = this._collisionCaster.TouchResult(Direction.Right);
-            RaycastHit2D touchUp = this._collisionCaster.TouchResult(Direction.Up);
-            RaycastHit2D touchLeft = this._collisionCaster.TouchResult(Direction.Left);
-            RaycastHit2D touchDown = this._collisionCaster.TouchResult(Direction.Down);
+            RaycastHit2D touchRight = _collisionCaster.TouchResult(Direction.Right);
+            RaycastHit2D touchUp = _collisionCaster.TouchResult(Direction.Up);
+            RaycastHit2D touchLeft = _collisionCaster.TouchResult(Direction.Left);
+            RaycastHit2D touchDown = _collisionCaster.TouchResult(Direction.Down);
 
             // apply gravity
-            if (this._applyGravity) {
-                v += this._gravity * Time.fixedDeltaTime;
+            if (_applyGravity) {
+                v += _gravity * Time.fixedDeltaTime;
             }
 
             // zero velocity on touch
-            if (this._stopOnTouchRight && touchRight) {
+            if (_stopOnTouchRight && touchRight) {
                 v.x = Mathf.Min(0, v.x);
             }
-            if (this._stopOnTouchUp && touchUp) {
+            if (_stopOnTouchUp && touchUp) {
                 v.y = Mathf.Min(0, v.y);
             }
-            if (this._stopOnTouchLeft && touchLeft) {
+            if (_stopOnTouchLeft && touchLeft) {
                 v.x = Mathf.Max(0, v.x);
             }
-            if (this._stopOnTouchDown && touchDown) {
+            if (_stopOnTouchDown && touchDown) {
                 v.y = Mathf.Max(0, v.y);
             }
 
             // apply custom velocity
-            this._rb2d.velocity = v;
+            _rb2d.velocity = v;
 
             // setting new position with MovePosition()
-            Vector2 pos = new Vector2(transform.position.x, transform.position.y) + this._rb2d.velocity * Time.fixedDeltaTime;
+            Vector2 pos = new Vector2(transform.position.x, transform.position.y) + _rb2d.velocity * Time.fixedDeltaTime;
 
             // project reposition
-            if (this._projectReposition) {
-                pos = this._collisionCaster.ProjectReposition(this._rb2d.velocity, Time.fixedDeltaTime);
+            if (_projectReposition) {
+                pos = _collisionCaster.ProjectReposition(_rb2d.velocity, Time.fixedDeltaTime);
             }
 
             // moving platform
-            if (this._movedByDownPlatform) {
+            if (_movedByDownPlatform) {
                 if (touchDown) {
                     Rigidbody2D downRb2d = touchDown.rigidbody;
                     if (downRb2d != null) { // can be null if collider hit wasn't attached to a rigidbody
@@ -308,7 +311,7 @@ namespace Core.Unity.Collision {
             }
 
             // applying position
-            this._rb2d.MovePosition(pos);
+            _rb2d.MovePosition(pos);
         }
 
         /// <summary>
