@@ -110,6 +110,20 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Rotates a vector around the origin.
+        /// </summary>
+        /// <param name="v">Vector to rotate.</param>
+        /// <param name="rotationRadians">Angle to rotate, in radians.</param>
+        public static Vector2 RotateAroundOrigin(Vector2 v, float rotationRadians) {
+            Vector2 ret = new Vector2();
+            float c = Mathf.Cos(rotationRadians);
+            float s = Mathf.Sin(rotationRadians);
+            ret.x = v.x * c - v.y * s;
+            ret.y = v.x * s + v.y * c;
+            return ret;
+        }
+
+        /// <summary>
         /// Rotates a vector around a given point.
         /// </summary>
         /// <param name="v">Vector to rotate.</param>
