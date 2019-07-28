@@ -15,10 +15,24 @@ namespace Core.Unity {
         /// <typeparam name="T">Type of component to search.</typeparam>
         /// <param name="component">This component to search</param>
         /// <returns>Component</returns>
-        public static T EnsureComponent<T>(this Component component) where T : Component {
+        public static T EnsureComponent<T>(this Component component) {
             T comp = component.GetComponent<T>();
             if (comp == null) {
-                throw new System.Exception($"Component {typeof(T)} not found in component {component}");
+                throw new System.Exception($"Component of type {typeof(T)} not found in component {component}");
+            }
+            return comp;
+        }
+
+        /// <summary>
+        /// Searches parents for the component of the given type, but throws an error if the component could not be found.
+        /// </summary>
+        /// <typeparam name="T">Type of component to search.</typeparam>
+        /// <param name="component">This component to search</param>
+        /// <returns>Component</returns>
+        public static T EnsureComponentInParent<T>(this Component component) {
+            T comp = component.GetComponentInParent<T>();
+            if (comp == null) {
+                throw new System.Exception($"Component of type {typeof(T)} not found in parents of component {component}");
             }
             return comp;
         }

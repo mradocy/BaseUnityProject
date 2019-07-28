@@ -15,10 +15,10 @@ namespace Core.Unity {
         /// <typeparam name="T">Type of component to search.</typeparam>
         /// <param name="gameObject">this GameObject</param>
         /// <returns>Component</returns>
-        public static T EnsureComponent<T>(this GameObject gameObject) where T : Component {
+        public static T EnsureComponent<T>(this GameObject gameObject) {
             T comp = gameObject.GetComponent<T>();
             if (comp == null) {
-                throw new System.Exception($"Component {typeof(T)} not found in game object {gameObject}");
+                throw new System.Exception($"Component of type {typeof(T)} not found in game object {gameObject}");
             }
             return comp;
         }
