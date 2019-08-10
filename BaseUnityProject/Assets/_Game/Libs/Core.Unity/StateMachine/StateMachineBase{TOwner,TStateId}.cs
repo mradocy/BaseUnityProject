@@ -10,7 +10,7 @@ namespace Core.Unity.StateMachine {
     /// <typeparam name="TOwner">Type of the <see cref="MonoBehaviour"/> owner of this state machine.</typeparam>
     /// <typeparam name="TStateId">The enum containing the ids representing the states.  Should be based off an int.</typeparam>
     [System.Serializable]
-    public abstract class BaseStateMachine<TOwner, TStateId> : IStateMachine
+    public abstract class StateMachineBase<TOwner, TStateId> : IStateMachine
         where TOwner : MonoBehaviour
         where TStateId : System.Enum {
 
@@ -19,17 +19,17 @@ namespace Core.Unity.StateMachine {
         /// <summary>
         /// The <see cref="MonoBehaviour"/> that owns this state machine.
         /// </summary>
-        public TOwner Owner { get { return this._owner; } }
+        public TOwner Owner { get { return _owner; } }
 
         /// <summary>
         /// The id of the current state.
         /// </summary>
-        public TStateId CurrentState { get { return this._currentState; } }
+        public TStateId CurrentState { get { return _currentState; } }
 
         /// <summary>
         /// The <see cref="IState"/> object of the current state.
         /// </summary>
-        public IState CurrentStateObject { get { return this._currentStateObject; } }
+        public IState CurrentStateObject { get { return _currentStateObject; } }
 
         #endregion
 
@@ -41,15 +41,15 @@ namespace Core.Unity.StateMachine {
         /// <param name="owner">Reference to the owner of this state machine.</param>
         /// <param name="initialState">The state to start with.</param>
         public void Awake(TOwner owner, TStateId initialState) {
-            if (this._awakeCalled) {
+            if (_awakeCalled) {
                 Debug.LogError($"Cannot call {nameof(this.Awake)}() more than once.");
                 return;
             }
-            this._awakeCalled = true;
+            _awakeCalled = true;
 
-            this._owner = owner;
+            _owner = owner;
             this.RegisterStates();
-            foreach (IState state in this._states.Values) {
+            foreach (IState state in _states.Values) {
                 state.OnRegistered();
             }
             this.ChangeState(initialState);
@@ -59,14 +59,14 @@ namespace Core.Unity.StateMachine {
         /// To be called by the owner in the Update() method.  Calls Update() of the current state.
         /// </summary>
         public void Update() {
-            this._currentStateObject?.Update();
+            _currentStateObject?.Update();
         }
 
         /// <summary>
         /// To be called by the owner in the FixedUpdate() method.  Calls FixedUpdate() of the current state.
         /// </summary>
         public void FixedUpdate() {
-            this._currentStateObject?.FixedUpdate();
+            _currentStateObject?.FixedUpdate();
         }
 
         #endregion
@@ -84,11 +84,11 @@ namespace Core.Unity.StateMachine {
                 return null;
             }
             IState state;
-            if (this._states.TryGetValue(stateID, out state)) {
+            if (_states.TryGetValue(stateID, out state)) {
                 return state;
             }
 
-            if (!this._awakeCalled) {
+            if (!_awakeCalled) {
                 Debug.LogError($"State machine cannot be used until {nameof(this.Awake)}() has been called.");
                 return null;
             }
@@ -108,10 +108,10 @@ namespace Core.Unity.StateMachine {
             if (this.CurrentState.Equals(state)) {
                 return false;
             }
-            this._currentStateObject?.OnEnd();
-            this._currentState = state;
-            this._currentStateObject = this.GetStateObject(this.CurrentState);
-            this._currentStateObject?.OnBegin();
+            _currentStateObject?.OnEnd();
+            _currentState = state;
+            _currentStateObject = this.GetStateObject(this.CurrentState);
+            _currentStateObject?.OnBegin();
             return true;
         }
 
@@ -136,13 +136,13 @@ namespace Core.Unity.StateMachine {
             if (state == null) {
                 throw new System.ArgumentNullException(nameof(state));
             }
-            if (this._states.ContainsKey(stateId)) {
+            if (_states.ContainsKey(stateId)) {
                 throw new System.ArgumentException($"State with id \"{stateId}\" has already been registered.", nameof(stateId));
             }
 
             state.Initialize(this);
 
-            this._states.Add(stateId, state);
+            _states.Add(stateId, state);
         }
 
         #endregion

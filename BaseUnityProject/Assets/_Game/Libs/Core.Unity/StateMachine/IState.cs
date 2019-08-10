@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Core.Unity.StateMachine {
 
     /// <summary>
-    /// Interface to be implemented by <see cref="BaseState{TOwner, TStateMachine, TStateID}"/>.
+    /// Interface to be implemented by <see cref="StateBase{TOwner, TStateMachine, TStateID}"/>.
     /// </summary>
     public interface IState {
 
