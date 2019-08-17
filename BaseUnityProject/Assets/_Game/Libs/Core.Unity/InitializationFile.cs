@@ -178,7 +178,10 @@ namespace Core.Unity {
             _properties.Clear();
             for (int i = 0; i < lines.Length; i++) {
                 string line = lines[i].Trim();
-                if (line == "") continue;
+                if (line == "")
+                    continue;
+                if (line.StartsWith("//"))
+                    continue;
 
                 int index = line.IndexOf(':');
                 if (index == -1) {

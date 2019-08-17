@@ -7,9 +7,9 @@ using UnityEngine;
 namespace Core.Unity.SaveData {
 
     /// <summary>
-    /// Represents a saved set of ints.  The base class for <see cref="SaveEnumSet{TEnum}"/>.
+    /// Represents a saved list of ints.  The base class for <see cref="SaveEnumList{TEnum}"/>.
     /// </summary>
-    public class SaveIntSet : SaveProperty {
+    public class SaveIntList : SaveProperty {
 
         /// <summary>
         /// Constructor, do not call.  All save properties, except for the root, have to be registered.
@@ -17,13 +17,13 @@ namespace Core.Unity.SaveData {
         /// <param name="key">Key to identify the group.</param>
         /// <param name="parent">Parent <see cref="SaveGroup"/></param>
         /// <param name="defaultValues">Value for the property to start with.</param>
-        public SaveIntSet(string key, SaveGroup parent, IEnumerable<int> defaultValues) : base(key, parent) {
+        public SaveIntList(string key, SaveGroup parent, IEnumerable<int> defaultValues) : base(key, parent) {
             if (defaultValues == null) {
-                _defaultValues = new HashSet<int>();
+                _defaultValues = new List<int>();
             } else {
-                _defaultValues = new HashSet<int>(defaultValues);
+                _defaultValues = new List<int>(defaultValues);
             }
-            _values = new HashSet<int>(_defaultValues);
+            _values = new List<int>(_defaultValues);
         }
 
         /// <summary>
@@ -37,16 +37,15 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Adds the given int to the set of values.  Returns if the item was added (i.e. not already in the set).
+        /// Adds the given int to the list of values.
         /// </summary>
         /// <param name="item">Item to add.</param>
-        /// <returns>Was added</returns>
-        public bool Add(int item) {
-            return _values.Add(item);
+        public void Add(int item) {
+            _values.Add(item);
         }
 
         /// <summary>
-        /// Removes the given int from the set of values.  Returns if an item was removed (i.e. was already in the set).
+        /// Removes the given int from the list of values.  Returns if an item was removed (i.e. was already in the list).
         /// </summary>
         /// <param name="item">Item to remove.</param>
         /// <returns>Was removed</returns>
@@ -55,23 +54,40 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Gets if the given int is currently contained in the set.
+        /// Gets the index of an item in the list, or -1 if it doesn't exist.
         /// </summary>
         /// <param name="item">Item to check.</param>
-        /// <returns>Is contained.</returns>
-        public bool Contains(int item) {
-            return _values.Contains(item);
+        /// <returns>Index.</returns>
+        public int IndexOf(int item) {
+            return _values.IndexOf(item);
         }
 
         /// <summary>
-        /// Clears the set of ints.
+        /// Gets the int value at the given index.  Throws an error if the index is invalid.
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Element</returns>
+        public int IntAt(int index) {
+            return _values[index];
+        }
+
+        /// <summary>
+        /// Gets all the values of this list copied to an int array.
+        /// </summary>
+        /// <returns></returns>
+        public int[] ToIntArray() {
+            return _values.ToArray();
+        }
+
+        /// <summary>
+        /// Clears the list of ints.
         /// </summary>
         public void Clear() {
             _values.Clear();
         }
 
         /// <summary>
-        /// Gets the number of items in the set.
+        /// Gets the number of items in the list.
         /// </summary>
         public int Count {
             get { return _values.Count; }
@@ -113,21 +129,17 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Create an XmlElement that represents this int set property.
+        /// Create an XmlElement that represents this int list property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
         /// <returns>XmlElement</returns>
         public override XmlElement CreateXML(XmlDocument xmlDoc) {
-            XmlElement element = xmlDoc.CreateElement("IntSet");
+            XmlElement element = xmlDoc.CreateElement("IntList");
             element.SetAttribute("key", this.Key);
-
-            // sorted would be nice
-            List<int> valList = new List<int>(_values);
-            valList.Sort();
 
             StringBuilder sb = new StringBuilder();
             int i = 0;
-            foreach (int val in valList) {
+            foreach (int val in _values) {
                 sb.Append(val);
                 if (i < _values.Count - 1) {
                     sb.Append(',');
@@ -138,7 +150,7 @@ namespace Core.Unity.SaveData {
             return element;
         }
 
-        protected HashSet<int> _values;
-        protected HashSet<int> _defaultValues;
+        protected List<int> _values;
+        protected List<int> _defaultValues;
     }
 }

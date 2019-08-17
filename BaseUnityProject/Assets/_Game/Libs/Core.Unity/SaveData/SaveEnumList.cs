@@ -7,10 +7,10 @@ using UnityEngine;
 namespace Core.Unity.SaveData {
 
     /// <summary>
-    /// Represents a saved set of enums.  Values are represented as ints internally.
+    /// Represents a saved list of enums.  Values are represented as ints internally.
     /// </summary>
     /// <typeparam name="TEnum">The enum type.</typeparam>
-    public class SaveEnumSet<TEnum> : SaveIntSet where TEnum : System.Enum {
+    public class SaveEnumList<TEnum> : SaveIntList where TEnum : System.Enum {
 
         /// <summary>
         /// Constructor, do not call.  All save properties, except for the root, have to be registered.
@@ -18,7 +18,7 @@ namespace Core.Unity.SaveData {
         /// <param name="key">Key to identify the group.</param>
         /// <param name="parent">Parent <see cref="SaveGroup"/></param>
         /// <param name="defaultValues">Value for the property to start with.</param>
-        public SaveEnumSet(string key, SaveGroup parent, IEnumerable<TEnum> defaultValues) : base(key, parent, null) {
+        public SaveEnumList(string key, SaveGroup parent, IEnumerable<TEnum> defaultValues) : base(key, parent, null) {
             if (defaultValues != null) {
                 foreach (TEnum enumVal in defaultValues) {
                     int val = System.Convert.ToInt32(enumVal);
@@ -29,12 +29,11 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Adds the given item to the set of values.  Returns if the item was added (i.e. not already in the set).
+        /// Adds the given item to the list of values.
         /// </summary>
         /// <param name="item">Item to add.</param>
-        /// <returns>Was added</returns>
-        public bool Add(TEnum item) {
-            return _values.Add(System.Convert.ToInt32(item));
+        public void Add(TEnum item) {
+            _values.Add(System.Convert.ToInt32(item));
         }
 
         /// <summary>
@@ -47,30 +46,47 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Gets if the given item is currently contained in the set.
+        /// Gets the index of the item in the list, or -1 if the item isn't included.
         /// </summary>
         /// <param name="item">Item to check.</param>
-        /// <returns>Is contained.</returns>
-        public bool Contains(TEnum item) {
-            return _values.Contains(System.Convert.ToInt32(item));
+        /// <returns>Index.</returns>
+        public int IndexOf(TEnum item) {
+            return _values.IndexOf(System.Convert.ToInt32(item));
         }
 
         /// <summary>
-        /// Create an XmlElement that represents this enum set property.
+        /// Gets the enum value at the given index.  Throws an error if the index is invalid.
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Element</returns>
+        public TEnum At(int index) {
+            return (TEnum)(object)_values[index];
+        }
+
+        /// <summary>
+        /// Gets all the values of this list copied to an array.
+        /// </summary>
+        /// <returns></returns>
+        public TEnum[] ToArray() {
+            TEnum[] arr = new TEnum[_values.Count];
+            for (int i=0; i < _values.Count; i++) {
+                arr[i] = (TEnum)(object)_values[i];
+            }
+            return arr;
+        }
+
+        /// <summary>
+        /// Create an XmlElement that represents this enum list property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
         /// <returns>XmlElement</returns>
         public override XmlElement CreateXML(XmlDocument xmlDoc) {
-            XmlElement element = xmlDoc.CreateElement("EnumSet");
+            XmlElement element = xmlDoc.CreateElement("EnumList");
             element.SetAttribute("key", this.Key);
-
-            // sorted would be nice
-            List<int> valList = new List<int>(_values);
-            valList.Sort();
 
             StringBuilder sb = new StringBuilder();
             int i = 0;
-            foreach (int val in valList) {
+            foreach (int val in _values) {
                 sb.Append(val);
                 if (i < _values.Count - 1) {
                     sb.Append(',');

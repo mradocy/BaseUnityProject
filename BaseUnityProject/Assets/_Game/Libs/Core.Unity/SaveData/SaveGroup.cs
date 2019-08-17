@@ -23,8 +23,8 @@ namespace Core.Unity.SaveData {
                 return null;
 
             SaveGroup group = new SaveGroup(key, this);
-            this._properties[key] = group;
-            this._propSearch[key] = false;
+            _properties[key] = group;
+            _propSearch[key] = false;
             return group;
         }
 
@@ -39,8 +39,8 @@ namespace Core.Unity.SaveData {
                 return null;
 
             SaveString str = new SaveString(key, this, defaultValue);
-            this._properties[key] = str;
-            this._propSearch[key] = false;
+            _properties[key] = str;
+            _propSearch[key] = false;
             return str;
         }
 
@@ -55,8 +55,8 @@ namespace Core.Unity.SaveData {
                 return null;
 
             SaveFloat f = new SaveFloat(key, this, defaultValue);
-            this._properties[key] = f;
-            this._propSearch[key] = false;
+            _properties[key] = f;
+            _propSearch[key] = false;
             return f;
         }
 
@@ -71,8 +71,8 @@ namespace Core.Unity.SaveData {
                 return null;
 
             SaveInt i = new SaveInt(key, this, defaultValue);
-            this._properties[key] = i;
-            this._propSearch[key] = false;
+            _properties[key] = i;
+            _propSearch[key] = false;
             return i;
         }
 
@@ -87,9 +87,25 @@ namespace Core.Unity.SaveData {
                 return null;
 
             SaveBool b = new SaveBool(key, this, defaultValue);
-            this._properties[key] = b;
-            this._propSearch[key] = false;
+            _properties[key] = b;
+            _propSearch[key] = false;
             return b;
+        }
+
+        /// <summary>
+        /// Registers a <see cref="SaveIntList"/>.
+        /// </summary>
+        /// <param name="key">Key of the int list property.</param>
+        /// <param name="defaultValues">Default values to give the property if data isn't found for it.  Passing in null will make the default values an empty list.</param>
+        /// <returns>Created int list property.</returns>
+        public SaveIntList RegisterIntList(string key, IEnumerable<int> defaultValues = null) {
+            if (this.RegisterErrorCheck(key))
+                return null;
+
+            SaveIntList intList = new SaveIntList(key, this, defaultValues);
+            _properties[key] = intList;
+            _propSearch[key] = false;
+            return intList;
         }
 
         /// <summary>
@@ -103,9 +119,26 @@ namespace Core.Unity.SaveData {
                 return null;
 
             SaveIntSet intSet = new SaveIntSet(key, this, defaultValues);
-            this._properties[key] = intSet;
-            this._propSearch[key] = false;
+            _properties[key] = intSet;
+            _propSearch[key] = false;
             return intSet;
+        }
+
+        /// <summary>
+        /// Registers a <see cref="SaveEnumList{TEnum}"/>.
+        /// </summary>
+        /// <param name="key">Key of the enum list property.</param>
+        /// <param name="defaultValues">Default values to give the property if data isn't found for it.  Passing in null will make the default values an empty list.</param>
+        /// <returns>Created enum list property.</returns>
+        public SaveEnumList<TEnum> RegisterEnumList<TEnum>(string key, IEnumerable<TEnum> defaultValues = null)
+            where TEnum : System.Enum {
+            if (this.RegisterErrorCheck(key))
+                return null;
+
+            SaveEnumList<TEnum> el = new SaveEnumList<TEnum>(key, this, defaultValues);
+            _properties[key] = el;
+            _propSearch[key] = false;
+            return el;
         }
 
         /// <summary>
@@ -120,8 +153,8 @@ namespace Core.Unity.SaveData {
                 return null;
 
             SaveEnumSet<TEnum> es = new SaveEnumSet<TEnum>(key, this, defaultValues);
-            this._properties[key] = es;
-            this._propSearch[key] = false;
+            _properties[key] = es;
+            _propSearch[key] = false;
             return es;
         }
 
@@ -138,8 +171,8 @@ namespace Core.Unity.SaveData {
                 return null;
 
             SaveSerializable<T> serializable = new SaveSerializable<T>(key, this, objectContainer);
-            this._properties[key] = serializable;
-            this._propSearch[key] = false;
+            _properties[key] = serializable;
+            _propSearch[key] = false;
             return serializable;
         }
 
@@ -193,12 +226,31 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Gets <see cref="SaveIntList"/> by key.  Returns null if no int list property with the given key has been registered.
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <returns>Int list property.</returns>
+        public SaveIntList GetIntList(string key) {
+            return this.GetProperty<SaveIntList>(key);
+        }
+
+        /// <summary>
         /// Gets <see cref="SaveIntSet"/> by key.  Returns null if no int set property with the given key has been registered.
         /// </summary>
         /// <param name="key">Key</param>
-        /// <returns>Enum set property.</returns>
+        /// <returns>Int set property.</returns>
         public SaveIntSet GetIntSet(string key) {
             return this.GetProperty<SaveIntSet>(key);
+        }
+
+        /// <summary>
+        /// Gets <see cref="SaveEnumList{TEnum}"/> by key.  Returns null if no enum list property with the given key has been registered.
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <returns>Enum list property.</returns>
+        public SaveEnumList<TEnum> GetEnumList<TEnum>(string key)
+            where TEnum : System.Enum {
+            return this.GetProperty<SaveEnumList<TEnum>>(key);
         }
 
         /// <summary>
@@ -230,7 +282,7 @@ namespace Core.Unity.SaveData {
         /// Resets the values of all this group's properties.
         /// </summary>
         public override void ResetToDefault() {
-            foreach (SaveProperty prop in this._properties.Values) {
+            foreach (SaveProperty prop in _properties.Values) {
                 prop.ResetToDefault();
             }
         }
@@ -256,8 +308,8 @@ namespace Core.Unity.SaveData {
             }
 
             // reset property search
-            foreach (string key in this._propSearch.Keys.ToList()) {
-                this._propSearch[key] = false;
+            foreach (string key in _propSearch.Keys.ToList()) {
+                _propSearch[key] = false;
             }
 
             // parse nodes
@@ -287,6 +339,8 @@ namespace Core.Unity.SaveData {
                     property = this.GetInt(key);
                 } else if (name == "Bool") {
                     property = this.GetBool(key);
+                } else if (name == "IntList" || name == "EnumList") {
+                    property = this.GetProperty<SaveIntList>(key); // SaveEnumList<T> extends SaveIntList
                 } else if (name == "IntSet" || name == "EnumSet") {
                     property = this.GetProperty<SaveIntSet>(key); // SaveEnumSet<T> extends SaveIntSet
                 } else {
@@ -300,7 +354,7 @@ namespace Core.Unity.SaveData {
                         Debug.LogWarning($"{name} property with key \"{key}\" (parent: \"{this.Key}\") is not registered; data lost.");
                     } else {
                         nodeStatus = property.ParseXML(childNode);
-                        this._propSearch[key] = true;
+                        _propSearch[key] = true;
                     }
                 }
                 if (nodeStatus != LoadStatus.Ok) {
@@ -309,8 +363,8 @@ namespace Core.Unity.SaveData {
             }
 
             // check property search
-            foreach (string key in this._propSearch.Keys) {
-                if (!this._propSearch[key]) {
+            foreach (string key in _propSearch.Keys) {
+                if (!_propSearch[key]) {
                     Debug.LogWarning($"Parsed data did not have an entry for registered property \"{key}\" (parent: \"{this.Key}\")");
                 }
             }
@@ -347,7 +401,7 @@ namespace Core.Unity.SaveData {
 
             // append child elements
             XmlElement childElement;
-            foreach (SaveProperty prop in this._properties.Values) {
+            foreach (SaveProperty prop in _properties.Values) {
                 childElement = prop.CreateXML(xmlDoc);
                 element.AppendChild(childElement);
             }
@@ -381,7 +435,7 @@ namespace Core.Unity.SaveData {
         /// <returns>Property</returns>
         protected T GetProperty<T>(string key) where T : SaveProperty {
             SaveProperty prop;
-            if (this._properties.TryGetValue(key, out prop)) {
+            if (_properties.TryGetValue(key, out prop)) {
                 return prop as T;
             }
             return null;
