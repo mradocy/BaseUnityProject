@@ -7,7 +7,7 @@ namespace Core.Unity.UI {
     /// <summary>
     /// Modal window representing something loading.
     /// </summary>
-    public abstract class ModelLoadingWindow : ModalWindow {
+    public abstract class ModalLoadingWindow : ModalWindow {
 
         #region Properties to Override
 
