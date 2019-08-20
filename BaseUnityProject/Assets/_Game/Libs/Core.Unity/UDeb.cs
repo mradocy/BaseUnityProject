@@ -17,7 +17,7 @@ namespace Core.Unity {
         public static bool IsEnabled {
             get {
 #if RELEASE // note: scripting define symbols can be set in Unity's player settings.
-            return false;
+                return false;
 #else
                 return true;
 #endif

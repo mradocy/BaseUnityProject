@@ -30,7 +30,7 @@ namespace Core.Unity {
         /// <returns>Exists</returns>
         public bool HasProperty(string key) {
             string dicKey = key.ToLower();
-            return this._properties.ContainsKey(dicKey);
+            return _properties.ContainsKey(dicKey);
         }
 
         /// <summary>
@@ -42,10 +42,10 @@ namespace Core.Unity {
             }
             string dicKey = key.ToLower();
             string val;
-            if (this._properties.TryGetValue(dicKey, out val)) {
+            if (_properties.TryGetValue(dicKey, out val)) {
                 return val;
             } else {
-                this._properties[dicKey] = defaultValue;
+                _properties[dicKey] = defaultValue;
             }
 
             return defaultValue;
@@ -90,7 +90,7 @@ namespace Core.Unity {
         public void SetString(string key, string value) {
             if (string.IsNullOrEmpty(key))
                 return;
-            this._properties[key.ToLower()] = value;
+            _properties[key.ToLower()] = value;
         }
         /// <summary>
         /// Sets a bool property.
