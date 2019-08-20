@@ -45,6 +45,10 @@ namespace Core.Unity.SaveData {
 
         #region Loading
 
+        private const string _startLoadMessage = "Started loading save data from \"{0}\".";
+        private const string _loadSuccessMessage = "Loaded save data from \"{0}\" successfully.";
+        private const string _loadFailMessage = "Error loading save data from \"{0}\": {1}";
+
         /// <summary>
         /// Gets if the save data has been parsed already.  If so, then no more properties can be registered.
         /// </summary>
@@ -58,19 +62,43 @@ namespace Core.Unity.SaveData {
         /// <returns>LoadStatus</returns>
         public LoadStatus LoadFromFile(string path) {
 
+            Debug.Log(string.Format(_startLoadMessage, path));
+            LoadStatus loadStatus = LoadStatus.Ok;
+
             // load file
             XmlDocument xmlDoc = new XmlDocument();
             try {
                 xmlDoc.Load(path);
             } catch (System.IO.FileNotFoundException) {
-                return LoadStatus.FileNotFound;
+                loadStatus = LoadStatus.FileNotFound;
             } catch (XmlException) {
-                return LoadStatus.ParseError;
+                loadStatus = LoadStatus.ParseError;
             } catch (System.Exception) {
-                return LoadStatus.FileCouldNotBeRead;
+                loadStatus = LoadStatus.FileCouldNotBeRead;
             }
-            
-            return this.ParseXML(xmlDoc);
+
+            // parse file
+            if (loadStatus == LoadStatus.Ok) {
+                loadStatus = this.ParseXML(xmlDoc);
+            }
+
+            // log
+            if (loadStatus == LoadStatus.Ok) {
+                Debug.Log(string.Format(_loadSuccessMessage, path));
+            } else {
+                Debug.LogError(string.Format(_loadFailMessage, path, loadStatus));
+            }
+
+            return loadStatus;
+        }
+
+        /// <summary>
+        /// Loads a file from Unity's persistent data directory.
+        /// </summary>
+        /// <param name="index">File index</param>
+        /// <returns>Load status</returns>
+        public LoadStatus LoadFromPersistentData(int index) {
+            return this.LoadFromFile(PersistentDataPath(index));
         }
 
         /// <summary>
@@ -121,6 +149,10 @@ namespace Core.Unity.SaveData {
 
         #region Saving
 
+        private const string _startSaveMessage = "Started saving to \"{0}\".";
+        private const string _saveSuccessMessage = "Saved data to \"{0}\" successfully.";
+        private const string _saveFailMessage = "Error saving data to \"{0}\": {1}";
+
         /// <summary>
         /// If data is currently being saved.
         /// </summary>
@@ -166,18 +198,29 @@ namespace Core.Unity.SaveData {
         /// <returns>Save status.</returns>
         public SaveStatus SaveToFile(string path, bool prettyPrint) {
 
+            Debug.Log(string.Format(_startSaveMessage, path));
+            SaveStatus saveStatus = SaveStatus.Ok;
+
             string str = this.SaveToString(prettyPrint);
             if (str == null) {
-                return SaveStatus.StringError;
+                saveStatus = SaveStatus.StringError;
             }
 
-            try {
-                File.WriteAllText(path, str, Encoding);
-            } catch (System.Exception) {
-                return SaveStatus.IOError;
+            if (saveStatus == SaveStatus.Ok) {
+                try {
+                    File.WriteAllText(path, str, Encoding);
+                } catch (System.Exception) {
+                    saveStatus = SaveStatus.IOError;
+                }
             }
 
-            return SaveStatus.Ok;
+            if (saveStatus == SaveStatus.Ok) {
+                Debug.Log(string.Format(_saveSuccessMessage, path));
+            } else {
+                Debug.LogError(string.Format(_saveFailMessage, path, saveStatus));
+            }
+
+            return saveStatus;
         }
 
         /// <summary>
@@ -201,10 +244,13 @@ namespace Core.Unity.SaveData {
         /// <returns>Coroutine IEnumerator.</returns>
         public IEnumerator SaveToFileCoroutine(string path, bool prettyPrint, UnityAction<SaveStatus> callback) {
 
+            Debug.Log(string.Format(_startSaveMessage, path));
+
             if (callback == null) {
                 throw new System.ArgumentNullException(nameof(callback));
             }
             if (this.IsSaving) {
+                Debug.LogError(string.Format(_saveFailMessage, path, SaveStatus.AlreadySaving));
                 callback(SaveStatus.AlreadySaving);
                 yield break;
             }
@@ -227,8 +273,26 @@ namespace Core.Unity.SaveData {
 
             // save complete
             this.IsSaving = false;
+            if (saveStatus == SaveStatus.Ok) {
+                Debug.Log(string.Format(_saveSuccessMessage, path));
+            } else {
+                Debug.LogError(string.Format(_saveFailMessage, path, saveStatus));
+            }
             callback(saveStatus.Value);
             yield return null;
+        }
+
+        /// <summary>
+        /// Returns a coroutine <see cref="IEnumerator"/> that will save data to the data to Unity's persistent data directory in another thread,
+        /// then call <paramref name="callback"/> in the main Unity thread on completion, even if there was an error.
+        /// Usage: this.StartCoroutine(saveRoot.SaveToPersistentDataCoroutine)
+        /// </summary>
+        /// <param name="index">File index</param>
+        /// <param name="prettyPrint">If the output string should be formatted.</param>
+        /// <param name="callback">Callback function to call once the save is complete.  The given <see cref="SaveStatus"/> param is the status of the save.</param>
+        /// <returns>Coroutine IEnumerator.</returns>
+        public IEnumerator SaveToPersistentDataCoroutine(int index, bool prettyPrint, UnityAction<SaveStatus> callback) {
+            return this.SaveToFileCoroutine(PersistentDataPath(index), prettyPrint, callback);
         }
 
         #endregion
