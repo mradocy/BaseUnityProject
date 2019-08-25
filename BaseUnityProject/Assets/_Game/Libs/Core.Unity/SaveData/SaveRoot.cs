@@ -33,12 +33,17 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// The complete file path for data saved to Unity's persistent data path.
+        /// The full path of the directory reserved for save files.  Is contained in Unity's <see cref="Application.persistentDataPath"/>.
+        /// </summary>
+        public static string SaveDirectory { get { return Path.Combine(Application.persistentDataPath, "SaveData"); } }
+
+        /// <summary>
+        /// Gets the full file path for data saved to the <see cref="SaveDirectory"/>.
         /// </summary>
         /// <param name="index">File index</param>
         /// <returns>Path</returns>
-        public static string PersistentDataPath(int index) {
-            return Path.Combine(Application.persistentDataPath, $"data{index}.sav");
+        public static string GetSaveDirectoryPath(int index) {
+            return Path.Combine(SaveDirectory, $"data{index}.sav");
         }
 
         #endregion
@@ -62,7 +67,6 @@ namespace Core.Unity.SaveData {
         /// <returns>LoadStatus</returns>
         public LoadStatus LoadFromFile(string path) {
 
-            Debug.Log(string.Format(_startLoadMessage, path));
             LoadStatus loadStatus = LoadStatus.Ok;
 
             // load file
@@ -93,12 +97,12 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Loads a file from Unity's persistent data directory.
+        /// Loads a file from <see cref="SaveDirectory"/>.
         /// </summary>
         /// <param name="index">File index</param>
         /// <returns>Load status</returns>
-        public LoadStatus LoadFromPersistentData(int index) {
-            return this.LoadFromFile(PersistentDataPath(index));
+        public LoadStatus LoadFromSaveDirectory(int index) {
+            return this.LoadFromFile(GetSaveDirectoryPath(index));
         }
 
         /// <summary>
@@ -198,7 +202,6 @@ namespace Core.Unity.SaveData {
         /// <returns>Save status.</returns>
         public SaveStatus SaveToFile(string path, bool prettyPrint) {
 
-            Debug.Log(string.Format(_startSaveMessage, path));
             SaveStatus saveStatus = SaveStatus.Ok;
 
             string str = this.SaveToString(prettyPrint);
@@ -224,13 +227,17 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Saves the data to Unity's persistent data directory.
+        /// Saves the data to <see cref="SaveDirectory"/>.
         /// </summary>
         /// <param name="index">File index</param>
         /// <param name="prettyPrint">If the output string should be formatted.</param>
         /// <returns>Save status</returns>
-        public SaveStatus SaveToPersistentData(int index, bool prettyPrint) {
-            return this.SaveToFile(PersistentDataPath(index), prettyPrint);
+        public SaveStatus SaveToSaveDirectory(int index, bool prettyPrint) {
+            if (!Directory.Exists(SaveDirectory)) {
+                Directory.CreateDirectory(SaveDirectory);
+            }
+
+            return this.SaveToFile(GetSaveDirectoryPath(index), prettyPrint);
         }
 
         /// <summary>
@@ -243,8 +250,6 @@ namespace Core.Unity.SaveData {
         /// <param name="callback">Callback function to call once the save is complete.  The given <see cref="SaveStatus"/> param is the status of the save.</param>
         /// <returns>Coroutine IEnumerator.</returns>
         public IEnumerator SaveToFileCoroutine(string path, bool prettyPrint, UnityAction<SaveStatus> callback) {
-
-            Debug.Log(string.Format(_startSaveMessage, path));
 
             if (callback == null) {
                 throw new System.ArgumentNullException(nameof(callback));
@@ -283,7 +288,7 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Returns a coroutine <see cref="IEnumerator"/> that will save data to the data to Unity's persistent data directory in another thread,
+        /// Returns a coroutine <see cref="IEnumerator"/> that will save data to the data to <see cref="SaveDirectory"/> in another thread,
         /// then call <paramref name="callback"/> in the main Unity thread on completion, even if there was an error.
         /// Usage: this.StartCoroutine(saveRoot.SaveToPersistentDataCoroutine)
         /// </summary>
@@ -291,8 +296,12 @@ namespace Core.Unity.SaveData {
         /// <param name="prettyPrint">If the output string should be formatted.</param>
         /// <param name="callback">Callback function to call once the save is complete.  The given <see cref="SaveStatus"/> param is the status of the save.</param>
         /// <returns>Coroutine IEnumerator.</returns>
-        public IEnumerator SaveToPersistentDataCoroutine(int index, bool prettyPrint, UnityAction<SaveStatus> callback) {
-            return this.SaveToFileCoroutine(PersistentDataPath(index), prettyPrint, callback);
+        public IEnumerator SaveToSaveDirectoryCoroutine(int index, bool prettyPrint, UnityAction<SaveStatus> callback) {
+            if (!Directory.Exists(SaveDirectory)) {
+                Directory.CreateDirectory(SaveDirectory);
+            }
+
+            return this.SaveToFileCoroutine(GetSaveDirectoryPath(index), prettyPrint, callback);
         }
 
         #endregion

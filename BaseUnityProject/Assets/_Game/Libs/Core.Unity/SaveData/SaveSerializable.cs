@@ -23,10 +23,10 @@ namespace Core.Unity.SaveData {
         /// Value of the property.
         /// </summary>
         public T Value {
-            get { return this._value; }
+            get { return _value; }
             set {
                 base.UntypedValue = value;
-                this._value = value;
+                _value = value;
             }
         }
 
@@ -38,10 +38,10 @@ namespace Core.Unity.SaveData {
             set {
                 base.UntypedValue = value;
                 if (value == null) {
-                    this._value = null;
+                    _value = null;
                 } else {
-                    this._value = value as T;
-                    if (this._value == null) {
+                    _value = value as T;
+                    if (_value == null) {
                         throw new System.ArgumentException($"Value must be of type {typeof(T).Name}");
                     }
                 }
@@ -67,22 +67,22 @@ namespace Core.Unity.SaveData {
                 throw new System.ArgumentNullException(nameof(objectContainer));
             }
             this.UntypedValue = objectContainer;
-            this._defaultSerValue = objectContainer.Serialize(false);
+            _defaultSerValue = objectContainer.Serialize(false);
         }
 
         /// <summary>
         /// ISerializable value of the property.
         /// </summary>
         public virtual ISerializable UntypedValue {
-            get { return this._untypedValue; }
-            set { this._untypedValue = value; }
+            get { return _untypedValue; }
+            set { _untypedValue = value; }
         }
 
         /// <summary>
         /// Resets value to the value provided when the property was registered.
         /// </summary>
         public override void ResetToDefault() {
-            this.UntypedValue.Deserialize(this._defaultSerValue);
+            this.UntypedValue.Deserialize(_defaultSerValue);
         }
 
         /// <summary>

@@ -77,6 +77,22 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Registers a <see cref="SaveEnum{TEnum}"/>.
+        /// </summary>
+        /// <param name="key">Key of the enum property.</param>
+        /// <param name="defaultValue">Default value to give the property if data isn't found for it.</param>
+        /// <returns>Created enum property.</returns>
+        public SaveEnum<TEnum> RegisterEnum<TEnum>(string key, TEnum defaultValue = default) where TEnum : System.Enum {
+            if (this.RegisterErrorCheck(key))
+                return null;
+
+            SaveEnum<TEnum> e = new SaveEnum<TEnum>(key, this, defaultValue);
+            _properties[key] = e;
+            _propSearch[key] = false;
+            return e;
+        }
+
+        /// <summary>
         /// Registers a <see cref="SaveBool"/>.
         /// </summary>
         /// <param name="key">Key of the bool property.</param>
@@ -217,6 +233,15 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Gets <see cref="SaveEnum{TEnum}"/> by key.  Returns null if no enum property with the given key has been registered.
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <returns>Enum property.</returns>
+        public SaveEnum<TEnum> GetEnum<TEnum>(string key) where TEnum : System.Enum {
+            return this.GetProperty<SaveEnum<TEnum>>(key);
+        }
+
+        /// <summary>
         /// Gets <see cref="SaveBool"/> by key.  Returns null if no bool property with the given key has been registered.
         /// </summary>
         /// <param name="key">Key</param>
@@ -337,6 +362,8 @@ namespace Core.Unity.SaveData {
                     property = this.GetFloat(key);
                 } else if (name == "Int") {
                     property = this.GetInt(key);
+                } else if (name == "Enum") {
+                    property = this.GetProperty<SaveEnum>(key);
                 } else if (name == "Bool") {
                     property = this.GetBool(key);
                 } else if (name == "IntList" || name == "EnumList") {

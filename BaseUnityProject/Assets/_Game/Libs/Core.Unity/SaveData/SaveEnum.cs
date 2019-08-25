@@ -8,7 +8,7 @@ namespace Core.Unity.SaveData {
     /// <summary>
     /// Represents a saved int value.
     /// </summary>
-    public class SaveInt : SaveProperty {
+    public class SaveEnum<TEnum> : SaveEnum where TEnum : System.Enum {
 
         /// <summary>
         /// Constructor, do not call.  All save properties, except for the root, have to be registered.
@@ -16,21 +16,58 @@ namespace Core.Unity.SaveData {
         /// <param name="key">Key to identify the group.</param>
         /// <param name="parent">Parent <see cref="SaveGroup"/></param>
         /// <param name="defaultValue">Value for the property to start with.</param>
-        public SaveInt(string key, SaveGroup parent, int defaultValue) : base(key, parent) {
-            _defaultValue = defaultValue;
+        public SaveEnum(string key, SaveGroup parent, TEnum defaultValue) : base(key, parent, System.Convert.ToInt32(defaultValue)) {
             this.Value = defaultValue;
+        }
+
+        /// <summary>
+        /// Enum value of the property.
+        /// </summary>
+        public TEnum Value {
+            get { return _value; }
+            set {
+                base.IntValue = System.Convert.ToInt32(value);
+                _value = value;
+            }
+        }
+
+        protected override int IntValue {
+            get { return base.IntValue; }
+            set {
+                base.IntValue = value;
+                _value = (TEnum)(object)value;
+            }
+        }
+
+        private TEnum _value;
+    }
+
+    /// <summary>
+    /// The base class for <see cref="SaveEnum{TEnum}"/>.
+    /// </summary>
+    public class SaveEnum : SaveProperty {
+
+        /// <summary>
+        /// Constructor, do not call.  All save properties, except for the root, have to be registered.
+        /// </summary>
+        /// <param name="key">Key to identify the group.</param>
+        /// <param name="parent">Parent <see cref="SaveGroup"/></param>
+        /// <param name="defaultValue">Value for the property to start with.</param>
+        public SaveEnum(string key, SaveGroup parent, int defaultValue) : base(key, parent) {
+            _defaultValue = defaultValue;
+            this.IntValue = defaultValue;
         }
 
         /// <summary>
         /// Int value of the property.
         /// </summary>
-        public int Value { get; set; }
+        protected virtual int IntValue { get; set; }
 
         /// <summary>
         /// Resets value to the value provided when the property was registered.
         /// </summary>
         public override void ResetToDefault() {
-            this.Value = _defaultValue;
+            this.IntValue = _defaultValue;
         }
 
         /// <summary>
@@ -55,7 +92,7 @@ namespace Core.Unity.SaveData {
 
             int i;
             if (int.TryParse(valAttr.Value, out i)) {
-                this.Value = i;
+                this.IntValue = i;
             } else {
                 return LoadStatus.ParseError;
             }
@@ -69,9 +106,9 @@ namespace Core.Unity.SaveData {
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
         /// <returns>XmlElement</returns>
         public override XmlElement CreateXML(XmlDocument xmlDoc) {
-            XmlElement element = xmlDoc.CreateElement("Int");
+            XmlElement element = xmlDoc.CreateElement("Enum");
             element.SetAttribute("key", this.Key);
-            element.SetAttribute("value", $"{this.Value}");
+            element.SetAttribute("value", $"{this.IntValue}");
             return element;
         }
 
