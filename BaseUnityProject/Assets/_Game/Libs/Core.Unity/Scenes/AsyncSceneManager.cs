@@ -99,6 +99,31 @@ namespace Core.Unity.Scenes {
             SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         }
 
+        /// <summary>
+        /// Unloads the scene with the given name asyncronously.
+        /// Does nothing if it's the only scene currently loaded (Unity's rule).
+        /// The scene is not unloaded if it is already not loaded or unloading.
+        /// </summary>
+        /// <param name="sceneName">The name of the scene.</param>
+        public static void UnloadSceneAsync(string sceneName) {
+            if (!IsSceneInBuild(sceneName))
+                throw new System.ArgumentException(string.Format(_sceneNotInBuildError, sceneName));
+
+            // don't unload scene if it's already not loaded or unloading
+            SceneLoadState currentLoadState = GetSceneLoadState(sceneName);
+            if (currentLoadState == SceneLoadState.NotLoaded || currentLoadState == SceneLoadState.Unloading)
+                return;
+
+            // don't unload scene if it's the only scene loaded (Unity's rule)
+            if (SceneManager.sceneCount <= 1)
+                return;
+
+            // start scene unload
+            _sceneStates[GetFullScenePath(sceneName)] = SceneLoadState.Unloading;
+            Debug.Log($"Start scene unload: {GetFullScenePath(sceneName)}");
+            SceneManager.UnloadSceneAsync(sceneName);
+        }
+
         #endregion
 
         #region Private Methods
