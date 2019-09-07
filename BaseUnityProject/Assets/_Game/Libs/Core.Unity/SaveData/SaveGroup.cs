@@ -141,6 +141,23 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Registers a <see cref="SaveIntBitArray"/>.
+        /// </summary>
+        /// <param name="key">Key of the int bit array property.</param>
+        /// <param name="max">Max value that can be stored in this array.  Range is [0, max].  This value cannot be higher than <see cref="SaveIntBitArray.GlobalMax"/>.</param>
+        /// <param name="defaultValues">Default values to give the property if data isn't found for it.  Passing in null will make the default values empty.</param>
+        /// <returns>Created int bit array property.</returns>
+        public SaveIntBitArray RegisterIntBitArray(string key, int max, IEnumerable<int> defaultValues = null) {
+            if (this.RegisterErrorCheck(key))
+                return null;
+
+            SaveIntBitArray intBitArray = new SaveIntBitArray(key, max, this, defaultValues);
+            _properties[key] = intBitArray;
+            _propSearch[key] = false;
+            return intBitArray;
+        }
+
+        /// <summary>
         /// Registers a <see cref="SaveEnumList{TEnum}"/>.
         /// </summary>
         /// <param name="key">Key of the enum list property.</param>
@@ -172,6 +189,24 @@ namespace Core.Unity.SaveData {
             _properties[key] = es;
             _propSearch[key] = false;
             return es;
+        }
+
+        /// <summary>
+        /// Registers a <see cref="SaveEnumBitArray{TEnum}"/>.
+        /// </summary>
+        /// <param name="key">Key of the int bit array property.</param>
+        /// <param name="max">Max enum value that can be stored in this array.  Range is [0, max].  This value cannot be higher than <see cref="SaveIntBitArray.GlobalMax"/>.</param>
+        /// <param name="defaultValues">Default values to give the property if data isn't found for it.  Passing in null will make the default values empty.</param>
+        /// <returns>Created enum bit array property.</returns>
+        public SaveEnumBitArray<TEnum> RegisterEnumBitArray<TEnum>(string key, TEnum max, IEnumerable<TEnum> defaultValues = null)
+            where TEnum : System.Enum {
+            if (this.RegisterErrorCheck(key))
+                return null;
+
+            SaveEnumBitArray<TEnum> enumBitArray = new SaveEnumBitArray<TEnum>(key, max, this, defaultValues);
+            _properties[key] = enumBitArray;
+            _propSearch[key] = false;
+            return enumBitArray;
         }
 
         /// <summary>
@@ -269,6 +304,15 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Gets <see cref="SaveIntBitArray"/> by key.  Returns null if no int bit array property with the given key has been registered.
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <returns>Int bit array property.</returns>
+        public SaveIntBitArray GetIntBitArray(string key) {
+            return this.GetProperty<SaveIntBitArray>(key);
+        }
+
+        /// <summary>
         /// Gets <see cref="SaveEnumList{TEnum}"/> by key.  Returns null if no enum list property with the given key has been registered.
         /// </summary>
         /// <param name="key">Key</param>
@@ -286,6 +330,16 @@ namespace Core.Unity.SaveData {
         public SaveEnumSet<TEnum> GetEnumSet<TEnum>(string key)
             where TEnum : System.Enum {
             return this.GetProperty<SaveEnumSet<TEnum>>(key);
+        }
+
+        /// <summary>
+        /// Gets <see cref="SaveEnumBitArray{TEnum}"/> by key.  Returns null if no enum bit array property with the given key has been registered.
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <returns>Enum bit array property.</returns>
+        public SaveEnumBitArray<TEnum> GetEnumBitArray<TEnum>(string key)
+            where TEnum : System.Enum {
+            return this.GetProperty<SaveEnumBitArray<TEnum>>(key);
         }
 
         /// <summary>
@@ -370,6 +424,8 @@ namespace Core.Unity.SaveData {
                     property = this.GetProperty<SaveIntList>(key); // SaveEnumList<T> extends SaveIntList
                 } else if (name == "IntSet" || name == "EnumSet") {
                     property = this.GetProperty<SaveIntSet>(key); // SaveEnumSet<T> extends SaveIntSet
+                } else if (name == "IntBitArray" || name == "EnumBitArray") {
+                    property = this.GetProperty<SaveIntBitArray>(key); // SaveEnumBitArray<T> extends SaveIntBitArray
                 } else {
                     nameFound = false;
                     Debug.Log($"TODO: parse node with name \"{name}\"");
