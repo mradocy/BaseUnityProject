@@ -8,7 +8,7 @@ pushd "%~dp0"
 set SOURCE_DIRECTORY=%GAMEDEV_SOURCE_LIBS%\Core\Core.Base
 
 :: Directory of this Core.Base folder:
-set DESTINATION_DIRECTORY=..\..\Scripts\Core.Base
+set DESTINATION_DIRECTORY=..\..\Libs\Core.Base
 
 :: The (only) types of files to merge.
 set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;
