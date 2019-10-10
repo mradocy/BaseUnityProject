@@ -9,6 +9,8 @@ using UnityEngine.Events;
 
 namespace Core.Unity {
 
+    // TODO: Get rid of LocalizationProperty, specific properties should be in their own classes.
+
     /// <summary>
     /// Handles game initialization.
     /// </summary>

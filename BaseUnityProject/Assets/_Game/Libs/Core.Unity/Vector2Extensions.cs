@@ -29,6 +29,20 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Clamps the magnitude of this Vector2 to the given value.  Does nothing if the given magnitude is larger than the current magnitude.
+        /// </summary>
+        /// <param name="vector2">This Vector2</param>
+        /// <param name="magnitude">The magnitude to clamp to.</param>
+        public static void ClampMagnitude(this Vector2 vector2, float magnitude) {
+            if (vector2.sqrMagnitude <= magnitude * magnitude || vector2.sqrMagnitude == 0)
+                return;
+
+            vector2.Normalize();
+            vector2.x *= magnitude;
+            vector2.y *= magnitude;
+        }
+
+        /// <summary>
         /// Gets this Vector2 as a Vector3 (setting z to 0).
         /// </summary>
         /// <param name="vector2">This Vector2</param>

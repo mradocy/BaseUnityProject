@@ -54,7 +54,7 @@ namespace Core.Unity {
         /// Gets a property as a boolean.  If the property doesn't exist, it's created with the given defaultValue.
         /// </summary>
         public bool GetBool(string key, bool defaultValue = false) {
-            string valStr = this.GetString(key, null);
+            string valStr = this.GetString(key, defaultValue ? "true" : "false");
             if (valStr == null)
                 return defaultValue;
             return !(string.IsNullOrEmpty(valStr) || valStr == "0" || valStr.ToLower() == "false");
@@ -63,7 +63,7 @@ namespace Core.Unity {
         /// Gets a property as an int.  If the property doesn't exist, it's created with the given defaultValue.
         /// </summary>
         public int GetInt(string key, int defaultValue = 0) {
-            string valStr = this.GetString(key, null);
+            string valStr = this.GetString(key, $"{defaultValue}");
             if (valStr == null)
                 return defaultValue;
             int ret;
@@ -75,7 +75,7 @@ namespace Core.Unity {
         /// Gets a property as a float.  If the property doesn't exist, it's created with the given defaultValue.
         /// </summary>
         public float GetFloat(string key, float defaultValue = 0) {
-            string valStr = this.GetString(key, null);
+            string valStr = this.GetString(key, $"{defaultValue}");
             if (valStr == null)
                 return defaultValue;
             float ret;
