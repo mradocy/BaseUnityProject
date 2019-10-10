@@ -70,11 +70,11 @@ namespace Core.Unity.RewiredExtensions {
 
         [SerializeField]
         [Tooltip("Number of columns the keyboard atlas image has.")]
-        private int _keyboardNumColumns = 1;
+        private int _keyboardNumColumns = 10;
 
         [SerializeField]
         [Tooltip("Number of rows the keyboard atlas image has.")]
-        private int _keyboardNumRows = 1;
+        private int _keyboardNumRows = 14;
 
 
         [Header("Joystick")]
@@ -89,11 +89,11 @@ namespace Core.Unity.RewiredExtensions {
 
         [SerializeField]
         [Tooltip("The number of columns all the joystick atlas images have.")]
-        private int _joystickNumColumns = 1;
+        private int _joystickNumColumns = 10;
 
         [SerializeField]
         [Tooltip("The number of rows all the joystick atlas images have.")]
-        private int _joystickNumRows = 1;
+        private int _joystickNumRows = 3;
 
         #endregion
 
