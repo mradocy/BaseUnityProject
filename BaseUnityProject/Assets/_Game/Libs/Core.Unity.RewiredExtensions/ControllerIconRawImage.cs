@@ -6,22 +6,9 @@ using UnityEngine.UI;
 
 namespace Core.Unity.RewiredExtensions {
 
-    public enum InputMethod {
-        /// <summary>
-        /// Value matches Rewired.ControllerType.Keyboard
-        /// </summary>
-        Keyboard = 0,
-
-        /// <summary>
-        /// Value matches Rewired.ControllerType.Joystick
-        /// </summary>
-        Joystick = 2,
-    }
-
-
     [RequireComponent(typeof(RawImage))]
     [ExecuteInEditMode]
-    public class ControllerIconRawImage : MonoBehaviour {
+    public class ControllerIconRawImage : MonoBehaviour, IControllerIcon {
 
         #region Inspector Fields
 
@@ -111,40 +98,32 @@ namespace Core.Unity.RewiredExtensions {
         /// Gets/sets if the icon is faded.
         /// </summary>
         public bool IsFaded {
-            get { return this._isFaded; }
+            get { return _isFaded; }
             set {
-                if (this._isFaded == value) return;
-                this._isFaded = value;
+                if (_isFaded == value) return;
+                _isFaded = value;
                 this.UpdateRawImage();
             }
         }
 
-        /// <summary>
-        /// The input method.
-        /// </summary>
+        /// <inheritdoc />
         public InputMethod InputMethod {
-            get { return this._inputMethod; }
+            get { return _inputMethod; }
         }
 
-        /// <summary>
-        /// The <see cref="KeyCode"/> to display when <see cref="this.InputMethod"/> is <see cref="InputMethod.Keyboard"/>.
-        /// </summary>
+        /// <inheritdoc />
         public KeyCode KeyboardKey {
-            get { return this._keyboardKey; }
+            get { return _keyboardKey; }
         }
 
-        /// <summary>
-        /// The <see cref="JoystickStyle"/> to display when <see cref="this.InputMethod"/> is <see cref="InputMethod.Joystick"/>.
-        /// </summary>
+        /// <inheritdoc />
         public JoystickStyleID JoystickStyle {
-            get { return this._joystickStyleID; }
+            get { return _joystickStyleID; }
         }
 
-        /// <summary>
-        /// The direction of the joystick element, if it's an axis.
-        /// </summary>
+        /// <inheritdoc />
         public Pole JoystickAxisDirection {
-            get { return this._joystickAxisDirection; }
+            get { return _joystickAxisDirection; }
         }
 
         /// <summary>
@@ -156,13 +135,10 @@ namespace Core.Unity.RewiredExtensions {
 
         #region Methods
 
-        /// <summary>
-        /// Sets this icon to a keyboard icon for the given key.
-        /// </summary>
-        /// <param name="key">Keyboard key.</param>
+        /// <inheritdoc />
         public void SetKeyboardIcon(KeyCode key) {
-            this._inputMethod = InputMethod.Keyboard;
-            this._keyboardKey = key;
+            _inputMethod = InputMethod.Keyboard;
+            _keyboardKey = key;
             this.UpdateRawImage();
         }
 
@@ -177,19 +153,13 @@ namespace Core.Unity.RewiredExtensions {
             this.SetJoystickIcon(RewiredUtils.GetJoystickStyle(rewiredHardwareGuid).ID, elementType, elementIndex, axisDirection);
         }
 
-        /// <summary>
-        /// Sets this icon to a joystick icon for the given element.
-        /// </summary>
-        /// <param name="joystickStyle">Style of the joystick.</param>
-        /// <param name="elementType">The type of the element (axis/button).</param>
-        /// <param name="elementIndex">Index of the element.</param>
-        /// <param name="axisDirection">Direction of the axis, if element is an axis.</param>
+        /// <inheritdoc />
         public void SetJoystickIcon(JoystickStyleID joystickStyle, ControllerElementType elementType, int elementIndex, Pole axisDirection) {
-            this._inputMethod = InputMethod.Joystick;
-            this._joystickStyleID = joystickStyle;
-            this._joystickElementType = elementType;
-            this._joystickElementIndex = elementIndex;
-            this._joystickAxisDirection = axisDirection;
+            _inputMethod = InputMethod.Joystick;
+            _joystickStyleID = joystickStyle;
+            _joystickElementType = elementType;
+            _joystickElementIndex = elementIndex;
+            _joystickAxisDirection = axisDirection;
             this.UpdateRawImage();
         }
 
@@ -203,31 +173,30 @@ namespace Core.Unity.RewiredExtensions {
         private void UpdateRawImage() {
 
             int imageIndex = 0;
-            if (this._inputMethod == InputMethod.Keyboard) {
+            if (_inputMethod == InputMethod.Keyboard) {
 
                 // update keyboard map
-                if (this._keyboardMap == null) {
-                    this._keyboardMap = RewiredUtils.GetKeyboardMap();
+                if (_keyboardMap == null) {
+                    _keyboardMap = RewiredUtils.GetKeyboardMap();
                 }
 
                 // get image index
-                imageIndex = this._keyboardMap.GetImageIndex(this._keyboardKey);
+                imageIndex = _keyboardMap.GetImageIndex(_keyboardKey);
 
-            } else if (this._inputMethod == InputMethod.Joystick) {
+            } else if (_inputMethod == InputMethod.Joystick) {
 
                 // update joystick style
-                if (this._joystickStyle == null || this._joystickStyle.ID != this._joystickStyleID) {
-                    this._joystickStyle = RewiredUtils.GetJoystickStyle(this._joystickStyleID);
+                if (_joystickStyle == null || _joystickStyle.ID != _joystickStyleID) {
+                    _joystickStyle = RewiredUtils.GetJoystickStyle(_joystickStyleID);
                 }
 
                 // get image index
-                imageIndex = this._joystickStyle.GetImageIndex(this._joystickElementType, this._joystickElementIndex, this._joystickAxisDirection);
-
+                imageIndex = _joystickStyle.GetImageIndex(_joystickElementType, _joystickElementIndex, _joystickAxisDirection);
             }
 
             this.SetRawImage(
-                this._inputMethod,
-                this._joystickStyleID,
+                _inputMethod,
+                _joystickStyleID,
                 imageIndex);
 
             // TODO: could probably merge SetRawImage() into this.
@@ -235,7 +204,7 @@ namespace Core.Unity.RewiredExtensions {
             // set color
             Color c = this.RawImage.color;
             if (this.IsFaded) {
-                c.a = this._fadedAlpha;
+                c.a = _fadedAlpha;
             } else {
                 c.a = 1;
             }
@@ -258,19 +227,19 @@ namespace Core.Unity.RewiredExtensions {
 
             switch (inputMethod) {
             case InputMethod.Keyboard:
-                numColumns = this._keyboardNumColumns;
-                numRows = this._keyboardNumRows;
-                this.RawImage.texture = this._keyboardTexture;
+                numColumns = _keyboardNumColumns;
+                numRows = _keyboardNumRows;
+                this.RawImage.texture = _keyboardTexture;
                 break;
             case InputMethod.Joystick:
-                numColumns = this._joystickNumColumns;
-                numRows = this._joystickNumRows;
+                numColumns = _joystickNumColumns;
+                numRows = _joystickNumRows;
                 switch (joystickStyle) {
                 case JoystickStyleID.Generic:
-                    this.RawImage.texture = this._joystickGenericTexture;
+                    this.RawImage.texture = _joystickGenericTexture;
                     break;
                 case JoystickStyleID.XBox360:
-                    this.RawImage.texture = this._joystickXBox360Texture;
+                    this.RawImage.texture = _joystickXBox360Texture;
                     break;
                 }
                 break;
@@ -311,15 +280,13 @@ namespace Core.Unity.RewiredExtensions {
             if (Application.isEditor) {
 
                 // failsafe
-                this._keyboardNumColumns = Mathf.Max(1, this._keyboardNumColumns);
-                this._keyboardNumRows = Mathf.Max(1, this._keyboardNumRows);
-                this._joystickNumColumns = Mathf.Max(1, this._joystickNumColumns);
-                this._joystickNumRows = Mathf.Max(1, this._joystickNumRows);
+                _keyboardNumColumns = Mathf.Max(1, _keyboardNumColumns);
+                _keyboardNumRows = Mathf.Max(1, _keyboardNumRows);
+                _joystickNumColumns = Mathf.Max(1, _joystickNumColumns);
+                _joystickNumRows = Mathf.Max(1, _joystickNumRows);
 
                 this.UpdateRawImage();
-
             }
-
         }
 
         #endregion
@@ -338,5 +305,4 @@ namespace Core.Unity.RewiredExtensions {
         #endregion
 
     }
-
 }

@@ -70,6 +70,15 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
+        /// Gets if the given button action was released this frame.
+        /// </summary>
+        /// <param name="actionId">Id of the action.</param>
+        /// <returns>Released</returns>
+        public static bool GetReleased(int actionId) {
+            return Player.GetButtonUp(actionId);
+        }
+
+        /// <summary>
         /// Gets keyboard map.
         /// </summary>
         /// <returns>Keyboard map.</returns>
@@ -134,6 +143,73 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
+        /// Gets the id of the input action with the given name.
+        /// </summary>
+        /// <param name="actionName">Action name</param>
+        /// <returns>Id</returns>
+        public static int GetActionId(string actionName) {
+            return ReInput.mapping.GetActionId(actionName);
+        }
+
+        /// <summary>
+        /// Gets the first keyboard <see cref="ActionElementMap"/> for the given <paramref name="action"/>.
+        /// </summary>
+        /// <param name="action">The input action.</param>
+        /// <param name="axisDirection">The direction of the action, if it's an axis action.</param>
+        /// <returns>keyboard ActionElementMap</returns>
+        public static ActionElementMap GetFirstKeyboardActionElementMap(InputAction action, Pole axisDirection) {
+            ActionElementMap keyboardMap = null;
+            if (action.type == InputActionType.Button) {
+                keyboardMap = Player.controllers.maps.GetFirstButtonMapWithAction(ControllerType.Keyboard, action.id, true);
+            } else if (action.type == InputActionType.Axis) {
+                List<ActionElementMap> maps = new List<ActionElementMap>();
+                Player.controllers.maps.GetButtonMapsWithAction(ControllerType.Keyboard, action.id, true, maps);
+                foreach (ActionElementMap map in maps) {
+
+                    // TODO: Test invert?
+
+                    if (map.axisContribution == axisDirection) {
+                        keyboardMap = map;
+                        break;
+                    }
+                }
+            }
+
+            return keyboardMap;
+        }
+
+        /// <summary>
+        /// Gets a list of keyboard <see cref="ActionElementMap"/>s for the given <paramref name="action"/>.
+        /// </summary>
+        /// <param name="action">The input action.</param>
+        /// <param name="axisDirection">The direction of the action, if it's an axis action.</param>
+        /// <returns>List of ActionElementMaps</returns>
+        public static IList<ActionElementMap> GetKeyboardActionElementMaps(InputAction action, Pole axisDirection) {
+            IEnumerable<ActionElementMap> keyboardMaps = Player.controllers.maps.ElementMapsWithAction(ControllerType.Keyboard, action.id, true);
+            if (action.type == InputActionType.Axis) {
+                // Each controller mapper row represents a button action, or an axis action in a specific direction.
+                // So if a keyboard map represents the id of an axis action but not the direction specified in this row, it should not be included
+                keyboardMaps = keyboardMaps.Where(km => km.elementType == ControllerElementType.Axis || km.axisContribution == axisDirection);
+            }
+
+            // sort to put axis maps before button maps
+            return keyboardMaps.OrderBy(km => km.elementIdentifierId).ToList();
+        }
+
+        /// <summary>
+        /// Gets the first joystick <see cref="ActionElementMap"/> for the given <paramref name="action"/>.
+        /// </summary>
+        /// <param name="action">The input action.</param>
+        /// <param name="axisDirection">The direction of the action, if it's an axis action.</param>
+        /// <returns>joystick ActionElementMap</returns>
+        public static ActionElementMap GetFirstJoystickActionElementMap(InputAction action, Pole axisDirection) {
+
+            // TODO: better way to get first
+
+            return GetJoystickActionElementMaps(action, axisDirection).FirstOrDefault();
+        }
+
+        /// <summary>
         /// Gets list of joystick <see cref="ActionElementMap"/>s for the given <paramref name="action"/>.
         /// </summary>
         /// <param name="action">The input action.</param>
@@ -144,8 +220,8 @@ namespace Core.Unity.RewiredExtensions {
             IEnumerable<ActionElementMap> joystickMaps = Player.controllers.maps.ElementMapsWithAction(ControllerType.Joystick, action.id, true);
             if (action.type == InputActionType.Axis) {
                 // Each controller mapper row represents a button action, or an axis action in a specific direction.
-                // So a joystick map represents the id of an axis action but not the direction specified in this row, it should not be considered
-                joystickMaps = joystickMaps.Where(jm => (jm.elementType == ControllerElementType.Axis || jm.axisContribution == axisDirection));
+                // So if a joystick map represents the id of an axis action but not the direction specified in this row, it should not be included
+                joystickMaps = joystickMaps.Where(jm => jm.elementType == ControllerElementType.Axis || jm.axisContribution == axisDirection);
             }
 
             // sort to put axis maps before button maps
@@ -157,6 +233,14 @@ namespace Core.Unity.RewiredExtensions {
         /// </summary>
         public static bool IsJoystickConnected {
             get { return Player.controllers.joystickCount > 0; }
+        }
+
+        /// <summary>
+        /// Gets the Rewired hardware guid of the first listed connected joystick.  Returns null if no joysticks are connected.
+        /// </summary>
+        /// <returns>Guid?</returns>
+        public static System.Guid? GetFirstJoystickGuid() {
+            return Player.controllers.Joysticks.FirstOrDefault()?.hardwareTypeGuid;
         }
 
 
@@ -183,5 +267,4 @@ namespace Core.Unity.RewiredExtensions {
 
         #endregion
     }
-
 }
