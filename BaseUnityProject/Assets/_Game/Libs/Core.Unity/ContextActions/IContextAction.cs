@@ -44,5 +44,10 @@ namespace Core.Unity.ContextActions {
         /// If the input is for an axis action, this value indicates which direction.  True for positive, false for negative.
         /// </summary>
         bool InputAxisPositiveDirection { get; }
+
+        /// <summary>
+        /// If the input can be held, instead of just pressed.
+        /// </summary>
+        bool CanHold { get; }
     }
 }
