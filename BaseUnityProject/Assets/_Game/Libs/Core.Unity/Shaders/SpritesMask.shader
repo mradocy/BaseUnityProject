@@ -9,7 +9,8 @@ Shader "Custom/SpritesMask" {
         [MaterialToggle] PixelSnap("Pixel snap", Float) = 0
         [KeywordEnum(Repeat, Clamp)] _WrapX("Wrap X", Float) = 0
         [KeywordEnum(Repeat, Clamp)] _WrapY("Wrap Y", Float) = 0
-		[IntRange] _StencilRef ("Stencil Ref", Range(0, 255)) = 2
+		[IntRange] _StencilRef("Stencil Ref", Range(0, 255)) = 2
+		[IntRange] _StencilWriteMask("Stencil Write Mask", Range(0, 255)) = 255
     }
 
     SubShader {
@@ -35,8 +36,9 @@ Shader "Custom/SpritesMask" {
             // stencil
             Stencil {
                 Ref [_StencilRef] // value to put in the stencil buffer for a pixel.  int in [1, 255]
+				WriteMask [_StencilWriteMask] // Masks the bits that the stencil buffer will be written to
                 Comp always // 'always' means pixel will always be drawn and the Ref value will be written to the buffer
-                Pass replace
+                Pass replace // 'replace' means the contents of the stencil buffer will be replaced by the ref value
             }
 
             CGPROGRAM

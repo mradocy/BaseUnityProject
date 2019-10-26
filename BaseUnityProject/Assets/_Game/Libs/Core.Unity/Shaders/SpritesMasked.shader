@@ -9,7 +9,8 @@ Shader "Custom/SpritesMasked" {
         [MaterialToggle] PixelSnap("Pixel snap", Float) = 0
         [KeywordEnum(Repeat, Clamp)] _WrapX("Wrap X", Float) = 0
         [KeywordEnum(Repeat, Clamp)] _WrapY("Wrap Y", Float) = 0
-		[IntRange] _StencilRef ("Stencil Ref", Range(0, 255)) = 2
+		[IntRange] _StencilRef("Stencil Ref", Range(0, 255)) = 2
+		[IntRange] _StencilReadMask("Stencil Read Mask", Range(0, 255)) = 255
     }
 
     SubShader {
@@ -32,8 +33,9 @@ Shader "Custom/SpritesMasked" {
             // stencil
             Stencil {
                 Ref [_StencilRef] // value to compare against the stencil buffer when deciding to draw a pixel
+				ReadMask [_StencilReadMask] // Masks the bits that the stencil buffer will be read from
                 Comp equal // 'equal' means pixel will be drawn only if the Ref value is already in the buffer
-                Pass replace
+                Pass keep // 'keep' means the current contents of the stencil buffer will stay as they are
             }
 
             CGPROGRAM
