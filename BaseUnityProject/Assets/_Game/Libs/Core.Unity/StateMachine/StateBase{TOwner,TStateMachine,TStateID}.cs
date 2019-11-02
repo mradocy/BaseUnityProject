@@ -9,19 +9,19 @@ namespace Core.Unity.StateMachine {
     /// </summary>
     /// <typeparam name="TOwner">Type of the owner of the state machine.</typeparam>
     /// <typeparam name="TStateMachine">Type of the state machine.</typeparam>
-    /// <typeparam name="TStateID">The enum containing the ids representing the states.  Should be based off an int.</typeparam>
+    /// <typeparam name="TStateId">The enum containing the ids representing the states.  Should be based off an int.</typeparam>
     [System.Serializable]
-    public abstract class StateBase<TOwner, TStateMachine, TStateID> : IState
+    public abstract class StateBase<TOwner, TStateMachine, TStateId> : IState
         where TOwner : MonoBehaviour
-        where TStateID : System.Enum
-        where TStateMachine : StateMachineBase<TOwner, TStateID> {
+        where TStateId : System.Enum
+        where TStateMachine : StateMachineBase<TOwner, TStateId> {
 
         #region Properties
 
         /// <summary>
-        /// Gets the ID of this state.
+        /// Gets the id of this state.
         /// </summary>
-        public abstract TStateID ID { get; }
+        public abstract TStateId Id { get; }
 
         /// <summary>
         /// Reference to the owner of the state machine.
@@ -64,6 +64,11 @@ namespace Core.Unity.StateMachine {
         protected virtual void FixedUpdate() { }
 
         /// <summary>
+        /// Called by the <see cref="StateMachine"/> during LateUpdate() method when this is the current state.
+        /// </summary>
+        protected virtual void LateUpdate() { }
+
+        /// <summary>
         /// Called when the state machine switches away from this state to a different state.
         /// </summary>
         protected virtual void OnEnd() { }
@@ -85,6 +90,10 @@ namespace Core.Unity.StateMachine {
 
         void IState.FixedUpdate() {
             this.FixedUpdate();
+        }
+
+        void IState.LateUpdate() {
+            this.LateUpdate();
         }
 
         void IState.OnEnd() {

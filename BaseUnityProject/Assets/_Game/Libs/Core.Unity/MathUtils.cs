@@ -14,6 +14,11 @@ namespace Core.Unity {
         public const float EPSILON = .0001f;
 
         /// <summary>
+        /// The square root of 2.
+        /// </summary>
+        public const float Sqrt2 = 1.414213562373095f;
+
+        /// <summary>
         /// Calculates the "floor mod", i.e. a mod b where the result has the same sign as b.
         /// </summary>
         /// <param name="a">The dividend.</param>

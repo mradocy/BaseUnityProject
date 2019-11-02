@@ -69,6 +69,13 @@ namespace Core.Unity.StateMachine {
             _currentStateObject?.FixedUpdate();
         }
 
+        /// <summary>
+        /// To be called by the owner in the LateUpdate() method.  Calls LateUpdate() of the current state.
+        /// </summary>
+        public void LateUpdate() {
+            _currentStateObject?.LateUpdate();
+        }
+
         #endregion
 
         #region Methods
