@@ -5,10 +5,10 @@ setlocal
 pushd "%~dp0"
 
 :: Directory of CutScript in this Unity project.
-set SOURCE_DIRECTORY=..\..\Scripts\CutScript
+set SOURCE_DIRECTORY=..\..\Libs\Core.CutScript
 
 :: Directory of the CutScript project:
-set DESTINATION_DIRECTORY=%GAMEDEV_SOURCE_TOOLS%\CutScript\CutScript
+set DESTINATION_DIRECTORY=%GAMEDEV_SOURCE_TOOLS%\Core.CutScript\Core.CutScript
 
 :: The (only) types of files to merge.
 set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;
