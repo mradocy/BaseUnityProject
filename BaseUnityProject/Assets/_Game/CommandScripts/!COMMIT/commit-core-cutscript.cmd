@@ -11,7 +11,7 @@ set SOURCE_DIRECTORY=..\..\Libs\Core.CutScript
 set DESTINATION_DIRECTORY=%GAMEDEV_SOURCE_TOOLS%\Core.CutScript\Core.CutScript
 
 :: The (only) types of files to merge.
-set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;
+set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;*.md;
 
 
 :: Calling KDiff3 (make sure KDiff3 is installed and contained in %PATH%)
