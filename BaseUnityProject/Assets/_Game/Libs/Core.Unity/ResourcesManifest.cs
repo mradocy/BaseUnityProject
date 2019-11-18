@@ -9,12 +9,37 @@ namespace Core.Unity {
     [System.Serializable]
     public class ResourcesManifest {
 
+        #region Fields
+
+        public LocalizedElement[] TextAssets;
+
+        #endregion
+
+        #region Classes
+
         [System.Serializable]
-        public class Element {
+        public class LocalizedElement {
             public string Name;
-            public string Path;
+            public LocalizedPaths Paths;
         }
 
-        public Element[] TextAssets;
+        [System.Serializable]
+        public class LocalizedPaths {
+            public string en_US;
+            public string ja;
+
+            public string GetPath(LocalizationCode localizationCode) {
+                switch (localizationCode) {
+                case LocalizationCode.en_US:
+                    return this.en_US;
+                case LocalizationCode.ja:
+                    return this.ja;
+                }
+
+                throw new System.Exception($"Localization code {localizationCode} not implemented yet.");
+            }
+        }
+
+        #endregion
     }
 }

@@ -1,10 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Core.Unity.Combat {
 
     public interface IReceivesDamage {
+
+        /// <summary>
+        /// Event triggered when this object receives damage.
+        /// Damage has already been dealt, altering the values passed in will not change anything.
+        /// </summary>
+        event UnityAction<IAttackInfo, IAttackResult> DamageResult;
 
         /// <summary>
         /// Gets if the IReceivesDamage is enabled.  If not, attack events won't be triggered and the object won't take damage.

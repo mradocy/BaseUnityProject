@@ -32,7 +32,11 @@ namespace Core.Unity.Assets {
         /// <param name="localization">Localization code to use.</param>
         /// <returns>text</returns>
         public string GetText(LocalizationCode localization) {
-            return this.GetTextAsset(localization)?.text;
+            TextAsset textAsset = this.GetTextAsset(localization);
+            if (textAsset == null)
+                return null;
+            
+            return textAsset.text;
         }
 
         /// <summary>

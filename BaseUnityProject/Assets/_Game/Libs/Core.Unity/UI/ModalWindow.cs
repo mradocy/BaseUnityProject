@@ -67,6 +67,9 @@ namespace Core.Unity.UI {
                 window._restoreTimeScaleOnClose = false;
             }
 
+            // ensure window is active
+            window.gameObject.SetActive(true);
+
             // launch created window
             window.IsLaunched = true;
             window._closeCallbackFunction = closeCallbackFunction;
@@ -112,10 +115,10 @@ namespace Core.Unity.UI {
         public bool IsLaunched { get; private set; }
 
         /// <summary>
-        /// Gets if this window should be destroyed when it closes.  The default is true.
-        /// Not destroting the window on close may be useful for recycling. 
+        /// Gets the action taken when the window closes.  The default is <see cref="ModalWindowCloseAction.Destroy"/>.
+        /// Not destroying the window on close may be useful for recycling. 
         /// </summary>
-        public virtual bool DestroyOnClose { get; } = true;
+        public virtual ModalWindowCloseAction CloseAction { get; } = ModalWindowCloseAction.Destroy;
 
         /// <summary>
         /// Gets if this window should zero the time scale when launched.
@@ -148,16 +151,21 @@ namespace Core.Unity.UI {
             }
 
             // restore time scale
-            if (this._restoreTimeScaleOnClose) {
-                Time.timeScale = this._prevTimeScale;
+            if (_restoreTimeScaleOnClose) {
+                Time.timeScale = _prevTimeScale;
             }
 
             // call callback function
-            this._closeCallbackFunction?.Invoke(closeArgs);
+            _closeCallbackFunction?.Invoke(closeArgs);
 
             // destroy
-            if (this.DestroyOnClose) {
+            switch (this.CloseAction) {
+            case ModalWindowCloseAction.SetInactive:
+                this.gameObject.SetActive(false);
+                break;
+            case ModalWindowCloseAction.Destroy:
                 Destroy(this.gameObject);
+                break;
             }
         }
 
@@ -214,7 +222,7 @@ namespace Core.Unity.UI {
         /// <summary>
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
         /// </summary>
-        protected virtual void Update() {
+        protected void Update() {
             this.VerifyEnabled();
 
             this.OnUpdate();
@@ -223,7 +231,7 @@ namespace Core.Unity.UI {
         /// <summary>
         /// Called by Unity when the script instance is being destroyed.
         /// </summary>
-        protected virtual void OnDestroy() {
+        protected void OnDestroy() {
             this.OnDerivedDestroy();
 
             if (this.IsLaunched) {

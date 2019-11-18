@@ -70,10 +70,12 @@ namespace Core.Unity {
         /// <param name="manifest">Manifest object.</param>
         public static void LoadManifest(ResourcesManifest manifest) {
 
+            LocalizationCode localizationCode = Localization.Current;
+
             // parse text assets
             if (manifest.TextAssets != null) {
-                foreach (ResourcesManifest.Element manifestElement in manifest.TextAssets) {
-                    LoadTextAsset(manifestElement.Name, manifestElement.Path);
+                foreach (ResourcesManifest.LocalizedElement manifestElement in manifest.TextAssets) {
+                    LoadTextAsset(manifestElement.Name, manifestElement.Paths.GetPath(localizationCode));
                 }
             }
 
