@@ -137,7 +137,7 @@ namespace Core.Unity {
         }
 
         /// <summary>
-        /// Saves properties to disk.
+        /// Saves properties to disk.  This is a syncronous action.
         /// </summary>
         public void Save() {
 
@@ -155,7 +155,7 @@ namespace Core.Unity {
         }
 
         /// <summary>
-        /// Loads properties from disk.
+        /// Loads properties from disk.  This is a syncronous action.
         /// </summary>
         public void Load() {
 

@@ -117,7 +117,8 @@ namespace Core.Unity.Collision {
                     // only apply snap down if distance away isn't trivial
                     Vector2 diff = Vector2.down * distance * rh2d.fraction;
                     if (diff.sqrMagnitude > _collisionCaster.TouchCastDistance * _collisionCaster.TouchCastDistance) {
-                        transform.position = pos + diff;
+                        // .01 added so that collider isn't intersecting the platform below
+                        transform.position = pos + diff + new Vector2(0, .01f);
                     }
 
                     return true;

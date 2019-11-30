@@ -86,6 +86,15 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Rounds the given value to the given place.  e.g. RoundTo(1.23, 0.1) = 1.2
+        /// </summary>
+        /// <param name="value">The value to round.</param>
+        /// <param name="place">The place to round to.</param>
+        public static float RoundTo(float value, float place) {
+            return Mathf.Round(value / place) * place;
+        }
+
+        /// <summary>
         /// Gets rotation along the z axis from the given quaternion, in degrees.  Range is [0, 360).
         /// </summary>
         /// <param name="quaternion">Quaterion to extract z rotation from.</param>

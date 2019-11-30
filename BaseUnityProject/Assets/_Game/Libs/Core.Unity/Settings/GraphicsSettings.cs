@@ -9,17 +9,22 @@ namespace Core.Unity.Settings {
     /// </summary>
     public static class GraphicsSettings {
 
-        #region Constants
+        #region Initialization Keys
+
+        /// <summary>
+        /// Key for accessing the fullscreen mode from <see cref="Initialization.Settings"/>.
+        /// </summary>
+        private const string _fullScreenModeInitializationKey = "fullscreen_mode";
 
         /// <summary>
         /// Key for accessing the vSync count from <see cref="Initialization.Settings"/>.
         /// </summary>
-        public const string VSyncCountInitializationKey = "v_sync_count";
+        private const string _vSyncCountInitializationKey = "v_sync_count";
 
         /// <summary>
         /// Key for accessing the max queued frames from <see cref="Initialization.Settings"/>.
         /// </summary>
-        public const string MaxQueuedFramesInitializationKey = "max_queued_frames";
+        private const string _maxQueuedFramesInitializationKey = "max_queued_frames";
 
         #endregion
 
@@ -37,8 +42,15 @@ namespace Core.Unity.Settings {
             if (_isInitialized)
                 return;
 
-            QualitySettings.vSyncCount = Initialization.Settings.GetInt(VSyncCountInitializationKey, 0);
-            QualitySettings.maxQueuedFrames = Initialization.Settings.GetInt(MaxQueuedFramesInitializationKey, 0);
+            int fullscreenModeInt = Initialization.Settings.GetInt(_fullScreenModeInitializationKey, (int)FullScreenMode.Windowed);
+            if (System.Enum.IsDefined(typeof(FullScreenMode), fullscreenModeInt)) {
+                Screen.fullScreenMode = (FullScreenMode)fullscreenModeInt;
+            } else {
+                Screen.fullScreenMode = FullScreenMode.Windowed;
+            }
+
+            QualitySettings.vSyncCount = Initialization.Settings.GetInt(_vSyncCountInitializationKey, 0);
+            QualitySettings.maxQueuedFrames = Initialization.Settings.GetInt(_maxQueuedFramesInitializationKey, 0);
             
             _isInitialized = true;
         }
@@ -48,8 +60,22 @@ namespace Core.Unity.Settings {
         #region Properties
 
         /// <summary>
+        /// Gets or sets the current fullscreen mode.
+        /// </summary>
+        public static FullScreenMode FullScreenMode {
+            get { return Screen.fullScreenMode; }
+            set {
+                if (Screen.fullScreenMode == value)
+                    return;
+
+                Screen.fullScreenMode = value;
+                Initialization.Settings.SetInt(_fullScreenModeInitializationKey, (int)value);
+                Initialization.Settings.Save();
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the number of VSyncs that should pass between each frame.  Use 'Don't Sync' (0) to not wait for VSync.  Value must be 0, 1, 2, 3, or 4.
-        /// This value will be saved to the .ini file.
         /// </summary>
         public static int VSyncCount {
             get { return QualitySettings.vSyncCount; }
@@ -58,7 +84,7 @@ namespace Core.Unity.Settings {
                     return;
 
                 QualitySettings.vSyncCount = value;
-                Initialization.Settings.SetInt(VSyncCountInitializationKey, QualitySettings.vSyncCount);
+                Initialization.Settings.SetInt(_vSyncCountInitializationKey, QualitySettings.vSyncCount);
                 Initialization.Settings.Save();
             }
         }
@@ -73,7 +99,7 @@ namespace Core.Unity.Settings {
                     return;
 
                 QualitySettings.maxQueuedFrames = value;
-                Initialization.Settings.SetInt(MaxQueuedFramesInitializationKey, QualitySettings.maxQueuedFrames);
+                Initialization.Settings.SetInt(_maxQueuedFramesInitializationKey, QualitySettings.maxQueuedFrames);
                 Initialization.Settings.Save();
             }
         }
