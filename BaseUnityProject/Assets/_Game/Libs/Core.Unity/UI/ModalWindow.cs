@@ -155,6 +155,8 @@ namespace Core.Unity.UI {
                 Time.timeScale = _prevTimeScale;
             }
 
+            this.OnClose();
+
             // call callback function
             _closeCallbackFunction?.Invoke(closeArgs);
 
@@ -199,6 +201,11 @@ namespace Core.Unity.UI {
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
         /// </summary>
         protected virtual void OnUpdate() { }
+
+        /// <summary>
+        /// Function called when this window gets closed.
+        /// </summary>
+        protected virtual void OnClose() { }
 
         /// <summary>
         /// Called by Unity when the script instance is being destroyed.

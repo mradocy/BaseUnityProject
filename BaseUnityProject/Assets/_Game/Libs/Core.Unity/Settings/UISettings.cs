@@ -52,7 +52,6 @@ namespace Core.Unity.Settings {
 
                 _uiScale = value;
                 Initialization.Settings.SetFloat(_uIScaleInitializationKey, _uiScale);
-                Initialization.Settings.Save();
             }
         }
 

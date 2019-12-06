@@ -70,7 +70,6 @@ namespace Core.Unity.Settings {
 
                 Screen.fullScreenMode = value;
                 Initialization.Settings.SetInt(_fullScreenModeInitializationKey, (int)value);
-                Initialization.Settings.Save();
             }
         }
 
@@ -85,7 +84,6 @@ namespace Core.Unity.Settings {
 
                 QualitySettings.vSyncCount = value;
                 Initialization.Settings.SetInt(_vSyncCountInitializationKey, QualitySettings.vSyncCount);
-                Initialization.Settings.Save();
             }
         }
 
@@ -100,7 +98,6 @@ namespace Core.Unity.Settings {
 
                 QualitySettings.maxQueuedFrames = value;
                 Initialization.Settings.SetInt(_maxQueuedFramesInitializationKey, QualitySettings.maxQueuedFrames);
-                Initialization.Settings.Save();
             }
         }
 
