@@ -36,7 +36,7 @@ namespace Core.Unity.UI {
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
         /// </summary>
         private void Update() {
-            if (!Application.isPlaying || this._bindWhenPlaying) {
+            if (!Application.isPlaying || _bindWhenPlaying) {
                 this.UpdateText();
             }
         }
@@ -49,14 +49,28 @@ namespace Core.Unity.UI {
             if (textComponent == null)
                 return;
 
-            textComponent.text = GetComponentText(this._text, this._forceLocalization, this._propertyKey);
+            if (_forceLocalization == LocalizationCode.None) {
+                textComponent.text = GetComponentText(_text, _propertyKey);
+            } else {
+                textComponent.text = GetComponentText(_text, _forceLocalization, _propertyKey);
+            }
+        }
+
+        /// <summary>
+        /// Gets the text that will be set to the Text component, using the default localization.
+        /// </summary>
+        /// <param name="localizedTextAsset">Localized text asset to pull the text from.</param>
+        /// <param name="propertyKey">If given, will pull the value of a property instead of the text file's entire content.</param>
+        /// <returns>text</returns>
+        public static string GetComponentText(LocalizedText localizedTextAsset, string propertyKey) {
+            return GetComponentText(localizedTextAsset, Localization.Current, propertyKey);
         }
 
         /// <summary>
         /// Gets the text that will be set to the Text component.
         /// </summary>
         /// <param name="localizedTextAsset">Localized text asset to pull the text from.</param>
-        /// <param name="localization">Localization code.  If None is given, then <see cref="Localization.Current"/> will be used.</param>
+        /// <param name="localization">Localization code.</param>
         /// <param name="propertyKey">If given, will pull the value of a property instead of the text file's entire content.</param>
         /// <returns>text</returns>
         public static string GetComponentText(LocalizedText localizedTextAsset, LocalizationCode localization, string propertyKey) {
