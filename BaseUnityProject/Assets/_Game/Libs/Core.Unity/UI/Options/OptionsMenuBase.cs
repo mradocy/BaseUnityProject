@@ -12,7 +12,7 @@ namespace Core.Unity.UI.Options {
 
         #region Inspector Fields
 
-        [Header("Children")]
+        [Header("OptionsMenuBase Children")]
 
         [SerializeField]
         [Tooltip("Transform to put the option controls in.")]
@@ -152,7 +152,7 @@ namespace Core.Unity.UI.Options {
         #region Protected Methods
 
         /// <summary>
-        /// Creates the option controls for this menu.
+        /// Creates (or recreates) the option controls for this menu.
         /// </summary>
         protected void CreateOptionControls() {
             // create option models
