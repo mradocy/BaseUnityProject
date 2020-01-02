@@ -1,5 +1,6 @@
 # Allow Rewired plugins
-!Rewired_*.dll
+!*/Assets/Rewired/**/*.dll
+!*/Assets/Rewired/**/*.zip
 
 [Ll]ibrary/
 [Tt]emp/
