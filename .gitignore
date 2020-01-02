@@ -1,6 +1,5 @@
-# Allow specified plugins
-!Ookii.Dialogs.dll
-!System.Windows.Forms.dll
+# Allow Rewired plugins
+!Rewired_*.dll
 
 [Ll]ibrary/
 [Tt]emp/
