@@ -20,7 +20,14 @@ namespace Core.Unity.Combat {
         /// Gets an id that uniquely defines this hurt box instance.  e.g. the result of this.GetInstanceID().
         /// Hitboxes will not hit hurtboxes with the same <see cref="UniqueId"/> until reset.
         /// </summary>
-        public int UniqueId { get; private set; }
+        public int UniqueId {
+            get {
+                if (_uniqueId == null)
+                    this.SetDefaultUniqueId();
+                
+                return _uniqueId.Value;
+            }
+        }
 
         /// <summary>
         /// Reference to the <see cref="IReceivesDamage"/> component that this hurtbox sends info to.
@@ -45,9 +52,9 @@ namespace Core.Unity.Combat {
         /// Manually sets the <see cref="UniqueId"/> property.
         /// For niche (hacky) uses.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Unique id</param>
         public void SetUniqueId(int id) {
-            this.UniqueId = id;
+            _uniqueId = id;
         }
 
         #endregion
@@ -59,12 +66,10 @@ namespace Core.Unity.Combat {
         /// </summary>
         private void Awake() {
             // set unique id
-            if (_hurtBoxGroup == null) {
-                this.UniqueId = this.GetInstanceID();
-            } else {
-                this.UniqueId = _hurtBoxGroup.UniqueId;
+            if (_uniqueId == null) {
+                this.SetDefaultUniqueId();
             }
-
+            
             // get reference to IReceivesDamage.  Can be null for now
             this.ReceivesDamage = this.GetComponent<IReceivesDamage>();
             if (this.ReceivesDamage == null) {
@@ -73,5 +78,21 @@ namespace Core.Unity.Combat {
         }
 
         #endregion
+
+        /// <summary>
+        /// Sets the unique id to its default value.
+        /// </summary>
+        private void SetDefaultUniqueId() {
+            if (_hurtBoxGroup == null) {
+                _uniqueId = this.GetInstanceID();
+            } else {
+                _uniqueId = _hurtBoxGroup.UniqueId;
+            }
+        }
+
+        /// <summary>
+        /// Field for <see cref="UniqueId"/>.  If null, it will be set by <see cref="SetDefaultUniqueId"/>.
+        /// </summary>
+        private int? _uniqueId = null;
     }
 }
