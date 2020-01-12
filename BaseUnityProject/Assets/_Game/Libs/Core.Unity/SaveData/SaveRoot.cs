@@ -55,6 +55,11 @@ namespace Core.Unity.SaveData {
         private const string _loadFailMessage = "Error loading save data from \"{0}\": {1}";
 
         /// <summary>
+        /// Event that's invoked immediately after xml is sucessfully loaded and parsed.
+        /// </summary>
+        public event UnityAction<SaveRoot> Loaded;
+
+        /// <summary>
         /// Gets if the save data has been parsed already.  If so, then no more properties can be registered.
         /// </summary>
         public bool IsParsed { get; private set; }
@@ -129,6 +134,11 @@ namespace Core.Unity.SaveData {
             LoadStatus status = this.ParseXML(rootNode);
 
             this.IsParsed = true;
+
+            if (status == LoadStatus.Ok) {
+                this.Loaded?.Invoke(this);
+            }
+
             return status;
         }
 
@@ -158,6 +168,11 @@ namespace Core.Unity.SaveData {
         private const string _saveFailMessage = "Error saving data to \"{0}\": {1}";
 
         /// <summary>
+        /// Event invoked immediately before save root is saved to a string.
+        /// </summary>
+        public event UnityAction<SaveRoot> PreSave;
+
+        /// <summary>
         /// If data is currently being saved.
         /// </summary>
         public bool IsSaving { get; private set; }
@@ -169,6 +184,8 @@ namespace Core.Unity.SaveData {
         /// <param name="prettyPrint">If the output string should be formatted.</param>
         /// <returns>string</returns>
         public string SaveToString(bool prettyPrint) {
+
+            this.PreSave?.Invoke(this);
 
             // create xml document, starting with root node
             XmlDocument xmlDoc = new XmlDocument();
@@ -321,8 +338,8 @@ namespace Core.Unity.SaveData {
                 return SaveStatus.StringError;
             }
 
-            // so function won't finish almost immediately
-            System.Threading.Thread.Sleep(1000);
+            //// so function won't finish almost immediately
+            //System.Threading.Thread.Sleep(1000);
 
             try {
                 using (StreamWriter outputFile = new StreamWriter(path, false, Encoding)) {

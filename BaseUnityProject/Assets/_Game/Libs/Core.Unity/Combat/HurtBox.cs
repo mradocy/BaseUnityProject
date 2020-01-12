@@ -20,15 +20,7 @@ namespace Core.Unity.Combat {
         /// Gets an id that uniquely defines this hurt box instance.  e.g. the result of this.GetInstanceID().
         /// Hitboxes will not hit hurtboxes with the same <see cref="UniqueId"/> until reset.
         /// </summary>
-        public int UniqueId {
-            get {
-                if (_hurtBoxGroup != null) {
-                    return _hurtBoxGroup.UniqueId;
-                }
-
-                return this.GetInstanceID();
-            }
-        }
+        public int UniqueId { get; private set; }
 
         /// <summary>
         /// Reference to the <see cref="IReceivesDamage"/> component that this hurtbox sends info to.
@@ -49,6 +41,15 @@ namespace Core.Unity.Combat {
             this.ReceivesDamage = receivesDamage;
         }
 
+        /// <summary>
+        /// Manually sets the <see cref="UniqueId"/> property.
+        /// For niche (hacky) uses.
+        /// </summary>
+        /// <param name="id"></param>
+        public void SetUniqueId(int id) {
+            this.UniqueId = id;
+        }
+
         #endregion
 
         #region Unity Methods
@@ -57,6 +58,12 @@ namespace Core.Unity.Combat {
         /// Called by Unity when the script instance is being loaded.
         /// </summary>
         private void Awake() {
+            // set unique id
+            if (_hurtBoxGroup == null) {
+                this.UniqueId = this.GetInstanceID();
+            } else {
+                this.UniqueId = _hurtBoxGroup.UniqueId;
+            }
 
             // get reference to IReceivesDamage.  Can be null for now
             this.ReceivesDamage = this.GetComponent<IReceivesDamage>();
