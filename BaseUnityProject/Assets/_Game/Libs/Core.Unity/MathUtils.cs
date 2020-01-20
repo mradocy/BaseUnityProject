@@ -114,6 +114,36 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Gets the point along a bezier curve with 3 control points.
+        /// </summary>
+        /// <param name="p0">Start point.</param>
+        /// <param name="p1">Anchor point.</param>
+        /// <param name="p2">End point.</param>
+        /// <param name="t">Time, in [0, 1]</param>
+        /// <returns>Point</returns>
+        /// <remarks>https://javascript.info/bezier-curve#maths</remarks>
+        public static Vector2 BezierPoint(Vector2 p0, Vector2 p1, Vector2 p2, float t) {
+            return
+                (1 - t) * (1 - t) * p0 +
+                2 * (1 - t) * t * p1 +
+                t * t * p2;
+        }
+
+        /// <summary>
+        /// Gets the normal vector (facing the "left") along a bezier curve with 3 control points.
+        /// </summary>
+        /// <param name="p0">Start point.</param>
+        /// <param name="p1">Anchor point.</param>
+        /// <param name="p2">End point.</param>
+        /// <param name="t">Time, in [0, 1]</param>
+        /// <returns>Normal</returns>
+        public static Vector2 BezierNormal(Vector2 p0, Vector2 p1, Vector2 p2, float t) {
+            Vector2 deriv = p0 * (2 * t - 2) + (2 * p2 - 4 * p1) * t + 2 * p1;
+            Vector2 normal = new Vector2(-deriv.y, deriv.x);
+            return normal.normalized;
+        }
+
+        /// <summary>
         /// Given a sector defined by a center angle and spread, return if the given test angle is contained in the sector (all in degrees).
         /// </summary>
         /// <param name="sectorAngle">Angle defining the center of the sector.</param>
