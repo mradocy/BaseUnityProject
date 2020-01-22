@@ -31,6 +31,11 @@ namespace Core.Unity.StateMachine {
         /// </summary>
         public IState CurrentStateObject { get { return _currentStateObject; } }
 
+        /// <summary>
+        /// Gets the id of the null state (equivalent to 0)
+        /// </summary>
+        public TStateId NullStateId { get { return default; } }
+
         #endregion
 
         #region Methods to be called by the Owner
