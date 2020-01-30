@@ -137,7 +137,7 @@ namespace Core.Unity {
         }
 
         /// <summary>
-        /// Saves properties to disk.  This is a syncronous action.
+        /// Saves properties to an .ini file.  This is a syncronous action.
         /// </summary>
         public void Save() {
 

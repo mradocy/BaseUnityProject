@@ -9,8 +9,6 @@ using UnityEngine.Events;
 
 namespace Core.Unity {
 
-    // TODO: Get rid of LocalizationProperty, specific properties should be in their own classes.
-
     /// <summary>
     /// Handles game initialization.
     /// </summary>
@@ -36,7 +34,17 @@ namespace Core.Unity {
         /// <summary>
         /// The .ini file containing the settings.
         /// </summary>
-        public static InitializationFile Settings { get { return _settings; } }
+        public static InitializationFile Settings { get; private set; }
+
+        /// <summary>
+        /// Saves settings to an .ini file.
+        /// </summary>
+        public static void SaveInitializationSettings() {
+            // save to .ini file
+            Settings.Save();
+        }
+
+        #region Private Methods
 
         /// <summary>
         /// Called by Unity before any scene is loaded.
@@ -51,8 +59,6 @@ namespace Core.Unity {
             Initialize();
         }
 
-        private const string LocalizationProperty = "localization";
-
         /// <summary>
         /// Initializes the initialization settings.
         /// </summary>
@@ -60,8 +66,8 @@ namespace Core.Unity {
             _isInitialized = true;
 
             // load ini file
-            _settings = new InitializationFile();
-            _settings.Load();
+            Settings = new InitializationFile();
+            Settings.Load();
 
             // call callback functions
             foreach (UnityAction callback in _callbacks) {
@@ -70,21 +76,11 @@ namespace Core.Unity {
             _callbacks.Clear();
         }
 
-        /// <summary>
-        /// Saves settings (such as music volume, localization) to an .ini file.
-        /// </summary>
-        public static void SaveInitializationSettings() {
-            // pull properties into .ini settings
-            _settings.SetString(LocalizationProperty, Localization.CodeToString(Localization.Current));
-
-            // save to .ini file
-            _settings.Save();
-        }
+        #endregion
 
         #region Private Fields
 
         private static bool _isInitialized = false;
-        private static InitializationFile _settings = null;
         private static List<UnityAction> _callbacks = new List<UnityAction>();
 
         #endregion

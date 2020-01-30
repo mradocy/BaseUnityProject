@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Core.Unity.Settings;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -70,7 +71,7 @@ namespace Core.Unity {
         /// <param name="manifest">Manifest object.</param>
         public static void LoadManifest(ResourcesManifest manifest) {
 
-            LocalizationCode localizationCode = Localization.Current;
+            LocalizationCode localizationCode = LocalizationSettings.Localization;
 
             // parse text assets
             if (manifest.TextAssets != null) {
@@ -146,7 +147,7 @@ namespace Core.Unity {
         /// <param name="path">raw path</param>
         /// <returns>path</returns>
         private static string PathConvert(string path) {
-            return System.IO.Path.ChangeExtension(path, null).Replace("$(Localization)", Localization.CodeToString(Localization.Current));
+            return System.IO.Path.ChangeExtension(path, null).Replace("$(Localization)", LocalizationSettings.CodeToString(LocalizationSettings.Localization));
         }
 
         private class Source<T> where T : Object {

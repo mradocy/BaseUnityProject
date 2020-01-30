@@ -1,4 +1,5 @@
 ﻿using Core.Unity;
+using Core.Unity.Settings;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -22,7 +23,7 @@ namespace Core.Unity.Assets {
         /// </summary>
         public string Text {
             get {
-                return this.GetText(Localization.Current);
+                return this.GetText(LocalizationSettings.Localization);
             }
         }
 
@@ -46,7 +47,7 @@ namespace Core.Unity.Assets {
         /// <param name="propertyKey">Key of the property.</param>
         /// <returns>Property value</returns>
         public string GetPropertyValue(string propertyKey) {
-            return this.GetPropertyValue(Localization.Current, propertyKey);
+            return this.GetPropertyValue(LocalizationSettings.Localization, propertyKey);
         }
 
         /// <summary>
@@ -82,7 +83,7 @@ namespace Core.Unity.Assets {
         /// </summary>
         protected TextAsset TextAsset {
             get {
-                return this.GetTextAsset(Localization.Current);
+                return this.GetTextAsset(LocalizationSettings.Localization);
             }
         }
 
@@ -99,7 +100,7 @@ namespace Core.Unity.Assets {
                 return this.ja;
             }
 
-            Debug.LogError($"Localization {Localization.Current} not supported");
+            Debug.LogError($"Localization {localization} not supported");
             return null;
         }
 

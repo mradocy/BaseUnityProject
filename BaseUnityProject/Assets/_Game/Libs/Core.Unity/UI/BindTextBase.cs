@@ -1,4 +1,5 @@
 ﻿using Core.Unity.Assets;
+using Core.Unity.Settings;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -67,7 +68,7 @@ namespace Core.Unity.UI {
 
             LocalizationCode localization = _forceLocalization;
             if (localization == LocalizationCode.None) {
-                localization = Localization.Current;
+                localization = LocalizationSettings.Localization;
             }
 
             if (string.IsNullOrEmpty(_propertyKey)) {
@@ -76,7 +77,7 @@ namespace Core.Unity.UI {
 
             string value = _text.GetPropertyValue(localization, _propertyKey);
             if (string.IsNullOrEmpty(value)) {
-                return $"<String \"{_propertyKey}:\" not found for localization \"{Localization.CodeToString(localization)}\">";
+                return $"<String \"{_propertyKey}:\" not found for localization \"{LocalizationSettings.CodeToString(localization)}\">";
             }
 
             return value;

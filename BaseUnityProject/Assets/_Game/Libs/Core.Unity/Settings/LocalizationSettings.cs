@@ -2,45 +2,63 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Core.Unity {
-    public static class Localization {
+namespace Core.Unity.Settings {
+
+    /// <summary>
+    /// Static class for accessing and setting localization settings.
+    /// </summary>
+    public static class LocalizationSettings {
+
+        #region Initialization Keys
+
+        /// <summary>
+        /// Key for accessing the current localization from <see cref="Initialization.Settings"/>.
+        /// </summary>
+        private const string _localizationInitializationKey = "localization";
+
+        #endregion
 
         #region Initialization
 
         /// <summary>
-        /// Used when reading the .ini file.
-        /// </summary>
-        private const string LocalizationProperty = "localization";
-
-        /// <summary>
-        /// Ensures <see cref="Initialize"/>() is called when .ini file is loaded. 
+        /// Called by Unity before any scene is loaded.
         /// </summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnBeforeSceneLoadRuntimeMethod() {
             Initialization.CallOnInitialize(Initialize);
         }
 
-        /// <summary>
-        /// Initializes <see cref="Localization"/>.
-        /// </summary>
         private static void Initialize() {
             if (_isInitialized)
                 return;
 
-            string localizationStr = Initialization.Settings.GetString(LocalizationProperty, CodeToString(LocalizationCode.Default));
-            Current = StringToCode(localizationStr);
+            string localizationStr = Initialization.Settings.GetString(_localizationInitializationKey, CodeToString(LocalizationCode.Default));
+            _localization = StringToCode(localizationStr);
+
+            _isInitialized = true;
         }
 
-        /// <summary>
-        /// If <see cref="Initialize"/> has been called already.
-        /// </summary>
-        private static bool _isInitialized = false;
         #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets or sets the currect localization.
         /// </summary>
-        public static LocalizationCode Current { get; set; } = LocalizationCode.Default;
+        public static LocalizationCode Localization {
+            get { return _localization; }
+            set {
+                if (Localization == value)
+                    return;
+
+                _localization = value;
+                Initialization.Settings.SetString(_localizationInitializationKey, CodeToString(_localization));
+            }
+        }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Converts a <see cref="LocalizationCode"/> into its string representation.
@@ -82,5 +100,14 @@ namespace Core.Unity {
             return LocalizationCode.None;
         }
 
+        #endregion
+
+        #region Private Fields
+
+        private static bool _isInitialized = false;
+
+        private static LocalizationCode _localization = LocalizationCode.Default;
+
+        #endregion
     }
 }
