@@ -1,6 +1,6 @@
 # BaseUnityProject
 
-Anything in the Testing folder will NOT be copied over to a new project.  Files here are intended to be used for testing the Stash code.
+Anything in the Testing folder will NOT be copied over to a new project.  Files here are intended to be used for testing the Core.Unity code.
 
 -------------------------------------------------------------------
 
@@ -21,8 +21,6 @@ Note: If having connections issues, try this: https://github.com/desktop/desktop
 
 ## PART 2: Copying the Base Unity Project
 
-* Make sure KDiff3 is installed and can be accessed through the command line.
-
 * Copy create-base-unity-project.cmd (located at the root of BaseUnityProject) into the root project folder.
 
-* Run create-base-unity-project.cmd.  It will use KDiff3 to copy the files from BaseUnityProject to the new Unity project.  This file will then delete itself.
+* Run create-base-unity-project.cmd.  It will use robocopy to copy the files from BaseUnityProject to the new Unity project.  This file will then delete itself.
