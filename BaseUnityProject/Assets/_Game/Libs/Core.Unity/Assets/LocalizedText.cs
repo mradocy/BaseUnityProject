@@ -40,6 +40,44 @@ namespace Core.Unity.Assets {
         }
 
         /// <summary>
+        /// Gets the value for a property defined in this text.  Assumes text contains lines in the form of 'prop_key: val'.
+        /// Uses the current localization.
+        /// </summary>
+        /// <param name="propertyKey">Key of the property.</param>
+        /// <returns>Property value</returns>
+        public string GetPropertyValue(string propertyKey) {
+            return this.GetPropertyValue(Localization.Current, propertyKey);
+        }
+
+        /// <summary>
+        /// Gets the value for a property defined in this text.  Assumes text contains lines in the form of 'prop_key: val'.
+        /// </summary>
+        /// <param name="localization">Localization code to use.</param>
+        /// <param name="propertyKey">Key of the property.</param>
+        /// <returns>Property value</returns>
+        public string GetPropertyValue(LocalizationCode localization, string propertyKey) {
+            string text = this.GetText(localization);
+            if (text == null || string.IsNullOrEmpty(propertyKey))
+                return null;
+
+            // TODO: this isn't a great way of finding the property value
+            int keyIndex = text.IndexOf($"{propertyKey}:");
+            if (keyIndex == -1) {
+                return null;
+            }
+            int valueStartIndex = keyIndex + propertyKey.Length + 1; // +1 for ":"
+            int valueEndIndex = text.IndexOf('\n', valueStartIndex);
+            string value;
+            if (valueEndIndex == -1) {
+                value = text.Substring(valueStartIndex).Trim();
+            } else {
+                value = text.Substring(valueStartIndex, valueEndIndex - valueStartIndex).Trim();
+            }
+
+            return value;
+        }
+
+        /// <summary>
         /// Gets the text asset for the current localization.
         /// </summary>
         protected TextAsset TextAsset {
