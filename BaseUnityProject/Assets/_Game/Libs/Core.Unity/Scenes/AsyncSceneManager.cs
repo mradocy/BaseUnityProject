@@ -84,7 +84,8 @@ namespace Core.Unity.Scenes {
         /// The scene is not loaded if it is already loading, loaded, or unloading.
         /// </summary>
         /// <param name="sceneName">The name of the scene.</param>
-        public static void LoadSceneAsync(string sceneName) {
+        /// <param name="loadSceneMode">Load scene mode.  If <see cref="LoadSceneMode.Single"/>, then all scenes will be unloaded before loading.</param>
+        public static void LoadSceneAsync(string sceneName, LoadSceneMode loadSceneMode) {
             if (!IsSceneInBuild(sceneName))
                 throw new System.ArgumentException(string.Format(_sceneNotInBuildError, sceneName));
 
@@ -96,7 +97,7 @@ namespace Core.Unity.Scenes {
             // start scene load
             _sceneStates[GetFullScenePath(sceneName)] = SceneLoadState.Loading;
             Debug.Log($"Start scene load: {GetFullScenePath(sceneName)}");
-            SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            SceneManager.LoadSceneAsync(sceneName, loadSceneMode);
         }
 
         /// <summary>
