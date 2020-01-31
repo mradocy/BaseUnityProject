@@ -64,6 +64,8 @@ namespace Core.Unity.SaveData {
         /// </summary>
         public bool IsParsed { get; private set; }
 
+        // TODO: Does this need to be public?  Should loading from an index in the save directory be the only option?
+
         /// <summary>
         /// Loads an xml file, the contents of which are then parsed.
         /// Returns the status of the load.
@@ -108,6 +110,15 @@ namespace Core.Unity.SaveData {
         /// <returns>Load status</returns>
         public LoadStatus LoadFromSaveDirectory(int index) {
             return this.LoadFromFile(GetSaveDirectoryPath(index));
+        }
+
+        /// <summary>
+        /// Gets if a file in the <see cref="SaveDirectory"/> exists at the given index.
+        /// </summary>
+        /// <param name="index">File index</param>
+        /// <returns>File exists</returns>
+        public bool SaveFileExists(int index) {
+            return File.Exists(GetSaveDirectoryPath(index));
         }
 
         /// <summary>
