@@ -143,6 +143,11 @@ namespace Core.Unity.UI.Options {
         protected virtual void OnPropertyValueChanged(PropertyOptionControlBase propertyOptionControl, bool incremented) { }
 
         /// <summary>
+        /// Called when the cancel button is pressed.
+        /// </summary>
+        protected virtual void OnCancelPressed() { }
+
+        /// <summary>
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
         /// </summary>
         protected virtual void OnUpdate() { }
@@ -209,12 +214,14 @@ namespace Core.Unity.UI.Options {
             OptionControlBase selectedOptionControl = this.SelectedControl;
             if (this.OptionsCount > 0) {
                 if (this.UIInput.IsDownPressed) {
+                    // increment selected index
                     if (this.SelectedIndex < 0 || this.SelectedIndex >= this.OptionsCount - 1) {
                         this.SelectOption(0);
                     } else {
                         this.SelectOption(this.SelectedIndex + 1);
                     }
                 } else if (this.UIInput.IsUpPressed) {
+                    // decrement selected index
                     if (this.SelectedIndex < 0 || this.SelectedIndex >= this.OptionsCount) {
                         this.SelectOption(0);
                     } else if (this.SelectedIndex == 0) {
@@ -267,10 +274,14 @@ namespace Core.Unity.UI.Options {
                         }
                     }
                 } else if (this.UIInput.IsSubmitPressed) {
+                    // execute the selected option
                     ButtonOptionControlBase buttonOptionControl = selectedOptionControl as ButtonOptionControlBase;
                     if (buttonOptionControl != null && buttonOptionControl.ButtonOption.CanExecute) {
                         buttonOptionControl.Execute();
                     }
+                } else if (this.UIInput.IsCancelPressed) {
+                    // call derived cancel method
+                    this.OnCancelPressed();
                 }
             }
 
