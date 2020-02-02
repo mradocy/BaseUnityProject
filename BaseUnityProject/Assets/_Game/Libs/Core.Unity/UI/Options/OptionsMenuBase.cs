@@ -111,6 +111,12 @@ namespace Core.Unity.UI.Options {
         /// <remarks>0.1f is a good value to use.</remarks>
         protected abstract float HoldChangePeriod { get; }
 
+        /// <summary>
+        /// When true, if there is a <see cref="ModalWindow"/> attached to this gameObject or a parent and it's disabled,
+        /// then the Update() method for this menu (i.e. the user input) will also be disabled.
+        /// </summary>
+        protected virtual bool DisableUpdateIfParentModalWindowIsDisabled { get; } = true;
+
         #endregion
 
         #region Protected Methods to be Overridden
@@ -193,6 +199,7 @@ namespace Core.Unity.UI.Options {
         /// Called by Unity when the script instance is being loaded.
         /// </summary>
         protected void Awake() {
+            _parentModalWindow = this.GetComponentInParent<ModalWindow>();
             this.CreateOptionControls();
 
             this.SelectOption(0);
@@ -202,6 +209,10 @@ namespace Core.Unity.UI.Options {
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
         /// </summary>
         protected void Update() {
+            if (this.DisableUpdateIfParentModalWindowIsDisabled) {
+                if (_parentModalWindow != null && !_parentModalWindow.enabled)
+                    return;
+            }
 
             float timestamp = Time.unscaledTime;
             if (this.UIInput.IsLeftPressed) {
@@ -306,6 +317,11 @@ namespace Core.Unity.UI.Options {
         private float _rightPressedTime = -9999;
         private float _decrementTime = -9999;
         private float _incrementTime = -9999;
+
+        /// <summary>
+        /// The modal window attached to this object or parent.  Can be null.
+        /// </summary>
+        private ModalWindow _parentModalWindow = null;
 
         #endregion
     }
