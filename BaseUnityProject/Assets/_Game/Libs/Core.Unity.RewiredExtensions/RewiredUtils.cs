@@ -61,6 +61,23 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
+        /// Gets if the given axis was "pressed" this frame.
+        /// </summary>
+        /// <param name="actionId">Id of the action.</param>
+        /// <param name="positive">If the axis was in the positive direction (false for negative direction).</param>
+        /// <param name="axisThreshold">Axis value that would consider a value "pressed" (e.g. 0.5)</param>
+        /// <returns>Pressed</returns>
+        public static bool GetAxisPressed(int actionId, bool positive, float axisThreshold) {
+            if (positive) {
+                axisThreshold = Mathf.Abs(axisThreshold);
+                return Player.GetAxis(actionId) >= axisThreshold && Player.GetAxisPrev(actionId) < axisThreshold;
+            } else {
+                axisThreshold = -Mathf.Abs(axisThreshold);
+                return Player.GetAxis(actionId) <= axisThreshold && Player.GetAxisPrev(actionId) > axisThreshold;
+            }
+        }
+
+        /// <summary>
         /// Gets if the given button action is currently being held.
         /// </summary>
         /// <param name="actionId">Id of the action.</param>
@@ -226,6 +243,13 @@ namespace Core.Unity.RewiredExtensions {
 
             // sort to put axis maps before button maps
             return joystickMaps.OrderBy(jm => jm.elementIdentifierId).ToList();
+        }
+
+        /// <summary>
+        /// Loads the maps defined in the Rewired Editor and assigned to this player for the keyboard. All existing maps will be cleared and replaced with the default maps. 
+        /// </summary>
+        public static void LoadDefaultKeyboardMaps() {
+            Player.controllers.maps.LoadDefaultMaps(ControllerType.Keyboard);
         }
 
         /// <summary>

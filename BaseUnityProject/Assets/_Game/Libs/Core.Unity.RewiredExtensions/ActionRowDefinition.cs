@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace Core.Unity.RewiredExtensions {
 
+    // TODO: Get rid of this
+
     /// <summary>
     /// Serializable defintion for an action map row that would be seen in a control customization menu.
     /// </summary>
