@@ -46,6 +46,15 @@ namespace Core.Unity.SaveData {
             return Path.Combine(SaveDirectory, $"data{index}.sav");
         }
 
+        /// <summary>
+        /// Gets the full file path for the backup of a given file.
+        /// </summary>
+        /// <param name="savePath">Original save path.</param>
+        /// <returns>Path</returns>
+        public static string GetBackupPath(string savePath) {
+            return $"{Path.ChangeExtension(savePath, null)}_backup.sav";
+        }
+
         #endregion
 
         #region Loading
@@ -229,7 +238,6 @@ namespace Core.Unity.SaveData {
         /// <param name="prettyPrint">If the output string should be formatted.</param>
         /// <returns>Save status.</returns>
         public SaveStatus SaveToFile(string path, bool prettyPrint) {
-
             SaveStatus saveStatus = SaveStatus.Ok;
 
             string str = this.SaveToString(prettyPrint);
@@ -237,9 +245,28 @@ namespace Core.Unity.SaveData {
                 saveStatus = SaveStatus.StringError;
             }
 
+            // save to temporary file first
+            string tempPath = null;
             if (saveStatus == SaveStatus.Ok) {
                 try {
-                    File.WriteAllText(path, str, Encoding);
+                    tempPath = Path.GetTempFileName();
+                } catch (IOException) {
+                    saveStatus = SaveStatus.IOError;
+                }
+                if (tempPath != null) {
+                    try {
+                        File.WriteAllText(tempPath, str, Encoding);
+                    } catch (System.Exception) {
+                        saveStatus = SaveStatus.IOError;
+                    }
+                }
+            }
+
+            // override previous file if successful
+            if (saveStatus == SaveStatus.Ok) {
+                string backupPath = GetBackupPath(path);
+                try {
+                    File.Replace(tempPath, path, backupPath);
                 } catch (System.Exception) {
                     saveStatus = SaveStatus.IOError;
                 }
