@@ -224,7 +224,7 @@ namespace Core.Unity.Collision {
         public bool WalkoffToLeft(float depthCheck, float leftOffset = 0) {
 
             Rect bounds = this.GetBounds(.01f);
-            Vector2 origin = new Vector2(bounds.xMin + leftOffset, bounds.yMin);
+            Vector2 origin = new Vector2(bounds.xMin + leftOffset, bounds.yMin + .02f);
             int layerMask = this.GetUnionLayerMask();
 
             return Physics2D.Raycast(origin, Vector2.down, depthCheck, layerMask).collider == null;
@@ -239,7 +239,7 @@ namespace Core.Unity.Collision {
         public bool WalkoffToRight(float depthCheck, float rightOffset = 0) {
 
             Rect bounds = this.GetBounds(.01f);
-            Vector2 origin = new Vector2(bounds.xMax + rightOffset, bounds.yMin);
+            Vector2 origin = new Vector2(bounds.xMax + rightOffset, bounds.yMin + .02f);
             int layerMask = this.GetUnionLayerMask();
 
             return Physics2D.Raycast(origin, Vector2.down, depthCheck, layerMask).collider == null;
