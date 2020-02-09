@@ -87,14 +87,19 @@ namespace Core.Unity.SaveData {
 
             // load file
             XmlDocument xmlDoc = new XmlDocument();
-            try {
-                xmlDoc.Load(path);
-            } catch (System.IO.FileNotFoundException) {
-                loadStatus = LoadStatus.FileNotFound;
-            } catch (XmlException) {
-                loadStatus = LoadStatus.ParseError;
-            } catch (System.Exception) {
-                loadStatus = LoadStatus.FileCouldNotBeRead;
+            XmlReaderSettings readerSettings = new XmlReaderSettings() {
+                IgnoreComments = true
+            };
+            using (XmlReader reader = XmlReader.Create(path, readerSettings)) {
+                try {
+                    xmlDoc.Load(reader);
+                } catch (FileNotFoundException) {
+                    loadStatus = LoadStatus.FileNotFound;
+                } catch (XmlException) {
+                    loadStatus = LoadStatus.ParseError;
+                } catch (System.Exception) {
+                    loadStatus = LoadStatus.FileCouldNotBeRead;
+                }
             }
 
             // parse file
@@ -198,6 +203,13 @@ namespace Core.Unity.SaveData {
         public bool IsSaving { get; private set; }
 
         /// <summary>
+        /// Gets or sets the warning comment to place at the top of the .xml file.
+        /// Default is null (no comment will be added).
+        /// This does NOT get overridden when loading a save file.
+        /// </summary>
+        public string WarningComment { get; set; }
+
+        /// <summary>
         /// Saves the data to a string.
         /// Returns null if there was a problem.
         /// </summary>
@@ -212,6 +224,12 @@ namespace Core.Unity.SaveData {
             XmlElement root = this.CreateXML(xmlDoc, true);
             xmlDoc.AppendChild(root);
 
+            // create warning comment at top
+            if (!string.IsNullOrEmpty(this.WarningComment)) {
+                XmlComment warningComment = xmlDoc.CreateComment(this.WarningComment);
+                xmlDoc.InsertBefore(warningComment, root);
+            }
+
             // write to string
             try {
                 XmlWriterSettings writerSettings = new XmlWriterSettings() {
@@ -219,7 +237,7 @@ namespace Core.Unity.SaveData {
                     Encoding = Encoding,
                     Indent = prettyPrint,
                 };
-                using (System.IO.StringWriter stringWriter = new System.IO.StringWriter())
+                using (StringWriter stringWriter = new StringWriter())
                 using (XmlWriter xmlTextWriter = XmlWriter.Create(stringWriter, writerSettings)) {
                     xmlDoc.WriteTo(xmlTextWriter);
                     xmlTextWriter.Flush();
