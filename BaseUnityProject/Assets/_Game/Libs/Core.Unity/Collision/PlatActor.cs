@@ -80,6 +80,38 @@ namespace Core.Unity.Collision {
         }
 
         /// <summary>
+        /// When touching an object (detected by CollisionCaster) in the downward direction, zero y velocity?
+        /// </summary>
+        public bool StopOnTouchDown {
+            get { return _stopOnTouchDown; }
+            set { _stopOnTouchDown = value; }
+        }
+
+        /// <summary>
+        /// When touching an object (detected by CollisionCaster) in the upward direction, zero y velocity?
+        /// </summary>
+        public bool StopOnTouchUp {
+            get { return _stopOnTouchUp; }
+            set { _stopOnTouchUp = value; }
+        }
+
+        /// <summary>
+        /// When touching an object (detected by CollisionCaster) in the leftward direction, zero x velocity?
+        /// </summary>
+        public bool StopOnTouchLeft {
+            get { return _stopOnTouchLeft; }
+            set { _stopOnTouchLeft = value; }
+        }
+
+        /// <summary>
+        /// When touching an object (detected by CollisionCaster) in the rightward direction, zero x velocity?
+        /// </summary>
+        public bool StopOnTouchRight {
+            get { return _stopOnTouchRight; }
+            set { _stopOnTouchRight = value; }
+        }
+
+        /// <summary>
         /// If touching a platform below, the platform's movement will be added to this object's movement.
         /// <para/>
         /// NOTE: must set platform's velocity and angular velocity, this will not work if the platform is being moved with MovePosition() or MoveRotation().
