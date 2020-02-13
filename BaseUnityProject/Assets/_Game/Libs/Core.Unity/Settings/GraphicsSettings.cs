@@ -17,6 +17,16 @@ namespace Core.Unity.Settings {
         private const string _fullScreenModeInitializationKey = "fullscreen_mode";
 
         /// <summary>
+        /// Key for accessing the screen width from <see cref="Initialization.Settings"/>.
+        /// </summary>
+        private const string _screenWidthInitializationKey = "screen_width";
+
+        /// <summary>
+        /// Key for accessing the screen height from <see cref="Initialization.Settings"/>.
+        /// </summary>
+        private const string _screenHeightInitializationKey = "screen_height";
+
+        /// <summary>
         /// Key for accessing the vSync count from <see cref="Initialization.Settings"/>.
         /// </summary>
         private const string _vSyncCountInitializationKey = "v_sync_count";
@@ -43,11 +53,13 @@ namespace Core.Unity.Settings {
                 return;
 
             int fullscreenModeInt = Initialization.Settings.GetInt(_fullScreenModeInitializationKey, (int)FullScreenMode.Windowed);
+            FullScreenMode fullscreenMode = FullScreenMode.Windowed;
             if (System.Enum.IsDefined(typeof(FullScreenMode), fullscreenModeInt)) {
-                Screen.fullScreenMode = (FullScreenMode)fullscreenModeInt;
-            } else {
-                Screen.fullScreenMode = FullScreenMode.Windowed;
+                fullscreenMode = (FullScreenMode)fullscreenModeInt;
             }
+            int screenWidth = Initialization.Settings.GetInt(_screenWidthInitializationKey, Screen.width);
+            int screenHeight = Initialization.Settings.GetInt(_screenHeightInitializationKey, Screen.height);
+            Screen.SetResolution(screenWidth, screenHeight, fullscreenMode);
 
             QualitySettings.vSyncCount = Initialization.Settings.GetInt(_vSyncCountInitializationKey, 0);
             QualitySettings.maxQueuedFrames = Initialization.Settings.GetInt(_maxQueuedFramesInitializationKey, 0);
@@ -70,6 +82,23 @@ namespace Core.Unity.Settings {
 
                 Screen.fullScreenMode = value;
                 Initialization.Settings.SetInt(_fullScreenModeInitializationKey, (int)value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the screen size (windowed) or screen resolution (fullscreen).
+        /// </summary>
+        public static Vector2Int ScreenSize {
+            get {
+                return new Vector2Int(Screen.width, Screen.height);
+            }
+            set {
+                if (value.x == Screen.width && value.y == Screen.height)
+                    return;
+
+                Screen.SetResolution(value.x, value.y, FullScreenMode);
+                Initialization.Settings.SetInt(_screenWidthInitializationKey, value.x);
+                Initialization.Settings.SetInt(_screenHeightInitializationKey, value.y);
             }
         }
 
@@ -98,6 +127,73 @@ namespace Core.Unity.Settings {
 
                 QualitySettings.maxQueuedFrames = value;
                 Initialization.Settings.SetInt(_maxQueuedFramesInitializationKey, QualitySettings.maxQueuedFrames);
+            }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Gets all screen sizes (resolutions) supported by the game and monitor.
+        /// </summary>
+        /// <returns>Screen sizes.</returns>
+        public static Vector2Int[] GetScreenSizes() {
+            List<Vector2Int> screenSizes = new List<Vector2Int>();
+
+            Resolution[] resolutions = Screen.resolutions;
+            for (int i=0; i < resolutions.Length; i++) {
+                Vector2Int screenSize = new Vector2Int(resolutions[i].width, resolutions[i].height);
+                if (screenSizes.Contains(screenSize))
+                    continue;
+
+                screenSizes.Add(screenSize);
+            }
+
+            return screenSizes.ToArray();
+        }
+
+        /// <summary>
+        /// Gets all resolutions supported by the game and monitor.
+        /// </summary>
+        /// <param name="removeDuplicateDimensions">If resolutions with identical dimensions should be removed.  Only the resolution with the highest refresh rate will be included.</param>
+        /// <returns></returns>
+        public static Resolution[] GetResolutions(bool removeDuplicateDimensions) {
+            Resolution[] resolutions = Screen.resolutions;
+
+            if (removeDuplicateDimensions) {
+                List<Resolution> filteredResolutions = new List<Resolution>();
+                for (int i=0; i < resolutions.Length; i++) {
+                    Resolution resolution = resolutions[i];
+
+                    // get index of filtered resolution with the same dimensions
+                    int filteredResolutionIndex = -1;
+                    for (int j=0; j < filteredResolutions.Count; j++) {
+                        Resolution filteredResolution = filteredResolutions[j];
+                        if (filteredResolution.width == resolution.width &&
+                            filteredResolution.height == resolution.height) {
+                            filteredResolutionIndex = j;
+                            break;
+                        }
+                    }
+
+                    if (filteredResolutionIndex == -1) {
+                        // doesn't have res of same dimensions, add
+                        filteredResolutions.Add(resolution);
+                    } else {
+                        // filtered resolution already added, compare to see which gets kept
+                        if (filteredResolutions[filteredResolutionIndex].refreshRate < resolution.refreshRate) {
+                            // replace filtered res
+                            filteredResolutions.RemoveAt(filteredResolutionIndex);
+                            filteredResolutions.Add(resolution);
+                        }
+                    }
+                }
+                
+                return filteredResolutions.ToArray();
+
+            } else {
+                return resolutions;
             }
         }
 
