@@ -59,9 +59,11 @@ namespace Core.Unity.SaveData {
 
         #region Loading
 
-        private const string _startLoadMessage = "Started loading save data from \"{0}\".";
-        private const string _loadSuccessMessage = "Loaded save data from \"{0}\" successfully.";
-        private const string _loadFailMessage = "Error loading save data from \"{0}\": {1}";
+        private const string _startLoadFileMessage = "Started loading save data from \"{0}\".";
+        private const string _loadFileSuccessMessage = "Loaded save data from \"{0}\" successfully.";
+        private const string _loadFileFailMessage = "Error loading save data from \"{0}\": {1}";
+        private const string _loadStringSuccessMessage = "Loaded save data from a string successfully.";
+        private const string _loadStringFailMessage = "Error loading save data from a string: {0}";
 
         /// <summary>
         /// Event that's invoked immediately after xml is sucessfully loaded and parsed.
@@ -82,15 +84,11 @@ namespace Core.Unity.SaveData {
         /// <param name="path">Path to the xml file.</param>
         /// <returns>LoadStatus</returns>
         public LoadStatus LoadFromFile(string path) {
-
             LoadStatus loadStatus = LoadStatus.Ok;
 
             // load file
             XmlDocument xmlDoc = new XmlDocument();
-            XmlReaderSettings readerSettings = new XmlReaderSettings() {
-                IgnoreComments = true
-            };
-            using (XmlReader reader = XmlReader.Create(path, readerSettings)) {
+            using (XmlReader reader = XmlReader.Create(path, _readerSettings)) {
                 try {
                     xmlDoc.Load(reader);
                 } catch (FileNotFoundException) {
@@ -101,17 +99,28 @@ namespace Core.Unity.SaveData {
                     loadStatus = LoadStatus.FileCouldNotBeRead;
                 }
             }
-
+            
             // parse file
             if (loadStatus == LoadStatus.Ok) {
+
                 loadStatus = this.ParseXML(xmlDoc);
+
+                if (loadStatus == LoadStatus.Ok) {
+                    // set cached file string after successful load
+                    string str = WriteXmlToString(xmlDoc, false);
+                    if (str == null) {
+                        loadStatus = LoadStatus.ParseError;
+                    } else {
+                        _cachedFileString = str;
+                    }
+                }
             }
 
             // log
             if (loadStatus == LoadStatus.Ok) {
-                Debug.Log(string.Format(_loadSuccessMessage, path));
+                Debug.Log(string.Format(_loadFileSuccessMessage, path));
             } else {
-                Debug.LogError(string.Format(_loadFailMessage, path, loadStatus));
+                Debug.LogError(string.Format(_loadFileFailMessage, path, loadStatus));
             }
 
             return loadStatus;
@@ -124,6 +133,43 @@ namespace Core.Unity.SaveData {
         /// <returns>Load status</returns>
         public LoadStatus LoadFromSaveDirectory(int index) {
             return this.LoadFromFile(GetSaveDirectoryPath(index));
+        }
+
+        /// <summary>
+        /// Loads the data from a string.
+        /// Returns the status of the load.
+        /// </summary>
+        /// <param name="str">String to load.</param>
+        /// <returns>LoadStatus</returns>
+        public LoadStatus LoadFromString(string str) {
+            LoadStatus loadStatus = LoadStatus.Ok;
+
+            // load from string
+            XmlDocument xmlDoc = new XmlDocument();
+            using (StringReader stringReader = new StringReader(str))
+            using (XmlReader xmlReader = XmlReader.Create(stringReader, _readerSettings)) {
+                try {
+                    xmlDoc.Load(xmlReader);
+                } catch (XmlException) {
+                    loadStatus = LoadStatus.ParseError;
+                } catch (System.Exception) {
+                    loadStatus = LoadStatus.FileCouldNotBeRead;
+                }
+            }
+
+            // parse xml
+            if (loadStatus == LoadStatus.Ok) {
+                loadStatus = this.ParseXML(xmlDoc);
+            }
+
+            // log
+            if (loadStatus == LoadStatus.Ok) {
+                Debug.Log(string.Format(_loadStringSuccessMessage));
+            } else {
+                Debug.LogError(string.Format(_loadStringFailMessage, loadStatus));
+            }
+
+            return loadStatus;
         }
 
         /// <summary>
@@ -167,22 +213,16 @@ namespace Core.Unity.SaveData {
             return status;
         }
 
-        /// <summary>
-        /// Parses a string containing xml data.
-        /// Returns the status of the load.
-        /// </summary>
-        /// <param name="xmlString">String to parse.</param>
-        /// <returns>LoadStatus</returns>
-        public LoadStatus ParseXML(string xmlString) {
-            XmlDocument xmlDoc = new XmlDocument();
-            try {
-                xmlDoc.LoadXml(xmlString);
-            } catch (XmlException) {
-                return LoadStatus.ParseError;
-            }
+        #endregion
 
-            return this.ParseXML(xmlDoc);
-        }
+        #region Loading - Private
+
+        /// <summary>
+        /// The settings for xml readers.
+        /// </summary>
+        private readonly XmlReaderSettings _readerSettings = new XmlReaderSettings() {
+            IgnoreComments = true
+        };
 
         #endregion
 
@@ -231,21 +271,7 @@ namespace Core.Unity.SaveData {
             }
 
             // write to string
-            try {
-                XmlWriterSettings writerSettings = new XmlWriterSettings() {
-                    OmitXmlDeclaration = true,
-                    Encoding = Encoding,
-                    Indent = prettyPrint,
-                };
-                using (StringWriter stringWriter = new StringWriter())
-                using (XmlWriter xmlTextWriter = XmlWriter.Create(stringWriter, writerSettings)) {
-                    xmlDoc.WriteTo(xmlTextWriter);
-                    xmlTextWriter.Flush();
-                    return stringWriter.GetStringBuilder().ToString();
-                }
-            } catch (System.Exception) {
-                return null;
-            }
+            return WriteXmlToString(xmlDoc, prettyPrint);
         }
 
         /// <summary>
@@ -288,6 +314,11 @@ namespace Core.Unity.SaveData {
                 } catch (System.Exception) {
                     saveStatus = SaveStatus.IOError;
                 }
+            }
+
+            // set cached file string after successful save
+            if (saveStatus == SaveStatus.Ok) {
+                _cachedFileString = str;
             }
 
             if (saveStatus == SaveStatus.Ok) {
@@ -377,6 +408,14 @@ namespace Core.Unity.SaveData {
             return this.SaveToFileCoroutine(GetSaveDirectoryPath(index), prettyPrint, callback);
         }
 
+        /// <summary>
+        /// Gets the string representation of the save data that was last loaded from or saved to a file.
+        /// The string only changes if the load or save was a success.
+        /// </summary>
+        public string GetCachedFileString() {
+            return _cachedFileString;
+        }
+
         #endregion
 
         #region Saving - Private
@@ -397,16 +436,63 @@ namespace Core.Unity.SaveData {
             //// so function won't finish almost immediately
             //System.Threading.Thread.Sleep(1000);
 
+            // save to temporary file first
+            string tempPath;
             try {
-                using (StreamWriter outputFile = new StreamWriter(path, false, Encoding)) {
+                tempPath = Path.GetTempFileName();
+            } catch (IOException) {
+                return SaveStatus.IOError;
+            }
+            try {
+                using (StreamWriter outputFile = new StreamWriter(tempPath, false, Encoding)) {
                     await outputFile.WriteAsync(str);
                 }
             } catch (System.Exception) {
                 return SaveStatus.IOError;
             }
+            
+            // override previous file if successful
+            string backupPath = GetBackupPath(path);
+            try {
+                File.Replace(tempPath, path, backupPath);
+            } catch (System.Exception) {
+                return SaveStatus.IOError;
+            }
+            
+            // set cached file string after successful save
+            _cachedFileString = str;
 
             return SaveStatus.Ok;
         }
+
+        /// <summary>
+        /// Uses an xml writer to convert the given xml document into a string.  Returns null if something went wrong.
+        /// </summary>
+        /// <param name="xmlDoc">The xml document</param>
+        /// <param name="prettyPrint">If pretty printing should be enabled.</param>
+        /// <returns>string</returns>
+        private static string WriteXmlToString(XmlDocument xmlDoc, bool prettyPrint) {
+            try {
+                XmlWriterSettings writerSettings = new XmlWriterSettings() {
+                    OmitXmlDeclaration = true,
+                    Encoding = Encoding,
+                    Indent = prettyPrint,
+                };
+                using (StringWriter stringWriter = new StringWriter())
+                using (XmlWriter xmlTextWriter = XmlWriter.Create(stringWriter, writerSettings)) {
+                    xmlDoc.WriteTo(xmlTextWriter);
+                    xmlTextWriter.Flush();
+                    return stringWriter.GetStringBuilder().ToString();
+                }
+            } catch (System.Exception) {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// string representation of the save data that was last loaded from or saved to a file.
+        /// </summary>
+        private string _cachedFileString = null;
 
         #endregion
     }
