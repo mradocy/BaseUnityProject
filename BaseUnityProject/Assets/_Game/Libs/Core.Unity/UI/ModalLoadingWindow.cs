@@ -44,12 +44,12 @@ namespace Core.Unity.UI {
         /// </summary>
         protected void CheckLoadDone() {
 
-            if (this._cachedLoadDone)
+            if (_cachedLoadDone)
                 return;
 
             if (this.GetIsLoadDone()) {
                 // load just completed now
-                this._cachedLoadDone = true;
+                _cachedLoadDone = true;
 
                 // TODO: Call event?
 

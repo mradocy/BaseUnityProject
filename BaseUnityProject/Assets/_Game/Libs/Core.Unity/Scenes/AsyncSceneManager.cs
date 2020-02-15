@@ -59,7 +59,7 @@ namespace Core.Unity.Scenes {
             // add scene to _sceneStates since not added already
             Scene scene = SceneManager.GetSceneByName(sceneName);
             SceneLoadState sceneLoadState = scene.IsValid() ? SceneLoadState.Loaded : SceneLoadState.NotLoaded;
-            _sceneStates[key] = sceneLoadState;
+            SetSceneLoadState(key, sceneLoadState);
             return sceneLoadState;
         }
 
@@ -80,8 +80,17 @@ namespace Core.Unity.Scenes {
         }
 
         /// <summary>
+        /// Gets an array of the full scene paths of all the scenes that are currently loaded.
+        /// </summary>
+        /// <returns>Full scene paths.</returns>
+        public static string[] GetLoadedScenes() {
+            return _loadedScenes.ToArray();
+        }
+
+        /// <summary>
         /// Loads the scene with the given name asyncronously.
-        /// The scene is not loaded if it is already loading, loaded, or unloading.
+        /// The scene is not loaded if it is already loading, or unloading.
+        /// It CAN be loaded again if the scene was already loaded.
         /// </summary>
         /// <param name="sceneName">The name of the scene.</param>
         /// <param name="loadSceneMode">Load scene mode.  If <see cref="LoadSceneMode.Single"/>, then all scenes will be unloaded before loading.</param>
@@ -89,13 +98,13 @@ namespace Core.Unity.Scenes {
             if (!IsSceneInBuild(sceneName))
                 throw new System.ArgumentException(string.Format(_sceneNotInBuildError, sceneName));
 
-            // don't load scene if it's already loading or loaded
+            // don't load scene if it's already loading or unloading
             SceneLoadState currentLoadState = GetSceneLoadState(sceneName);
-            if (currentLoadState == SceneLoadState.Loading || currentLoadState == SceneLoadState.Loaded || currentLoadState == SceneLoadState.Unloading)
+            if (currentLoadState == SceneLoadState.Loading || currentLoadState == SceneLoadState.Unloading)
                 return;
 
             // start scene load
-            _sceneStates[GetFullScenePath(sceneName)] = SceneLoadState.Loading;
+            SetSceneLoadState(GetFullScenePath(sceneName), SceneLoadState.Loading);
             Debug.Log($"Start scene load: {GetFullScenePath(sceneName)}");
             SceneManager.LoadSceneAsync(sceneName, loadSceneMode);
         }
@@ -120,7 +129,7 @@ namespace Core.Unity.Scenes {
                 return;
 
             // start scene unload
-            _sceneStates[GetFullScenePath(sceneName)] = SceneLoadState.Unloading;
+            SetSceneLoadState(GetFullScenePath(sceneName), SceneLoadState.Unloading);
             Debug.Log($"Start scene unload: {GetFullScenePath(sceneName)}");
             SceneManager.UnloadSceneAsync(sceneName);
         }
@@ -158,7 +167,7 @@ namespace Core.Unity.Scenes {
 
             Debug.Log($"Scene loaded: {GetFullScenePath(scene.path)}");
 
-            _sceneStates[GetFullScenePath(scene.path)] = SceneLoadState.Loaded;
+            SetSceneLoadState(GetFullScenePath(scene.path), SceneLoadState.Loaded);
         }
 
         /// <summary>
@@ -168,7 +177,33 @@ namespace Core.Unity.Scenes {
         private static void OnSceneUnloaded(Scene scene) {
             Debug.Log($"Scene unloaded: {GetFullScenePath(scene.path)}");
 
-            _sceneStates[GetFullScenePath(scene.path)] = SceneLoadState.NotLoaded;
+            SetSceneLoadState(GetFullScenePath(scene.path), SceneLoadState.NotLoaded);
+        }
+
+        /// <summary>
+        /// Sets the load state in <see cref="_sceneStates"/> for the given scene.
+        /// </summary>
+        /// <param name="fullScenePath">Full path of the scene.</param>
+        /// <param name="loadState">Load state</param>
+        private static void SetSceneLoadState(string fullScenePath, SceneLoadState loadState) {
+            // update _loadedScenes
+            SceneLoadState prevState;
+            if (_sceneStates.TryGetValue(fullScenePath, out prevState)) {
+                if (prevState == loadState) {
+                    return;
+                }
+
+                if (prevState == SceneLoadState.Loaded) {
+                    _loadedScenes.Remove(fullScenePath);
+                }
+            }
+
+            if (loadState == SceneLoadState.Loaded) {
+                _loadedScenes.Add(fullScenePath);
+            }
+
+            // update _sceneStates
+            _sceneStates[fullScenePath] = loadState;
         }
 
         #endregion
@@ -184,6 +219,11 @@ namespace Core.Unity.Scenes {
         /// Maps the names of scenes to their load state
         /// </summary>
         private static Dictionary<string, SceneLoadState> _sceneStates = new Dictionary<string, SceneLoadState>();
+
+        /// <summary>
+        /// Index of all the scenes that are currently loaded.
+        /// </summary>
+        private static List<string> _loadedScenes = new List<string>();
 
         #endregion
     }
