@@ -25,6 +25,7 @@ namespace Core.Unity.RewiredExtensions {
             _joystickStyles = new List<IJoystickStyle>() {
                 _genericJoystickStyle,
                 new XBox360JoystickStyle(),
+                new DS4JoystickStyle(),
             };
         }
 
@@ -93,6 +94,75 @@ namespace Core.Unity.RewiredExtensions {
         /// <returns>Released</returns>
         public static bool GetReleased(int actionId) {
             return Player.GetButtonUp(actionId);
+        }
+
+        /// <summary>
+        /// Gets if any keyboard button has been pressed this frame.  If so, the key pressed is outed as <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">The key pressed.</param>
+        /// <returns>Any key pressed.</returns>
+        public static bool GetAnyKeyboardButtonPressed(out KeyCode key) {
+            key = KeyCode.None;
+            IEnumerable<ControllerPollingInfo> pollingInfos = Player.controllers.polling.PollAllControllersOfTypeForAllButtonsDown(ControllerType.Keyboard);
+            if (!pollingInfos.Any()) {
+                return false;
+            }
+
+            ControllerPollingInfo pollingInfo = pollingInfos.First();
+            key = pollingInfo.keyboardKey;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets if any joystick button has been pressed this frame.  If so, the element index of the button pressed is outed as <paramref name="elementIndex"/>.
+        /// </summary>
+        /// <param name="elementIndex">The element index of the button pressed.</param>
+        /// <returns>Any joystick button pressed.</returns>
+        public static bool GetAnyJoystickButtonPressed(out int elementIndex) {
+            elementIndex = 0;
+            IEnumerable<ControllerPollingInfo> pollingInfos = Player.controllers.polling.PollAllControllersOfTypeForAllButtonsDown(ControllerType.Joystick);
+            if (!pollingInfos.Any()) {
+                return false;
+            }
+
+            ControllerPollingInfo pollingInfo = pollingInfos.First();
+            elementIndex = pollingInfo.elementIndex;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets if any joystick axis was "pressed" this frame.  If so, the element index of the axis pressed is outed as <paramref name="elementIndex"/> and the direction is outed as <paramref name="positive"/>.
+        /// </summary>
+        /// <param name="axisThreshold">Axis value that would consider a value "pressed" (e.g. 0.5)</param>
+        /// <param name="elementIndex">The element index of the axis pressed.</param>
+        /// <param name="positive">If the axis was in the positive direction (false for negative direction).</param>
+        /// <returns>Any joystick axis "pressed".</returns>
+        public static bool GetAnyJoystickAxisPressed(float axisThreshold, out int elementIndex, out bool positive) {
+            elementIndex = 0;
+            positive = false;
+            Joystick joystick = Player.controllers.Joysticks.FirstOrDefault();
+            if (joystick == null) {
+                return false;
+            }
+
+            axisThreshold = Mathf.Abs(axisThreshold);
+            int axisCount = joystick.axisCount;
+            for (int i=0; i < axisCount; i++) {
+                float prevAxis = joystick.GetAxisPrev(i);
+                float axis = joystick.GetAxis(i);
+                if (axis >= axisThreshold && prevAxis < axisThreshold) {
+                    positive = true;
+                    elementIndex = i;
+                    return true;
+                }
+                if (axis <= -axisThreshold && prevAxis > -axisThreshold) {
+                    positive = false;
+                    elementIndex = i;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -265,6 +335,19 @@ namespace Core.Unity.RewiredExtensions {
         /// <returns>Guid?</returns>
         public static System.Guid? GetFirstJoystickGuid() {
             return Player.controllers.Joysticks.FirstOrDefault()?.hardwareTypeGuid;
+        }
+
+        /// <summary>
+        /// Gets the joystick style of the first listed connected joystick.  Returns null if no joysticks are connected.
+        /// </summary>
+        /// <returns>JoystickStyleID?</returns>
+        public static IJoystickStyle GetFirstJoystickStyle() {
+            System.Guid? guid = GetFirstJoystickGuid();
+            if (guid == null) {
+                return null;
+            } else {
+                return GetJoystickStyle(guid.Value);
+            }
         }
 
 

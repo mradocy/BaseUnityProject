@@ -75,6 +75,10 @@ namespace Core.Unity.RewiredExtensions {
         private Texture _joystickXBox360Texture = null;
 
         [SerializeField]
+        [Tooltip("The Joystick - DS4 image to display in the RawImage component.")]
+        private Texture _joystickDS4Texture = null;
+
+        [SerializeField]
         [Tooltip("The number of columns all the joystick atlas images have.")]
         private int _joystickNumColumns = 10;
 
@@ -240,6 +244,9 @@ namespace Core.Unity.RewiredExtensions {
                     break;
                 case JoystickStyleID.XBox360:
                     this.RawImage.texture = _joystickXBox360Texture;
+                    break;
+                case JoystickStyleID.DS4:
+                    this.RawImage.texture = _joystickDS4Texture;
                     break;
                 }
                 break;

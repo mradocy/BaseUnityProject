@@ -11,6 +11,7 @@ namespace Core.Unity.RewiredExtensions {
         Generic = 0,
         XBox360 = 1,
         XBoxOne = 2,
+        DS4 = 3,
     }
 
 }
