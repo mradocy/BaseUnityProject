@@ -4,7 +4,7 @@ using UnityEngine;
 using Core.Unity;
 using Rewired;
 
-namespace Core.Unity.RewiredExtensions {
+namespace Core.Unity.RewiredExtensions.UI {
 
     /// <summary>
     /// Interface for a graphical object displaying a controller icon.

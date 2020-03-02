@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Core.Unity.RewiredExtensions {
+namespace Core.Unity.RewiredExtensions.UI {
 
     [RequireComponent(typeof(RawImage))]
     [ExecuteInEditMode]

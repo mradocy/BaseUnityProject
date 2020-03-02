@@ -4,7 +4,7 @@ using UnityEngine;
 using Core.Unity;
 using Rewired;
 
-namespace Core.Unity.RewiredExtensions {
+namespace Core.Unity.RewiredExtensions.UI {
 
     /// <summary>
     /// Binds the icon displayed in a sibling <see cref="IControllerIcon"/> to an action, updated to whatever is the input method currently being used.

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Rewired;
 
-namespace Core.Unity.RewiredExtensions {
+namespace Core.Unity.RewiredExtensions.UI {
 
     /// <summary>
     /// Binds the icon displayed in a sibling <see cref="IControllerIcon"/> to whatever input the user last submitted.
