@@ -14,9 +14,17 @@ namespace Core.Unity.SaveData {
     public class SaveRoot : SaveGroup {
 
         /// <summary>
+        /// Constructor.  The <see cref="CompatibilityId"/> is set to <see cref="System.Guid.Empty"/>.
+        /// </summary>
+        public SaveRoot() : this(System.Guid.Empty) { }
+
+        /// <summary>
         /// Constructor.
         /// </summary>
-        public SaveRoot() : base("<Root>", null) { }
+        /// <param name="compatibilityId">The <see cref="CompatibilityId"/> expected from the save data.</param>
+        public SaveRoot(System.Guid compatibilityId) : base("<Root>", null) {
+            this.CompatibilityId = compatibilityId;
+        }
 
         /// <inheritdoc />
         public override SaveRoot Root {
@@ -71,6 +79,11 @@ namespace Core.Unity.SaveData {
         public event UnityAction<SaveRoot> Loaded;
 
         /// <summary>
+        /// Gets the compatibility id expected from the save data.  If this does not match the save data's compatibility id, the data is considered incompatible and cannot be used.
+        /// </summary>
+        public System.Guid CompatibilityId { get; }
+
+        /// <summary>
         /// Gets if the save data has been parsed already.  If so, then no more properties can be registered.
         /// </summary>
         public bool IsParsed { get; private set; }
@@ -88,18 +101,18 @@ namespace Core.Unity.SaveData {
 
             // load file
             XmlDocument xmlDoc = new XmlDocument();
-            using (XmlReader reader = XmlReader.Create(path, _readerSettings)) {
-                try {
+            try {
+                using (XmlReader reader = XmlReader.Create(path, _readerSettings)) {
                     xmlDoc.Load(reader);
-                } catch (FileNotFoundException) {
-                    loadStatus = LoadStatus.FileNotFound;
-                } catch (XmlException) {
-                    loadStatus = LoadStatus.ParseError;
-                } catch (System.Exception) {
-                    loadStatus = LoadStatus.FileCouldNotBeRead;
                 }
+            } catch (FileNotFoundException) {
+                loadStatus = LoadStatus.FileNotFound;
+            } catch (XmlException) {
+                loadStatus = LoadStatus.ParseError;
+            } catch (System.Exception) {
+                loadStatus = LoadStatus.FileCouldNotBeRead;
             }
-            
+
             // parse file
             if (loadStatus == LoadStatus.Ok) {
 
@@ -196,6 +209,16 @@ namespace Core.Unity.SaveData {
             XmlNode rootNode = xmlDoc.FirstChild;
             if (rootNode?.Name != "Root") {
                 return LoadStatus.ParseError;
+            }
+
+            // verify compatibility
+            XmlAttribute compatAttr = rootNode.Attributes?["compatibilityId"];
+            System.Guid compatId;
+            if (!System.Guid.TryParse(compatAttr?.Value, out compatId)) {
+                compatId = System.Guid.Empty;
+            }
+            if (compatId != this.CompatibilityId) {
+                return LoadStatus.CompatibilityError;
             }
 
             // clear existing data
@@ -310,7 +333,11 @@ namespace Core.Unity.SaveData {
             if (saveStatus == SaveStatus.Ok) {
                 string backupPath = GetBackupPath(path);
                 try {
-                    File.Replace(tempPath, path, backupPath);
+                    if (File.Exists(path)) {
+                        File.Replace(tempPath, path, backupPath);
+                    } else {
+                        File.Copy(tempPath, path);
+                    }
                 } catch (System.Exception) {
                     saveStatus = SaveStatus.IOError;
                 }

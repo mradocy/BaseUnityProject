@@ -37,6 +37,13 @@ namespace Core.Unity {
             return comp;
         }
 
+        /// <summary>
+        /// Gets if this component belongs to a gameObject that currently belongs to the active scene.
+        /// </summary>
+        /// <param name="component">This component</param>
+        /// <returns>In active scene</returns>
+        public static bool IsInActiveScene(this Component component) {
+            return component.gameObject.scene.buildIndex == UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
+        }
     }
-
 }

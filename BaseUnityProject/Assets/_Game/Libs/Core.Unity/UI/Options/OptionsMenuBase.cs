@@ -224,7 +224,16 @@ namespace Core.Unity.UI.Options {
 
             OptionControlBase selectedOptionControl = this.SelectedControl;
             if (this.OptionsCount > 0) {
-                if (this.UIInput.IsDownPressed) {
+                if (this.UIInput.IsSubmitPressed) {
+                    // execute the selected option
+                    ButtonOptionControlBase buttonOptionControl = selectedOptionControl as ButtonOptionControlBase;
+                    if (buttonOptionControl != null && buttonOptionControl.ButtonOption.CanExecute) {
+                        buttonOptionControl.Execute();
+                    }
+                } else if (this.UIInput.IsCancelPressed) {
+                    // call derived cancel method
+                    this.OnCancelPressed();
+                } else if (this.UIInput.IsDownPressed) {
                     // increment selected index
                     if (this.SelectedIndex < 0 || this.SelectedIndex >= this.OptionsCount - 1) {
                         this.SelectOption(0);
@@ -284,15 +293,6 @@ namespace Core.Unity.UI.Options {
                             this.OnPropertyValueChanged(propertyOptionControl, true);
                         }
                     }
-                } else if (this.UIInput.IsSubmitPressed) {
-                    // execute the selected option
-                    ButtonOptionControlBase buttonOptionControl = selectedOptionControl as ButtonOptionControlBase;
-                    if (buttonOptionControl != null && buttonOptionControl.ButtonOption.CanExecute) {
-                        buttonOptionControl.Execute();
-                    }
-                } else if (this.UIInput.IsCancelPressed) {
-                    // call derived cancel method
-                    this.OnCancelPressed();
                 }
             }
 

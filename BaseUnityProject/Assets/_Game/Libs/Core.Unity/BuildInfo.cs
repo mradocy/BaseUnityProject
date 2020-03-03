@@ -9,7 +9,7 @@ namespace Core.Unity {
 
         /// <summary>
         /// Returns the version of the game, as a string.
-        /// If the RELEASE symbol is not defined, then "DEBUG-" will be prepended to the version name.
+        /// If the RELEASE symbol is not defined, then "-DEBUG" will be appended to the version name.
         /// </summary>
         /// <remarks>This gets the version from UnityEngine.Application.version, but this value can only be set in Editor scripts.</remarks>
         public static string Version {
@@ -17,7 +17,7 @@ namespace Core.Unity {
 #if RELEASE
                 return Application.version;
 #else
-                return $"DEBUG-{Application.version}";
+                return $"{Application.version}-DEBUG";
 #endif
             }
         }

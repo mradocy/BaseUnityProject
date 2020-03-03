@@ -118,6 +118,33 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Cubic ease out interpolation between a and b.  t is clamped between 0 and d.
+        /// </summary>
+        public static float CubicOut(float a, float b, float t, float d = 1) {
+            return CubicOutUnclamp(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+        /// <summary>
+        /// Cubic ease out interpolation between a and b.  No clamping is done.
+        /// </summary>
+        public static float CubicOutUnclamp(float a, float b, float t, float d = 1) {
+            t = t / d - 1;
+            return (b - a) * (t * t * t + 1) + a;
+        }
+        /// <summary>
+        /// Cubic ease out interpolation between a and b.  t is clamped between 0 and d.
+        /// </summary>
+        public static Vector2 CubicOut(Vector2 a, Vector2 b, float t, float d = 1) {
+            return CubicOutUnclamp(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+        /// <summary>
+        /// Cubic ease out interpolation between a and b.  No clamping is done.
+        /// </summary>
+        public static Vector2 CubicOutUnclamp(Vector2 a, Vector2 b, float t, float d = 1) {
+            t = t / d - 1;
+            return (b - a) * (t * t * t + 1) + a;
+        }
+
+        /// <summary>
         /// Alternates between a and b with a sine wave.  t is able to go beyond the bounds.
         /// </summary>
         /// <param name="phaseShift">If true, value will be a at t = 0 (phase shifted -PI/2).  If false, value will be (a + b) / 2 at t = 0.</param>

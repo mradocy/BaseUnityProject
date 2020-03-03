@@ -25,6 +25,9 @@ namespace Core.Unity.SaveData {
 
         [Description("There was an issue deserializing a serializable part of the data.")]
         DeserializationError = 5,
+
+        [Description("The save data is incompatible with what the game expects.")]
+        CompatibilityError = 6,
     }
 
     public static class LoadStatusExtensions {

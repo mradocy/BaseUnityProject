@@ -477,6 +477,7 @@ namespace Core.Unity.SaveData {
             XmlElement element;
             if (isRoot) {
                 element = xmlDoc.CreateElement("Root");
+                element.SetAttribute("compatibilityId", this.Root.CompatibilityId.ToString());
             } else {
                 element = xmlDoc.CreateElement("Group");
                 element.SetAttribute("key", this.Key);
