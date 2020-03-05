@@ -1,4 +1,5 @@
-﻿using Rewired;
+﻿using Core.Unity.Attributes;
+using Rewired;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,6 @@ using UnityEngine.UI;
 
 namespace Core.Unity.RewiredExtensions.UI {
 
-    [RequireComponent(typeof(RawImage))]
     [ExecuteInEditMode]
     public class ControllerIconRawImage : MonoBehaviour, IControllerIcon {
 
@@ -39,50 +39,87 @@ namespace Core.Unity.RewiredExtensions.UI {
         private Pole _joystickAxisDirection = Pole.Negative;
 
         [SerializeField]
-        [Tooltip("If the icon should be transparent.  Usually denotes an action that the player can't assign.")]
-        private bool _isFaded = false;
+        [Tooltip("If the icon is pressed.")]
+        private bool _isPressed = false;
 
 
-        [Header("Appearance")]
+        [Header("Children")]
 
         [SerializeField]
-        private float _fadedAlpha = .5f;
+        [Tooltip("Child RawImage component to display frames from the keyboard background textures or the joystick textures.")]
+        private RawImage _backgroundRawImage = null;
+
+        [SerializeField]
+        [Tooltip("Child RawImage component to display frames from the keyboard text textures.")]
+        private RawImage _textRawImage = null;
 
 
         [Header("Keyboard")]
 
-        [SerializeField]
-        [Tooltip("The keyboard atlas image to display in the RawImage component.")]
-        private Texture _keyboardTexture = null;
+        [SerializeField, LongLabel]
+        [Tooltip("The atlas image containing backgrounds for default keys to display in the background RawImage component.")]
+        private Texture _keyboardBackgroundsDefaultTexture = null;
 
-        [SerializeField]
-        [Tooltip("Number of columns the keyboard atlas image has.")]
-        private int _keyboardNumColumns = 10;
+        [SerializeField, LongLabel]
+        [Tooltip("The atlas image containing backgrounds for pressed keys to display in the background RawImage component.")]
+        private Texture _keyboardBackgroundsPressedTexture = null;
 
-        [SerializeField]
-        [Tooltip("Number of rows the keyboard atlas image has.")]
-        private int _keyboardNumRows = 14;
+        [SerializeField, LongLabel]
+        [Tooltip("The atlas image containing text for default keys to display in the text RawImage component.")]
+        private Texture _keyboardTextDefaultTexture = null;
+
+        [SerializeField, LongLabel]
+        [Tooltip("The atlas image containing text for pressed keys to display in the text RawImage component.")]
+        private Texture _keyboardTextPressedTexture = null;
+
+        [SerializeField, LongLabel]
+        [Tooltip("Number of columns the keyboard background atlas images have.")]
+        private int _keyboardBackgroundNumColumns = 4;
+
+        [SerializeField, LongLabel]
+        [Tooltip("Number of rows the keyboard background atlas images have.")]
+        private int _keyboardBackgroundNumRows = 1;
+
+        [SerializeField, LongLabel]
+        [Tooltip("Number of columns the keyboard text atlas images have.")]
+        private int _keyboardTextNumColumns = 10;
+
+        [SerializeField, LongLabel]
+        [Tooltip("Number of rows the keyboard text atlas images have.")]
+        private int _keyboardTextNumRows = 14;
 
 
         [Header("Joystick")]
 
-        [SerializeField]
-        [Tooltip("The Joystick - Generic image to display in the RawImage component.")]
-        private Texture _joystickGenericTexture = null;
+        [SerializeField, LongLabel]
+        [Tooltip("The Joystick - Generic image to display for default buttons in the background RawImage component.")]
+        private Texture _joystickGenericDefaultTexture = null;
 
-        [SerializeField]
-        [Tooltip("The Joystick - XBox 360 image to display in the RawImage component.")]
-        private Texture _joystickXBox360Texture = null;
+        [SerializeField, LongLabel]
+        [Tooltip("The Joystick - Generic image to display for pressed buttons in the background RawImage component.")]
+        private Texture _joystickGenericPressedTexture = null;
 
-        [SerializeField]
-        [Tooltip("The Joystick - DS4 image to display in the RawImage component.")]
-        private Texture _joystickDS4Texture = null;
+        [SerializeField, LongLabel]
+        [Tooltip("The Joystick - XBox 360 image to display for default buttons in the background RawImage component.")]
+        private Texture _joystickXBox360DefaultTexture = null;
 
-        [SerializeField]
+        [SerializeField, LongLabel]
+        [Tooltip("The Joystick - XBox 360 image to display for pressed buttons in the background RawImage component.")]
+        private Texture _joystickXBox360PressedTexture = null;
+
+        [SerializeField, LongLabel]
+        [Tooltip("The Joystick - DS4 image to display for default buttons in the RawImage component.")]
+        private Texture _joystickDS4DefaultTexture = null;
+
+        [SerializeField, LongLabel]
+        [Tooltip("The Joystick - DS4 image to display for pressed buttons in the RawImage component.")]
+        private Texture _joystickDS4PressedTexture = null;
+
+        [SerializeField, LongLabel]
         [Tooltip("The number of columns all the joystick atlas images have.")]
         private int _joystickNumColumns = 10;
 
-        [SerializeField]
+        [SerializeField, LongLabel]
         [Tooltip("The number of rows all the joystick atlas images have.")]
         private int _joystickNumRows = 3;
 
@@ -94,18 +131,29 @@ namespace Core.Unity.RewiredExtensions.UI {
         /// Gets/sets if the icon is visible.
         /// </summary>
         public bool IsVisible {
-            get { return this.RawImage.enabled; }
-            set { this.RawImage.enabled = value; }
+            get {
+                if (_backgroundRawImage == null)
+                    return false;
+                return _backgroundRawImage.enabled;
+            }
+            set {
+                if (_backgroundRawImage != null) {
+                    _backgroundRawImage.enabled = value;
+                }
+                if (_textRawImage != null) {
+                    _textRawImage.enabled = value;
+                }
+            }
         }
 
         /// <summary>
-        /// Gets/sets if the icon is faded.
+        /// Gets/sets if the icon is pressed.
         /// </summary>
-        public bool IsFaded {
-            get { return _isFaded; }
+        public bool IsPressed {
+            get { return _isPressed; }
             set {
-                if (_isFaded == value) return;
-                _isFaded = value;
+                if (_isPressed == value) return;
+                _isPressed = value;
                 this.UpdateRawImage();
             }
         }
@@ -129,11 +177,6 @@ namespace Core.Unity.RewiredExtensions.UI {
         public Pole JoystickAxisDirection {
             get { return _joystickAxisDirection; }
         }
-
-        /// <summary>
-        /// Reference to the <see cref="RawImage"/> component whose UV Rect gets set when the <see cref="KeyboardKey"/> changes.
-        /// </summary>
-        public RawImage RawImage { get; private set; }
 
         #endregion
 
@@ -172,96 +215,99 @@ namespace Core.Unity.RewiredExtensions.UI {
         #region Private Methods
         
         /// <summary>
-        /// Updates the source and UV rect of the raw image, based on the current input method, joystick style, key, button
+        /// Updates the source and UV rect of the raw image, based on the current input method, joystick style, key, button, pressed
         /// </summary>
         private void UpdateRawImage() {
 
-            int imageIndex = 0;
             if (_inputMethod == InputMethod.Keyboard) {
-
                 // update keyboard map
                 if (_keyboardMap == null) {
                     _keyboardMap = RewiredUtils.GetKeyboardMap();
                 }
 
-                // get image index
-                imageIndex = _keyboardMap.GetImageIndex(_keyboardKey);
+                // get image indices
+                int textImageIndex = _keyboardMap.GetTextImageIndex(_keyboardKey);
+                int backgroundImageIndex = _keyboardMap.GetBackgroundImageIndex(_keyboardKey);
 
-            } else if (_inputMethod == InputMethod.Joystick) {
+                // update text raw image
+                if (_textRawImage != null) {
+                    _textRawImage.gameObject.SetActive(true);
+                    if (_isPressed) {
+                        _textRawImage.texture = _keyboardTextPressedTexture;
+                    } else {
+                        _textRawImage.texture = _keyboardTextDefaultTexture;
+                    }
+                    SetRawImageUVRect(_textRawImage, _keyboardTextNumColumns, _keyboardTextNumRows, textImageIndex);
+                }
 
+                // update background raw image
+                if (_backgroundRawImage != null) {
+                    if (_isPressed) {
+                        _backgroundRawImage.texture = _keyboardBackgroundsPressedTexture;
+                    } else {
+                        _backgroundRawImage.texture = _keyboardBackgroundsDefaultTexture;
+                    }
+                    SetRawImageUVRect(_backgroundRawImage, _keyboardBackgroundNumColumns, _keyboardBackgroundNumRows, backgroundImageIndex);
+                }
+            } else {
                 // update joystick style
                 if (_joystickStyle == null || _joystickStyle.ID != _joystickStyleID) {
                     _joystickStyle = RewiredUtils.GetJoystickStyle(_joystickStyleID);
                 }
 
-                // get image index
-                imageIndex = _joystickStyle.GetImageIndex(_joystickElementType, _joystickElementIndex, _joystickAxisDirection);
+                if (_backgroundRawImage != null) {
+                    // set texture
+                    if (_isPressed) {
+                        switch (_joystickStyleID) {
+                        case JoystickStyleID.Generic:
+                            _backgroundRawImage.texture = _joystickGenericPressedTexture;
+                            break;
+                        case JoystickStyleID.XBox360:
+                            _backgroundRawImage.texture = _joystickXBox360PressedTexture;
+                            break;
+                        case JoystickStyleID.DS4:
+                            _backgroundRawImage.texture = _joystickDS4PressedTexture;
+                            break;
+                        }
+                    } else {
+                        switch (_joystickStyleID) {
+                        case JoystickStyleID.Generic:
+                            _backgroundRawImage.texture = _joystickGenericDefaultTexture;
+                            break;
+                        case JoystickStyleID.XBox360:
+                            _backgroundRawImage.texture = _joystickXBox360DefaultTexture;
+                            break;
+                        case JoystickStyleID.DS4:
+                            _backgroundRawImage.texture = _joystickDS4DefaultTexture;
+                            break;
+                        }
+                    }
+
+                    // set image index
+                    int backgroundImageIndex = _joystickStyle.GetImageIndex(_joystickElementType, _joystickElementIndex, _joystickAxisDirection);
+                    SetRawImageUVRect(_backgroundRawImage, _joystickNumColumns, _joystickNumRows, backgroundImageIndex);
+                }
+
+                if (_textRawImage != null) {
+                    _textRawImage.gameObject.SetActive(false);
+                }
             }
-
-            this.SetRawImage(
-                _inputMethod,
-                _joystickStyleID,
-                imageIndex);
-
-            // TODO: could probably merge SetRawImage() into this.
-
-            // set color
-            Color c = this.RawImage.color;
-            if (this.IsFaded) {
-                c.a = _fadedAlpha;
-            } else {
-                c.a = 1;
-            }
-            this.RawImage.color = c;
         }
 
-        /// <summary>
-        /// Sets the source and UV rect of the raw image based on the given image index, input method, and number of columns, rows in the atlas image.
-        /// </summary>
-        /// <param name="inputMethod">The input method.  Decides which image atlas to display.  Note that all controller image atlases are formatted the same way.</param>
-        /// <param name="joystickStyle">Decides which image atlas to used, if the input method is <see cref="InputMethod.Joystick"/>.</param>
-        /// <param name="imageIndex">Index within the image atlas to display.</param>
-        private void SetRawImage(InputMethod inputMethod, JoystickStyleID joystickStyle, int imageIndex) {
-            if (Application.isEditor || this.RawImage == null) {
-                this.RawImage = this.GetComponent<RawImage>();
-            }
-
-            int numColumns = 0;
-            int numRows = 0;
-
-            switch (inputMethod) {
-            case InputMethod.Keyboard:
-                numColumns = _keyboardNumColumns;
-                numRows = _keyboardNumRows;
-                this.RawImage.texture = _keyboardTexture;
-                break;
-            case InputMethod.Joystick:
-                numColumns = _joystickNumColumns;
-                numRows = _joystickNumRows;
-                switch (joystickStyle) {
-                case JoystickStyleID.Generic:
-                    this.RawImage.texture = _joystickGenericTexture;
-                    break;
-                case JoystickStyleID.XBox360:
-                    this.RawImage.texture = _joystickXBox360Texture;
-                    break;
-                case JoystickStyleID.DS4:
-                    this.RawImage.texture = _joystickDS4Texture;
-                    break;
-                }
-                break;
-            }
+        private static void SetRawImageUVRect(RawImage rawImage, int numColumns, int numRows, int index) {
+            if (rawImage == null)
+                return;
 
             if (numColumns < 1 || numRows < 1 ||
-                imageIndex < 0 || imageIndex >= numColumns * numRows) {
-                this.RawImage.uvRect = new Rect(0, 0, 1, 1);
+                index < 0 || index >= numColumns * numRows) {
+                rawImage.uvRect = new Rect(0, 0, 1, 1);
                 return;
             }
 
-            int col = imageIndex % numColumns;
-            int row = numRows - 1 - imageIndex / numColumns;
+            int col = index % numColumns;
+            int row = numRows - 1 - index / numColumns;
 
-            this.RawImage.uvRect = new Rect(
+            rawImage.uvRect = new Rect(
                 (float)col / numColumns,
                 (float)row / numRows,
                 1.0f / numColumns,
@@ -275,9 +321,7 @@ namespace Core.Unity.RewiredExtensions.UI {
         /// <summary>
         /// Called by Unity when the script instance is being loaded.
         /// </summary>
-        private void Awake() {
-            this.RawImage = this.GetComponent<RawImage>();
-        }
+        private void Awake() { }
 
         /// <summary>
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
@@ -287,8 +331,8 @@ namespace Core.Unity.RewiredExtensions.UI {
             if (Application.isEditor) {
 
                 // failsafe
-                _keyboardNumColumns = Mathf.Max(1, _keyboardNumColumns);
-                _keyboardNumRows = Mathf.Max(1, _keyboardNumRows);
+                _keyboardTextNumColumns = Mathf.Max(1, _keyboardTextNumColumns);
+                _keyboardTextNumRows = Mathf.Max(1, _keyboardTextNumRows);
                 _joystickNumColumns = Mathf.Max(1, _joystickNumColumns);
                 _joystickNumRows = Mathf.Max(1, _joystickNumRows);
 

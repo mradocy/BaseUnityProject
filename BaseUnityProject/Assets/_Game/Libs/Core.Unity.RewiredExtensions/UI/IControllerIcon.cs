@@ -32,6 +32,11 @@ namespace Core.Unity.RewiredExtensions.UI {
         Pole JoystickAxisDirection { get; }
 
         /// <summary>
+        /// Gets or sets if the icon is pressed.
+        /// </summary>
+        bool IsPressed { get; set; }
+
+        /// <summary>
         /// Sets this icon to a keyboard icon for the given key.
         /// </summary>
         /// <param name="key">Keyboard key.</param>

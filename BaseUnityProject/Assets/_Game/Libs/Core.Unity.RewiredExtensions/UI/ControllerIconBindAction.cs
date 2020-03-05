@@ -22,6 +22,10 @@ namespace Core.Unity.RewiredExtensions.UI {
         [Tooltip("The direction of the action, if it's an axis action.")]
         private Pole _axisDirection = Pole.Positive;
 
+        [SerializeField]
+        [Tooltip("If this bind also sets the icon's IsPressed property.")]
+        private bool _setsIsPressed = false;
+
         #endregion
 
         #region Properties
@@ -87,6 +91,15 @@ namespace Core.Unity.RewiredExtensions.UI {
                 int elementIndex = joystickMap?.elementIndex ?? 0;
 
                 _controllerIcon.SetJoystickIcon(joystickStyleId, elementType, elementIndex, this.AxisDirection);
+            }
+
+
+            if (_setsIsPressed) {
+                if (_inputAction.type == InputActionType.Button) {
+                    _controllerIcon.IsPressed = RewiredUtils.GetHeld(this.ActionId);
+                } else {
+                    _controllerIcon.IsPressed = RewiredUtils.GetAxisHeld(this.ActionId, this.AxisDirection == Pole.Positive, 0.5f);
+                }
             }
         }
 

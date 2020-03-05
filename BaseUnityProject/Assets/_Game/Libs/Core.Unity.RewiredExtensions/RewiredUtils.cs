@@ -79,6 +79,23 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
+        /// Gets if the given axis was "held" this frame.
+        /// </summary>
+        /// <param name="actionId">Id of the action.</param>
+        /// <param name="positive">If the axis was in the positive direction (false for negative direction).</param>
+        /// <param name="axisThreshold">Axis value that would consider a value "held" (e.g. 0.5)</param>
+        /// <returns>Pressed</returns>
+        public static bool GetAxisHeld(int actionId, bool positive, float axisThreshold) {
+            if (positive) {
+                axisThreshold = Mathf.Abs(axisThreshold);
+                return Player.GetAxis(actionId) >= axisThreshold;
+            } else {
+                axisThreshold = -Mathf.Abs(axisThreshold);
+                return Player.GetAxis(actionId) <= axisThreshold;
+            }
+        }
+
+        /// <summary>
         /// Gets if the given button action is currently being held.
         /// </summary>
         /// <param name="actionId">Id of the action.</param>

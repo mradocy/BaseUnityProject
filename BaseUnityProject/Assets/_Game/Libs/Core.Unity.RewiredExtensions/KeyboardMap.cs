@@ -10,22 +10,51 @@ namespace Core.Unity.RewiredExtensions {
     public class KeyboardMap {
 
         /// <summary>
-        /// Gets the index of the icon corresponding to the given keycode in the keyboard icon texture.
+        /// Gets the index of the text frame corresponding to the given keycode in the keyboard text icon textures.
         /// </summary>
         /// <param name="keyCode">KeyCode</param>
         /// <returns>image index</returns>
-        public int GetImageIndex(KeyCode keyCode) {
+        public int GetTextImageIndex(KeyCode keyCode) {
             int imageIndex;
-            if (_keycodeMapping.TryGetValue(keyCode, out imageIndex)) {
+            if (_keycodeTextMapping.TryGetValue(keyCode, out imageIndex)) {
                 return imageIndex;
             }
             return 0;
         }
 
         /// <summary>
-        /// Mapping from <see cref="KeyCode"/> to image index.
+        /// Gets the index of the background frame corresponding to the given keycode in the keyboard background icon textures.
         /// </summary>
-        private static Dictionary<KeyCode, int> _keycodeMapping = new Dictionary<KeyCode, int>() {
+        /// <param name="keyCode">KeyCode</param>
+        /// <returns>image index</returns>
+        public int GetBackgroundImageIndex(KeyCode keyCode) {
+            switch (keyCode) {
+            // wide background
+            case KeyCode.Backspace:
+            case KeyCode.Tab:
+            case KeyCode.RightShift:
+            case KeyCode.LeftShift:
+            case KeyCode.RightControl:
+            case KeyCode.LeftControl:
+            case KeyCode.RightCommand:
+            case KeyCode.LeftCommand:
+                return 1;
+            // enter background
+            case KeyCode.Return:
+                return 2;
+            // space background
+            case KeyCode.Space:
+                return 3;
+            // square background
+            default:
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Mapping from <see cref="KeyCode"/> to text image index.
+        /// </summary>
+        private static Dictionary<KeyCode, int> _keycodeTextMapping = new Dictionary<KeyCode, int>() {
             [KeyCode.Backspace] = 1,
             [KeyCode.Tab] = 2,
             [KeyCode.Clear] = 3,
