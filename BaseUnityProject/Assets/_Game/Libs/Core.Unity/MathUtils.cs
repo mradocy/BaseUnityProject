@@ -522,5 +522,25 @@ namespace Core.Unity {
             return b / m;
         }
 
+        /// <summary>
+        /// Returns the rectangle formed by the intersection of the two given rectangles.  The width and height of the intersection rectangle are non-negative.
+        /// If the given rectangles do not intersect, then a rectangle with a negative width is returned.
+        /// </summary>
+        /// <param name="rect0">Rectangle 0 to compare.</param>
+        /// <param name="rect1">Rectangle 1 to compare.</param>
+        public static Rect RectRectIntersection(Rect rect0, Rect rect1) {
+            float intXMin = Mathf.Max(rect0.xMin, rect1.xMin);
+            float intXMax = Mathf.Min(rect0.xMax, rect1.xMax);
+            if (intXMax < intXMin) {
+                return new Rect(0, 0, -1, -1);
+            }
+            float intYMin = Mathf.Max(rect0.yMin, rect1.yMin);
+            float intYMax = Mathf.Min(rect0.yMax, rect1.yMax);
+            if (intYMax < intYMin) {
+                return new Rect(0, 0, -1, -1);
+            }
+
+            return new Rect(intXMin, intYMin, intXMax - intXMin, intYMax - intYMin);
+        }
     }
 }

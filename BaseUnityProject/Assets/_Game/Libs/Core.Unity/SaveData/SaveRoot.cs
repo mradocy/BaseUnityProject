@@ -443,6 +443,14 @@ namespace Core.Unity.SaveData {
             return _cachedFileString;
         }
 
+        /// <summary>
+        /// Gets if save data was successfully loaded from or saved to a file at least once.
+        /// </summary>
+        /// <returns>Exists</returns>
+        public bool GetCachedFileStringExists() {
+            return _cachedFileString != null;
+        }
+
         #endregion
 
         #region Saving - Private
