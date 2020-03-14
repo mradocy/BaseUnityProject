@@ -340,6 +340,13 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
+        /// Loads the maps defined in the Rewired Editor and assigned to this player for the joysticks. All existing maps will be cleared and replaced with the default maps. 
+        /// </summary>
+        public static void LoadDefaultJoystickMaps() {
+            Player.controllers.maps.LoadDefaultMaps(ControllerType.Joystick);
+        }
+
+        /// <summary>
         /// Gets if a joystick is currently connected.
         /// </summary>
         public static bool IsJoystickConnected {
