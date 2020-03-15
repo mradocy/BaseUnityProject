@@ -34,9 +34,18 @@ namespace Core.Unity.Combat {
         public IDealsDamage DealsDamage { get; private set; } = null;
 
         /// <summary>
-        /// Name of the attack represented by this hit box.
+        /// Gets or sets the name of the attack represented by this hit box.
         /// </summary>
-        public string AttackName { get { return _attackName; } }
+        public string AttackName {
+            get { return _attackName; }
+            set {
+                if (value == _attackName)
+                    return;
+
+                _attackName = value;
+                _cachedAttackData = null;
+            }
+        }
 
         /// <inheritdoc />
         public bool IsHitStopped { get; private set; }
