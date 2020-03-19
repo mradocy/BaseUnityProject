@@ -226,7 +226,7 @@ namespace Core.Unity.Combat {
             }
 
             // create AttackInfo
-            AttackInfo attackInfo = AttackInfo.CreateNew(attackData, this.DealsDamage, this.transform.lossyScale.x < 0, contactPoint, collision2d);
+            AttackInfo attackInfo = AttackInfo.CreateNew(attackData, this.DealsDamage, this.transform.lossyScale.x < 0, contactPoint, collision2d, hurtBox);
 
             // attacker processes attack (e.g. does attacking damage calculations)
             if (this.DealsDamage != null) {

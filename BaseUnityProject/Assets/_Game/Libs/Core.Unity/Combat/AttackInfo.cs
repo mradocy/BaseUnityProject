@@ -18,8 +18,9 @@ namespace Core.Unity.Combat {
         /// <param name="reflectHeading">If the heading should be reflected over the y axis (i.e. if attacker was facing left)</param>
         /// <param name="contactPoint">Point of impact for the attack.</param>
         /// <param name="collision2D">Collision2D object for the attack.  Can be null.</param>
+        /// <param name="hurtBox">HurtBox object belonging to the object damaged that was hit.  Can be null.</param>
         /// <returns>New attack info.</returns>
-        public static AttackInfo CreateNew(IAttackData data, IDealsDamage attacker, bool reflectHeading, Vector2 contactPoint, Collision2D collision2D) {
+        public static AttackInfo CreateNew(IAttackData data, IDealsDamage attacker, bool reflectHeading, Vector2 contactPoint, Collision2D collision2D, HurtBox hurtBox) {
             if (data == null) {
                 throw new System.ArgumentNullException(nameof(data));
             }
@@ -38,6 +39,7 @@ namespace Core.Unity.Combat {
             ai.AttackingHitStopDuration = data.HitStopDuration;
             ai.ContactPoint = contactPoint;
             ai.Collision2D = collision2D;
+            ai.HurtBox = hurtBox;
             ai._flags.Clear();
             data.GetAllFlags(ai._flags);
             ai._attributes.Clear();
@@ -75,6 +77,9 @@ namespace Core.Unity.Combat {
 
         /// <inheritdoc />
         public Collision2D Collision2D { get; set; }
+
+        /// <inheritdoc />
+        public HurtBox HurtBox { get; set; }
 
         #endregion
 

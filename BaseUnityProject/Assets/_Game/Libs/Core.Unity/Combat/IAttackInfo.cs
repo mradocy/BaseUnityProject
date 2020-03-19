@@ -48,6 +48,11 @@ namespace Core.Unity.Combat {
         Collision2D Collision2D { get; }
 
         /// <summary>
+        /// The <see cref="HurtBox"/> of the defender that got hit by the attack.  Can be null.
+        /// </summary>
+        HurtBox HurtBox { get; }
+
+        /// <summary>
         /// Gets if this attack contains the flag with the given id.
         /// </summary>
         /// <param name="flagId">Id of the flag.</param>
