@@ -200,8 +200,10 @@ namespace Core.Unity.Combat {
                     return;
             }
 
-            HurtBox hurtBox = collider2d?.gameObject?.GetComponent<HurtBox>();
-            if (hurtBox?.ReceivesDamage == null)
+            if (collider2d == null || collider2d.gameObject == null)
+                return;
+            HurtBox hurtBox = collider2d.gameObject.GetComponent<HurtBox>();
+            if (hurtBox == null || hurtBox.ReceivesDamage == null)
                 return;
             if (!hurtBox.enabled || !hurtBox.ReceivesDamage.IsReceivesDamageEnabled)
                 return;

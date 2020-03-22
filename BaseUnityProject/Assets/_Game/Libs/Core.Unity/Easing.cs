@@ -145,6 +145,35 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Elastic ease out interpolation between a and b.  t is clamped between 0 and d.
+        /// </summary>
+        public static float ElasticOut(float a, float b, float t, float d = 1) {
+            return ElasticOutUnclamp(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+        /// <summary>
+        /// Elastic ease out interpolation between a and b.  No clamping is done.
+        /// </summary>
+        public static float ElasticOutUnclamp(float a, float b, float t, float d = 1) {
+            float k = float.NaN, p = float.NaN; // these can be given?  https://github.com/danro/tweenman-as3/blob/master/Easing.as
+            float s;
+            if (t == 0)
+                return a;
+            t /= d;
+            if (Mathf.Approximately(t, 1))
+                return b;
+            if (float.IsNaN(p))
+                p = d * 0.3f;
+            if (float.IsNaN(k) || k < Mathf.Abs(b - a)) {
+                k = b - a;
+                s = p / 4;
+            } else {
+                s = p / Mathf.PI * 2 * Mathf.Asin((b - a) / k);
+            }
+
+            return k * Mathf.Pow(2, -10 * t) * Mathf.Sin((t * d - s) * Mathf.PI * 2 / p) + b;
+        }
+
+        /// <summary>
         /// Alternates between a and b with a sine wave.  t is able to go beyond the bounds.
         /// </summary>
         /// <param name="phaseShift">If true, value will be a at t = 0 (phase shifted -PI/2).  If false, value will be (a + b) / 2 at t = 0.</param>
