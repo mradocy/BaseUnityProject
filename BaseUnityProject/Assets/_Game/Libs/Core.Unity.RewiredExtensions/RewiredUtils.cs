@@ -256,7 +256,7 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
-        /// Gets the first keyboard <see cref="ActionElementMap"/> for the given <paramref name="action"/>.
+        /// Gets the first keyboard <see cref="ActionElementMap"/> for the given <paramref name="action"/>, or null if no map exists.
         /// </summary>
         /// <param name="action">The input action.</param>
         /// <param name="axisDirection">The direction of the action, if it's an axis action.</param>
@@ -296,8 +296,7 @@ namespace Core.Unity.RewiredExtensions {
                 keyboardMaps = keyboardMaps.Where(km => km.elementType == ControllerElementType.Axis || km.axisContribution == axisDirection);
             }
 
-            // sort to put axis maps before button maps
-            return keyboardMaps.OrderBy(km => km.elementIdentifierId).ToList();
+            return keyboardMaps.ToList();
         }
 
         /// <summary>
@@ -328,8 +327,7 @@ namespace Core.Unity.RewiredExtensions {
                 joystickMaps = joystickMaps.Where(jm => jm.elementType == ControllerElementType.Axis || jm.axisContribution == axisDirection);
             }
 
-            // sort to put axis maps before button maps
-            return joystickMaps.OrderBy(jm => jm.elementIdentifierId).ToList();
+            return joystickMaps.ToList();
         }
 
         /// <summary>

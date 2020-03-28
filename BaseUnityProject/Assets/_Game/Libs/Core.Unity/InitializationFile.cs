@@ -96,7 +96,7 @@ namespace Core.Unity {
         /// Sets a bool property.
         /// </summary>
         public void SetBool(string key, bool value) {
-            this.SetString(key, value ? "1" : "0");
+            this.SetString(key, value ? "true" : "false");
         }
         /// <summary>
         /// Sets an int property.
