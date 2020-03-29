@@ -300,16 +300,28 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
-        /// Gets the first joystick <see cref="ActionElementMap"/> for the given <paramref name="action"/>.
+        /// Gets the first joystick <see cref="ActionElementMap"/> for the given <paramref name="action"/>, or null if no map exists.
         /// </summary>
         /// <param name="action">The input action.</param>
         /// <param name="axisDirection">The direction of the action, if it's an axis action.</param>
         /// <returns>joystick ActionElementMap</returns>
         public static ActionElementMap GetFirstJoystickActionElementMap(InputAction action, Pole axisDirection) {
-
-            // TODO: better way to get first
-
             return GetJoystickActionElementMaps(action, axisDirection).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the second joystick <see cref="ActionElementMap"/> for the given <paramref name="action"/>, or null if an alt map doesn't exist.
+        /// </summary>
+        /// <param name="action">The input action.</param>
+        /// <param name="axisDirection">The direction of the action, if it's an axis action.</param>
+        /// <returns>joystick ActionElementMap</returns>
+        public static ActionElementMap GetAltJoystickActionElementMap(InputAction action, Pole axisDirection) {
+            IList<ActionElementMap> maps = GetJoystickActionElementMaps(action, axisDirection);
+            if (maps.Count > 1) {
+                return maps[1];
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -370,6 +382,31 @@ namespace Core.Unity.RewiredExtensions {
             } else {
                 return GetJoystickStyle(guid.Value);
             }
+        }
+
+        /// <summary>
+        /// Creates a <see cref="InputMapper.Context"/> for rebinding a keyboard assignment to the given input action.
+        /// <para/>
+        /// To be used when starting the input mapper like so: _inputMapper.Start(_inputMapperContext);
+        /// </summary>
+        /// <param name="inputActionId">Id of the input action to rebind the keyboard assignment for.</param>
+        /// <param name="axisDirection">Axis direction for the action</param>
+        /// <returns>Input mapper context.</returns>
+        public static InputMapper.Context CreateKeyboardInputMapperContext(int inputActionId, Pole axisDirection) {
+            InputAction inputAction = GetAction(inputActionId);
+
+            // TODO: can use this for joystick mapping?
+            //RewiredUtils.Player.controllers.GetLastActiveController().id
+            ControllerMap controllerMap = Player.controllers.maps.GetMapsInCategory(ControllerType.Keyboard, 0, inputAction.categoryId).FirstOrDefault();
+
+            ActionElementMap existingKeyboardMap = GetFirstKeyboardActionElementMap(inputAction, axisDirection);
+
+            return new InputMapper.Context() {
+                actionId = inputActionId,
+                controllerMap = controllerMap,
+                actionRange = axisDirection == Pole.Negative ? AxisRange.Negative : AxisRange.Positive,
+                actionElementMapToReplace = existingKeyboardMap
+            };
         }
 
 
