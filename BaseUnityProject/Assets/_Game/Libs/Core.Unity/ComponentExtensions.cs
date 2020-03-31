@@ -10,7 +10,7 @@ namespace Core.Unity {
     public static class ComponentExtensions {
 
         /// <summary>
-        /// Gets the component of the given type, but throws an error if the component could not be found.
+        /// Gets the component of the given type, but logs an error if the component could not be found.
         /// </summary>
         /// <typeparam name="T">Type of component to search.</typeparam>
         /// <param name="component">This component to search</param>
@@ -18,13 +18,13 @@ namespace Core.Unity {
         public static T EnsureComponent<T>(this Component component) {
             T comp = component.GetComponent<T>();
             if (comp == null) {
-                throw new System.Exception($"Component of type {typeof(T)} not found in component {component}");
+                Debug.LogError($"Component of type {typeof(T)} not found in component {component}");
             }
             return comp;
         }
 
         /// <summary>
-        /// Searches parents for the component of the given type, but throws an error if the component could not be found.
+        /// Searches parents for the component of the given type, but logs an error if the component could not be found.
         /// </summary>
         /// <typeparam name="T">Type of component to search.</typeparam>
         /// <param name="component">This component to search</param>
@@ -32,7 +32,7 @@ namespace Core.Unity {
         public static T EnsureComponentInParent<T>(this Component component) {
             T comp = component.GetComponentInParent<T>();
             if (comp == null) {
-                throw new System.Exception($"Component of type {typeof(T)} not found in parents of component {component}");
+                Debug.LogError($"Component of type {typeof(T)} not found in parents of component {component}");
             }
             return comp;
         }

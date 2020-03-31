@@ -10,7 +10,7 @@ namespace Core.Unity {
     public static class GameObjectExtensions {
 
         /// <summary>
-        /// Gets the component of the given type, but throws an error if the component could not be found.
+        /// Gets the component of the given type, but logs an error if the component could not be found.
         /// </summary>
         /// <typeparam name="T">Type of component to search.</typeparam>
         /// <param name="gameObject">this GameObject</param>
@@ -18,7 +18,7 @@ namespace Core.Unity {
         public static T EnsureComponent<T>(this GameObject gameObject) {
             T comp = gameObject.GetComponent<T>();
             if (comp == null) {
-                throw new System.Exception($"Component of type {typeof(T)} not found in game object {gameObject}");
+                Debug.LogError($"Component of type {typeof(T)} not found in game object {gameObject}");
             }
             return comp;
         }
