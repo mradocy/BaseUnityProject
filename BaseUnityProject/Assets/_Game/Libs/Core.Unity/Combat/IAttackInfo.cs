@@ -24,7 +24,7 @@ namespace Core.Unity.Combat {
         /// This is the result of all the calculations done on the attacker's side, without knowing anything about the opponent.
         /// E.g. the attacker's level, attack stat, move's power would be considered here.
         /// </summary>
-        float AttackingDamage { get; set; }
+        int AttackingDamage { get; set; }
 
         /// <summary>
         /// The direction of the attack in degrees, in [0, 360)

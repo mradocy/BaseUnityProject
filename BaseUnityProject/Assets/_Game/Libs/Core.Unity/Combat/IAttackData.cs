@@ -17,7 +17,7 @@ namespace Core.Unity.Combat {
         /// <summary>
         /// Damage of the attack.  This is the attack's base power, before any calculations are done.
         /// </summary>
-        float Damage { get; }
+        int Damage { get; }
 
         /// <summary>
         /// The heading of the attack in degrees.

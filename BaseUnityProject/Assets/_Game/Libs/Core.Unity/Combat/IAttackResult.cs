@@ -17,7 +17,7 @@ namespace Core.Unity.Combat {
         /// <summary>
         /// The damage actually dealt.  This will be affected by the opponent's defense or other factors.
         /// </summary>
-        float Damage { get; }
+        int Damage { get; }
 
         /// <summary>
         /// Gets how much hit stop should be applied as the result of this attack.  0 means no hit stop.

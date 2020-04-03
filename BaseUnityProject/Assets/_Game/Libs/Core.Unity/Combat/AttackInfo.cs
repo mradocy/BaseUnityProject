@@ -64,7 +64,7 @@ namespace Core.Unity.Combat {
         public IDealsDamage Attacker { get; private set; }
 
         /// <inheritdoc />
-        public float AttackingDamage { get; set; }
+        public int AttackingDamage { get; set; }
 
         /// <inheritdoc />
         public float AttackingHeading { get; set; }

@@ -238,15 +238,15 @@ namespace Core.Unity.Combat {
             // deal damage
             IAttackResult result = hurtBox.ReceivesDamage.ReceiveDamage(attackInfo);
 
-            // add hurt box record
-            this.AddHurtBoxRecord(hurtBox, _fixedTime + _hurtRecordDuration);
-
-            // notify attacker
-            if (this.DealsDamage != null) {
-                this.DealsDamage.NotifyAttackResult(attackInfo, result);
-            }
-
             if (result.Hit) {
+
+                // add hurt box record
+                this.AddHurtBoxRecord(hurtBox, _fixedTime + _hurtRecordDuration);
+
+                // notify attacker
+                if (this.DealsDamage != null) {
+                    this.DealsDamage.NotifyAttackResult(attackInfo, result);
+                }
 
                 // apply hit stop
                 if (result.HitStopDuration > 0) {

@@ -22,12 +22,12 @@ namespace Core.Unity.Combat {
         /// <summary>
         /// The maximum health of the object.
         /// </summary>
-        float MaxHealth { get; }
+        int MaxHealth { get; }
 
         /// <summary>
         /// The amount of health the object currently has.
         /// </summary>
-        float Health { get; }
+        int Health { get; }
 
         /// <summary>
         /// Receive an attack, then returns the result of the attack.
