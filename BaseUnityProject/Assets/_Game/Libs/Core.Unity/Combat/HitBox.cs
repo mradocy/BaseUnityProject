@@ -15,6 +15,10 @@ namespace Core.Unity.Combat {
         private string _attackName = null;
 
         [SerializeField]
+        [Tooltip("How the heading of the attack should be set.")]
+        private HeadingSetMode _headingSetMode = HeadingSetMode.Default;
+
+        [SerializeField]
         [Tooltip("If this hit box should start enabled.  Otherwise, it will have to be enabled manually.")]
         private bool _startEnabled = false;
 
@@ -45,6 +49,14 @@ namespace Core.Unity.Combat {
                 _attackName = value;
                 _cachedAttackData = null;
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the way in which the heading of the attack is set.
+        /// </summary>
+        public HeadingSetMode HeadingSetMode {
+            get { return _headingSetMode; }
+            set { _headingSetMode = value; }
         }
 
         /// <inheritdoc />
@@ -223,30 +235,32 @@ namespace Core.Unity.Combat {
                 ContactPoint2D collisionContactPoint = collision2d.GetContact(0);
                 contactPoint = collisionContactPoint.point;
             } else {
-                //  (may need a better way to do this for trigger interaction)
+                // (may need a better way to do this for trigger interaction)
                 contactPoint = collider2d.ClosestPoint(transform.position);
             }
 
-            // create AttackInfo
-            AttackInfo attackInfo = AttackInfo.CreateNew(attackData, this.DealsDamage, this.transform.lossyScale.x < 0, contactPoint, collision2d, hurtBox);
-
-            // attacker processes attack (e.g. does attacking damage calculations)
-            if (this.DealsDamage != null) {
-                this.DealsDamage.ProcessAttack(attackInfo);
+            // get heading
+            float heading = attackData.Heading;
+            bool flipHeading = false;
+            switch (this.HeadingSetMode) {
+            case HeadingSetMode.FlipPosition:
+                flipHeading = hurtBox.transform.position.x < contactPoint.x;
+                break;
+            case HeadingSetMode.FlipLossyScale:
+                flipHeading = this.transform.lossyScale.x < 0;
+                break;
+            }
+            if (flipHeading) {
+                heading = MathUtils.Wrap360(180 - heading);
             }
 
-            // deal damage
-            IAttackResult result = hurtBox.ReceivesDamage.ReceiveDamage(attackInfo);
+            // execute attack
+            AttackResult result = CombatUtils.ExecuteAttack(attackData, heading, this.DealsDamage, hurtBox.ReceivesDamage, contactPoint, collision2d, this, hurtBox);
 
-            if (result.Hit) {
+            if (result.Success) {
 
                 // add hurt box record
                 this.AddHurtBoxRecord(hurtBox, _fixedTime + _hurtRecordDuration);
-
-                // notify attacker
-                if (this.DealsDamage != null) {
-                    this.DealsDamage.NotifyAttackResult(attackInfo, result);
-                }
 
                 // apply hit stop
                 if (result.HitStopDuration > 0) {

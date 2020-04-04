@@ -11,11 +11,6 @@ namespace Core.Unity.Combat {
     public interface IDealsDamage {
 
         /// <summary>
-        /// Event triggered when this object gets notified of an attack result.
-        /// </summary>
-        event UnityAction<IAttackInfo, IAttackResult> AttackResult;
-
-        /// <summary>
         /// Gets if the IDealsDamage is enabled.  If not, hitboxes won't attempt to make attacks.
         /// IDealsDamage can be disabled when the object dies, to ensure it can't deal any more damage to the player.
         /// </summary>
@@ -34,13 +29,13 @@ namespace Core.Unity.Combat {
         /// Attacking damage, flags, attributes have already been copied over from the attack data.
         /// </summary>
         /// <param name="attackInfo">Attack info to modify.</param>
-        void ProcessAttack(IAttackInfo attackInfo);
+        void ProcessAttack(AttackInfo attackInfo);
 
         /// <summary>
-        /// Get notified of the result of an attack.  Invokes <see cref="AttackResult"/>.
+        /// Get notified of the result of an attack.
         /// </summary>
-        /// <param name="attackInfo">Info of the attack</param>
+        /// <param name="attackInfo">Info of the attack.  This will be recycled, so don't save a reference to it.</param>
         /// <param name="result">Result of the attack.</param>
-        void NotifyAttackResult(IAttackInfo attackInfo, IAttackResult result);
+        void NotifyAttackResult(AttackInfo attackInfo, AttackResult result);
     }
 }

@@ -20,7 +20,7 @@ namespace Core.Unity.Combat {
         int Damage { get; }
 
         /// <summary>
-        /// The heading of the attack in degrees.
+        /// The base heading of the attack in degrees.
         /// </summary>
         float Heading { get; }
 

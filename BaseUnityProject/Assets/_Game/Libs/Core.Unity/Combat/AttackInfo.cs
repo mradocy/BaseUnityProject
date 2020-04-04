@@ -6,91 +6,121 @@ using UnityEngine;
 
 namespace Core.Unity.Combat {
 
-    public class AttackInfo : IAttackInfo {
-
-        #region Creation
-
-        /// <summary>
-        /// Creates a new <see cref="AttackInfo"/>.
-        /// </summary>
-        /// <param name="data">Data of the attack.</param>
-        /// <param name="attacker">The attacker.  Can be null.</param>
-        /// <param name="reflectHeading">If the heading should be reflected over the y axis (i.e. if attacker was facing left)</param>
-        /// <param name="contactPoint">Point of impact for the attack.</param>
-        /// <param name="collision2D">Collision2D object for the attack.  Can be null.</param>
-        /// <param name="hurtBox">HurtBox object belonging to the object damaged that was hit.  Can be null.</param>
-        /// <returns>New attack info.</returns>
-        public static AttackInfo CreateNew(IAttackData data, IDealsDamage attacker, bool reflectHeading, Vector2 contactPoint, Collision2D collision2D, HurtBox hurtBox) {
-            if (data == null) {
-                throw new System.ArgumentNullException(nameof(data));
-            }
-
-            AttackInfo ai = new AttackInfo();
-            ai.Data = data;
-            ai.Attacker = attacker;
-
-            // copy over properties from data
-            ai.AttackingDamage = data.Damage;
-            if (reflectHeading) {
-                ai.AttackingHeading = MathUtils.Wrap360(180 - data.Heading);
-            } else {
-                ai.AttackingHeading = data.Heading;
-            }
-            ai.AttackingHitStopDuration = data.HitStopDuration;
-            ai.ContactPoint = contactPoint;
-            ai.Collision2D = collision2D;
-            ai.HurtBox = hurtBox;
-            ai._flags.Clear();
-            data.GetAllFlags(ai._flags);
-            ai._attributes.Clear();
-            data.GetAllAttributes(ai._attributes);
-
-            return ai;
-        }
-
-        /// <summary>
-        /// Private Constructor.
-        /// </summary>
-        private AttackInfo() { }
-
-        #endregion
+    /// <summary>
+    /// Details information about an attack.
+    /// </summary>
+    public class AttackInfo {
 
         #region Properties
 
-        /// <inheritdoc />
-        public IAttackData Data { get; private set; }
+        /// <summary>
+        /// Gets the original raw data for this attack, before it was modified by the attacker.
+        /// </summary>
+        public IAttackData AttackData;
 
-        /// <inheritdoc />
-        public IDealsDamage Attacker { get; private set; }
+        /// <summary>
+        /// Gets the attack's damage.
+        /// This is the result of all the calculations done on the attacker's side, without knowing anything about the opponent.
+        /// E.g. the attacker's level, attack stat, move's power would be considered here.
+        /// </summary>
+        public int Damage;
 
-        /// <inheritdoc />
-        public int AttackingDamage { get; set; }
+        /// <summary>
+        /// The direction of the attack in degrees, in [0, 360)
+        /// </summary>
+        public float Heading;
 
-        /// <inheritdoc />
-        public float AttackingHeading { get; set; }
+        /// <summary>
+        /// Gets if the heading of this attack info points to the right.
+        /// </summary>
+        public bool IsToRight {
+            get {
+                float heading = MathUtils.Wrap360(Heading);
+                return heading < 90 || heading >= 270;
+            }
+        }
 
-        /// <inheritdoc />
-        public float AttackingHitStopDuration { get; set; }
+        /// <summary>
+        /// Gets how long the hit stop should be as a result of the attack hitting.
+        /// Set to 0 for no hit stop.
+        /// </summary>
+        public float HitStopDuration;
 
-        /// <inheritdoc />
-        public Vector2 ContactPoint { get; set; }
+        /// <summary>
+        /// The attacker.  This can be null.
+        /// </summary>
+        public IDealsDamage Attacker;
 
-        /// <inheritdoc />
-        public Collision2D Collision2D { get; set; }
+        /// <summary>
+        /// The receiver of the attack.
+        /// </summary>
+        public IReceivesDamage Receiver;
 
-        /// <inheritdoc />
-        public HurtBox HurtBox { get; set; }
+        /// <summary>
+        /// Point of impact for the attack.
+        /// </summary>
+        public Vector2 ContactPoint;
+
+        /// <summary>
+        /// The Collision2D object associated with the attack.  Can be null (e.g. if the attack was the result of a trigger interaction).
+        /// </summary>
+        public Collision2D Collision2D;
+
+        /// <summary>
+        /// The attacker's hit box involved in the attack.  Can be null.
+        /// </summary>
+        public HitBox HitBox;
+
+        /// <summary>
+        /// The receiver's hurt box involved in the attack.  Can be null.
+        /// </summary>
+        public HurtBox HurtBox;
 
         #endregion
 
         #region Methods
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Initializes this attack info with the given data.
+        /// </summary>
+        /// <param name="attackData">Raw data of the attack</param>
+        /// <param name="heading">Overrides the attack's heading.</param>
+        /// <param name="attacker">The attacker.  Can be null.</param>
+        /// <param name="receiver">The receiver of the attack.</param>
+        /// <param name="contactPoint">The point of impact for the attack.</param>
+        /// <param name="collision2D">The Collision2D object involved in the attack.  Can be null.</param>
+        /// <param name="hitBox">The <see cref="HitBox"/> involved in the attack.  Can be null.</param>
+        /// <param name="hurtBox">The <see cref="HurtBox"/> involved in the attack.  Can be null.</param>
+        public void Initialize(IAttackData attackData, float heading, IDealsDamage attacker, IReceivesDamage receiver, Vector2 contactPoint, Collision2D collision2D, HitBox hitBox, HurtBox hurtBox) {
+            this.AttackData = attackData;
+            this.Damage = attackData.Damage;
+            this.Heading = heading;
+            this.HitStopDuration = attackData.HitStopDuration;
+            _flags.Clear();
+            attackData.GetAllFlags(_flags);
+            _attributes.Clear();
+            attackData.GetAllAttributes(_attributes);
+            this.Attacker = attacker;
+            this.Receiver = receiver;
+            this.ContactPoint = contactPoint;
+            this.Collision2D = collision2D;
+            this.HitBox = hitBox;
+            this.HurtBox = hurtBox;
+        }
+
+        /// <summary>
+        /// Gets if this attack contains the flag with the given id.
+        /// </summary>
+        /// <param name="flagId">Id of the flag.</param>
+        /// <returns>Has flag.</returns>
         public bool HasFlag(int flagId) {
             return _flags.Contains(flagId);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Sets if the given flag is contained in this data.
+        /// </summary>
+        /// <param name="flagId">Id of the flag.</param>
         public void SetFlag(int flagId, bool hasFlag) {
             if (hasFlag)
                 _flags.Add(flagId);
@@ -98,7 +128,12 @@ namespace Core.Unity.Combat {
                 _flags.Remove(flagId);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the value of the attribute with the given id.
+        /// </summary>
+        /// <param name="attributeId">Id of the attribute.</param>
+        /// <param name="defaultValue">Value to return if the attack data does not contain the attribute.</param>
+        /// <returns>Attribute value.</returns>
         public float GetAttribute(int attributeId, float defaultValue = 0) {
             float val;
             if (_attributes.TryGetValue(attributeId, out val))
@@ -106,24 +141,46 @@ namespace Core.Unity.Combat {
             return defaultValue;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Sets the value of the attribute with the given id.
+        /// </summary>
+        /// <param name="attributeId">Id of the attribute.</param>
+        /// <param name="value">Value to set.</param>
         public void SetAttribute(int attributeId, float value) {
             _attributes[attributeId] = value;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Removes the given attribute from the attack data.
+        /// </summary>
+        /// <param name="attributeId">Id of the attribute.</param>
         public void RemoveAttribute(int attributeId) {
             _attributes.Remove(attributeId);
         }
 
-        /// <inheritdoc />
-        public override string ToString() {
-            StringBuilder sb = new StringBuilder();
-            sb.Append($"Attacking Damage: {this.AttackingDamage}, ");
-            sb.Append($"Attacking Heading: {this.AttackingHeading}, ");
-            sb.Append($"Attacking Hit Stop Duration: {this.AttackingHitStopDuration}");
-
-            return sb.ToString();
+        /// <summary>
+        /// Shallow copies all values from this attack info to the given attack info.
+        /// </summary>
+        /// <param name="attackInfo"></param>
+        public void CopyTo(AttackInfo attackInfo) {
+            attackInfo.AttackData = this.AttackData;
+            attackInfo.Damage = this.Damage;
+            attackInfo.Heading = this.Heading;
+            attackInfo.HitStopDuration = this.HitStopDuration;
+            attackInfo.Attacker = this.Attacker;
+            attackInfo.Receiver = this.Receiver;
+            attackInfo.ContactPoint = this.ContactPoint;
+            attackInfo.Collision2D = this.Collision2D;
+            attackInfo.HitBox = this.HitBox;
+            attackInfo.HurtBox = this.HurtBox;
+            attackInfo._flags.Clear();
+            foreach (int f in _flags) {
+                attackInfo._flags.Add(f);
+            }
+            attackInfo._attributes.Clear();
+            foreach (KeyValuePair<int, float> a in _attributes) {
+                attackInfo._attributes.Add(a.Key, a.Value);
+            }
         }
 
         #endregion
