@@ -18,7 +18,17 @@ namespace Core.Unity.Combat {
         #region Constructors
 
         /// <summary>
-        /// Constructor.
+        /// Creates a default <see cref="AttackResult"/> where the attack was a success and dealt the amount of damage and hitstop specified in the <paramref name="attackInfo"/>.
+        /// </summary>
+        /// <param name="attackInfo">Info of the attack.</param>
+        public AttackResult(AttackInfo attackInfo) {
+            Success = true;
+            Damage = attackInfo.Damage;
+            HitStopDuration = attackInfo.HitStopDuration;
+        }
+
+        /// <summary>
+        /// Creates a default <see cref="AttackResult"/> with the given <paramref name="success"/> value.
         /// </summary>
         /// <param name="success">If the attack hit.</param>
         public AttackResult(bool success) {
