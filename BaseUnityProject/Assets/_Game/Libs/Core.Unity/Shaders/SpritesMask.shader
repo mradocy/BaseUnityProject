@@ -11,6 +11,7 @@ Shader "Custom/SpritesMask" {
         [KeywordEnum(Repeat, Clamp)] _WrapY("Wrap Y", Float) = 0
 		[IntRange] _StencilRef("Stencil Ref", Range(0, 255)) = 2
 		[IntRange] _StencilWriteMask("Stencil Write Mask", Range(0, 255)) = 255
+        [Enum(Core.Unity.Rendering.ColorWriteMaskToggle)] _ColorMaskToggle("Color Mask Toggle", Float) = 15
     }
 
     SubShader {
@@ -28,8 +29,8 @@ Shader "Custom/SpritesMask" {
         ZWrite Off
         Blend One OneMinusSrcAlpha
 
-        // uncomment to hide this mask image
-        //colormask 0
+        // shows or hides the mask image
+        colormask [_ColorMaskToggle]
 
         Pass {
 
