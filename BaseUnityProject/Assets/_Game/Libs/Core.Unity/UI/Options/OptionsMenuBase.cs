@@ -135,6 +135,14 @@ namespace Core.Unity.UI.Options {
         protected abstract OptionControlBase CreateControl(IOption option);
 
         /// <summary>
+        /// Destroys the given control.  By default this uses Unity's Destroy() method, can be overridden to recycle instead.
+        /// </summary>
+        /// <param name="control">Control to destroy.</param>
+        protected virtual void DestoryControl(OptionControlBase control) {
+            Destroy(control.gameObject);
+        }
+
+        /// <summary>
         /// Called when the selection changes.
         /// </summary>
         /// <param name="prevIndex">The previous <see cref="SelectedIndex"/>.</param>
@@ -152,6 +160,11 @@ namespace Core.Unity.UI.Options {
         /// Called when the cancel button is pressed.
         /// </summary>
         protected virtual void OnCancelPressed() { }
+
+        /// <summary>
+        /// Called by Unity when the script instance is being loaded.
+        /// </summary>
+        protected virtual void OnAwake() { }
 
         /// <summary>
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
@@ -189,7 +202,7 @@ namespace Core.Unity.UI.Options {
         /// </summary>
         protected void ClearOptions() {
             foreach (OptionControlBase optionControl in _optionControls) {
-                Destroy(optionControl.gameObject);
+                this.DestoryControl(optionControl);
             }
             _optionControls.Clear();
             _optionModels.Clear();
@@ -200,8 +213,10 @@ namespace Core.Unity.UI.Options {
         /// </summary>
         protected void Awake() {
             _parentModalWindow = this.GetComponentInParent<ModalWindow>();
-            this.CreateOptionControls();
 
+            this.OnAwake();
+
+            this.CreateOptionControls();
             this.SelectOption(0);
         }
 

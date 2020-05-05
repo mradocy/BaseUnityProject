@@ -54,6 +54,15 @@ namespace Core.Unity.Rendering {
         }
 
         /// <summary>
+        /// Gets if the given animator has the given state.
+        /// </summary>
+        /// <param name="animator">This animator.</param>
+        /// <param name="stateName">Name of the state.</param>
+        public static bool HasState(this Animator animator, string stateName) {
+            return animator.HasState(0, Animator.StringToHash(stateName));
+        }
+
+        /// <summary>
         /// A smoother way to play a state on the animator.  Uses a crossfade.  If a crossfade is already happening, the animation is interrupted.
         /// </summary>
         /// <param name="animator">This animator.</param>

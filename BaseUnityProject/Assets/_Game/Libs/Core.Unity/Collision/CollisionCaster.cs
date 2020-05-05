@@ -221,10 +221,10 @@ namespace Core.Unity.Collision {
         /// </summary>
         /// <param name="depthCheck">How far down to check if there's a platform (distance of the raycast).</param>
         /// <param name="leftOffset">x offset from the left side of the bounds.</param>
-        public bool WalkoffToLeft(float depthCheck, float leftOffset = 0) {
+        public bool WalkoffToLeft(float depthCheck, float leftOffset) {
 
             Rect bounds = this.GetBounds(.01f);
-            Vector2 origin = new Vector2(bounds.xMin + leftOffset, bounds.yMin + .02f);
+            Vector2 origin = new Vector2(bounds.xMin - leftOffset, bounds.yMin + .02f);
             int layerMask = this.GetUnionLayerMask();
 
             return Physics2D.Raycast(origin, Vector2.down, depthCheck, layerMask).collider == null;
@@ -236,7 +236,7 @@ namespace Core.Unity.Collision {
         /// </summary>
         /// <param name="depthCheck">How far down to check if there's a platform (distance of the raycast).</param>
         /// <param name="rightOffset">x offset from the right side of the bounds.</param>
-        public bool WalkoffToRight(float depthCheck, float rightOffset = 0) {
+        public bool WalkoffToRight(float depthCheck, float rightOffset) {
 
             Rect bounds = this.GetBounds(.01f);
             Vector2 origin = new Vector2(bounds.xMax + rightOffset, bounds.yMin + .02f);
