@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace Core.Unity.Settings {
 
@@ -41,6 +42,7 @@ namespace Core.Unity.Settings {
             if (_isInitialized)
                 return;
 
+            // get initial values from .ini file
             _effectsVolume = Initialization.Settings.GetFloat(_effectsVolumeInitializationKey, DefaultVolume);
 
             _isInitialized = true;
@@ -65,7 +67,8 @@ namespace Core.Unity.Settings {
                     LogAudioMixerNotSet();
                     return;
                 }
-                _audioMixer.OnEffectsVolumeSettingChanged(VolumeToAudioMixerVolume(_effectsVolume));
+
+                SetAudioMixerValue(_effectsVolumeParameterKey, VolumeToAudioMixerVolume(_effectsVolume));
             }
         }
 
@@ -74,10 +77,11 @@ namespace Core.Unity.Settings {
         #region Methods
 
         /// <summary>
-        /// Sets the <see cref="ISoundSettingsAudioMixer"/> whose values to modify when the settings change.
+        /// Sets the AudioMixer whose values to change with the settings change
         /// </summary>
-        /// <param name="audioMixer"></param>
-        public static void SetAudioMixer(ISoundSettingsAudioMixer audioMixer) {
+        /// <param name="audioMixer">The AudioMixer to modify.</param>
+        /// <param name="effectsVolumeParameterKey">The name of the parameter in the AudioMixer to change when the <see cref="EffectsVolume"/> changes.</param>
+        public static void SetAudioMixer(AudioMixer audioMixer, string effectsVolumeParameterKey) {
             if (!_isInitialized) {
                 Debug.LogError("SoundSettings has not been initialized yet");
                 return;
@@ -88,7 +92,10 @@ namespace Core.Unity.Settings {
             }
 
             _audioMixer = audioMixer;
-            _audioMixer.OnEffectsVolumeSettingChanged(VolumeToAudioMixerVolume(_effectsVolume));
+            _effectsVolumeParameterKey = effectsVolumeParameterKey;
+
+            // set initial values
+            SetAudioMixerValue(_effectsVolumeParameterKey, VolumeToAudioMixerVolume(_effectsVolume));
         }
 
         /// <summary>
@@ -110,14 +117,22 @@ namespace Core.Unity.Settings {
 
         #region Private
 
+        private static void SetAudioMixerValue(string name, float value) {
+            if (!_audioMixer.SetFloat(name, value)) {
+                Debug.LogError($"Could not set value with name \"{name}\" to the AudioMixer.");
+            }
+        }
+
         private static void LogAudioMixerNotSet() {
-            Debug.LogError("Cannot set audio setting because audio mixer has not been set.");
+            Debug.LogError("Cannot set sound setting because AudioMixer has not been set.");
         }
 
         private static bool _isInitialized = false;
 
         private static float _effectsVolume;
-        private static ISoundSettingsAudioMixer _audioMixer = null;
+
+        private static AudioMixer _audioMixer = null;
+        private static string _effectsVolumeParameterKey = null;
 
         #endregion
     }
