@@ -74,6 +74,12 @@ namespace Core.Unity.SaveData {
         private const string _loadStringFailMessage = "Error loading save data from a string: {0}";
 
         /// <summary>
+        /// Event that's invoked immediately before loading save data from a string or file.
+        /// This is done before verification, so it's possible the save data isn't loaded after this event is invoked.
+        /// </summary>
+        public event UnityAction<SaveRoot> PreLoad;
+
+        /// <summary>
         /// Event that's invoked immediately after xml is sucessfully loaded and parsed.
         /// </summary>
         public event UnityAction<SaveRoot> Loaded;
@@ -98,6 +104,9 @@ namespace Core.Unity.SaveData {
         /// <returns>LoadStatus</returns>
         public LoadStatus LoadFromFile(string path) {
             LoadStatus loadStatus = LoadStatus.Ok;
+
+            // invoke preload
+            this.PreLoad?.Invoke(this);
 
             // load file
             XmlDocument xmlDoc = new XmlDocument();
@@ -157,6 +166,9 @@ namespace Core.Unity.SaveData {
         public LoadStatus LoadFromString(string str) {
             LoadStatus loadStatus = LoadStatus.Ok;
 
+            // invoke preload
+            this.PreLoad?.Invoke(this);
+
             // load from string
             XmlDocument xmlDoc = new XmlDocument();
             using (StringReader stringReader = new StringReader(str))
@@ -194,13 +206,17 @@ namespace Core.Unity.SaveData {
             return File.Exists(GetSaveDirectoryPath(index));
         }
 
+        #endregion
+
+        #region Loading - Private
+
         /// <summary>
         /// Parses an <see cref="XmlDocument"/> object.
         /// Returns the status of the load.
         /// </summary>
         /// <param name="xmlDoc">The document to parse.</param>
         /// <returns>LoadStatus</returns>
-        public LoadStatus ParseXML(XmlDocument xmlDoc) {
+        private LoadStatus ParseXML(XmlDocument xmlDoc) {
             if (xmlDoc == null) {
                 return LoadStatus.ParseError;
             }
@@ -235,10 +251,6 @@ namespace Core.Unity.SaveData {
 
             return status;
         }
-
-        #endregion
-
-        #region Loading - Private
 
         /// <summary>
         /// The settings for xml readers.
