@@ -141,7 +141,7 @@ namespace Core.Unity.Collision {
         /// <param name="border">Adds an additional border to the returned rectangle.</param>
         public Rect GetBounds(float border = 0) {
             if (_colliders.Count <= 0)
-                return new Rect(transform.position.x, transform.position.y, 0, 0);
+                return new Rect(this.transform.position.x, this.transform.position.y, 0, 0);
 
             float left = float.MaxValue;
             float right = float.MinValue;
@@ -251,10 +251,10 @@ namespace Core.Unity.Collision {
         /// </summary>
         /// <param name="velocity">Velocity of the moving object (e.g. rigidbody2d.velocity).</param>
         /// <param name="time">The amount of time passed in the collision test (e.g. Time.fixedDeltaTime).</param>
-        /// <param name="directionRestriction">If UP or DOWN, projection will be along the x axis (i.e. the x value will be the same as if no collision happened).  Vise-versa if direction is LEFT or RIGHT.  If set to NONE, all casts are tested and the projection direction is automatically determined.</param>
+        /// <param name="directionRestriction">If Up or Down, projection will be along the x axis (i.e. the x value will be the same as if no collision happened).  Vise-versa if direction is Left or Right.  If set to None, all casts are tested and the projection direction is automatically determined.</param>
         public Vector2 ProjectReposition(Vector2 velocity, float time, Direction directionRestriction = Direction.None) {
 
-            Vector2 pos0 = transform.position; // position at the start
+            Vector2 pos0 = this.transform.position; // position at the start
             Vector2 displacement = velocity * time;
             if (displacement == Vector2.zero) return pos0;
 
@@ -262,7 +262,7 @@ namespace Core.Unity.Collision {
             float castDistance = displacement.magnitude;
             Vector2 directionVec = displacement / castDistance;
 
-            int numResults = 0;
+            int numResults;
             RaycastHit2D rh2d;
             Vector2 hitPt; // where collider hit object
             Vector2 slope = new Vector2(); // slope of object hit.  Is perpendicular to the normal
@@ -296,11 +296,25 @@ namespace Core.Unity.Collision {
                     ret = new Vector2(
                         hitPt.x + slope.x / slope.y * (pos1.y - hitPt.y),
                         pos1.y);
+
+                    // add a tiny bit of distance between the projected position and the wall
+                    if (nDir == Direction.Left) {
+                        ret.x -= TouchCastDistance / 2;
+                    } else {
+                        ret.x += TouchCastDistance / 2;
+                    }
                 } else {
                     // project vertically
                     ret = new Vector2(
                         pos1.x,
                         hitPt.y + slope.y / slope.x * (pos1.x - hitPt.x));
+
+                    // add a tiny bit of distance between the projected position and the wall
+                    if (nDir == Direction.Down) {
+                        ret.y -= TouchCastDistance / 2;
+                    } else {
+                        ret.y += TouchCastDistance / 2;
+                    }
                 }
 
             } else { // if didn't hit anything
@@ -329,8 +343,8 @@ namespace Core.Unity.Collision {
             if (collider2D == null)
                 return;
 
-            this._ignoreCollisionColliders.Add(collider2D.GetInstanceID());
-            foreach (Collider2D selfCollider in this._colliders) {
+            _ignoreCollisionColliders.Add(collider2D.GetInstanceID());
+            foreach (Collider2D selfCollider in _colliders) {
                 Physics2D.IgnoreCollision(selfCollider, collider2D, true);
             }
         }
@@ -343,8 +357,8 @@ namespace Core.Unity.Collision {
             if (collider2D == null)
                 return;
 
-            this._ignoreCollisionColliders.Remove(collider2D.GetInstanceID());
-            foreach (Collider2D selfCollider in this._colliders) {
+            _ignoreCollisionColliders.Remove(collider2D.GetInstanceID());
+            foreach (Collider2D selfCollider in _colliders) {
                 Physics2D.IgnoreCollision(selfCollider, collider2D, false);
             }
         }
@@ -357,7 +371,7 @@ namespace Core.Unity.Collision {
         /// </summary>
         public void UpdateColliders() {
 
-            this._colliders.Clear();
+            _colliders.Clear();
 
             Collider2D[] colliders = this.GetComponentsInChildren<Collider2D>(true);
             foreach (Collider2D c2d in colliders) {
@@ -365,7 +379,7 @@ namespace Core.Unity.Collision {
                 if ((c2d is BoxCollider2D) ||
                     (c2d is CircleCollider2D) ||
                     (c2d is CapsuleCollider2D)) {
-                    this._colliders.Add(c2d);
+                    _colliders.Add(c2d);
                 } else {
                     Debug.LogError("CollisionCaster only recognizes BoxCollider2D, CircleCollider2D, CapsuleCollider2D");
                 }
@@ -383,7 +397,7 @@ namespace Core.Unity.Collision {
         }
 
         void OnDestroy() {
-            this._colliders.Clear();
+            _colliders.Clear();
         }
 
         /// <summary>
@@ -393,8 +407,8 @@ namespace Core.Unity.Collision {
         /// <param name="totalResults"></param>
         private void CheckCasts(Direction direction, out int totalResults, float castDistance, Vector2 originOffset) {
 
-            Vector2 directionVec = new Vector2();
-            Direction oppositeDirection = Direction.None;
+            Vector2 directionVec;
+            Direction oppositeDirection;
             switch (direction) {
             case Direction.Right:
                 directionVec = Vector2.right;
@@ -437,7 +451,7 @@ namespace Core.Unity.Collision {
 
             totalResults = 0;
 
-            foreach (Collider2D c2d in this._colliders) {
+            foreach (Collider2D c2d in _colliders) {
 
                 if (c2d == null || !c2d.isActiveAndEnabled) continue;
 
@@ -451,7 +465,7 @@ namespace Core.Unity.Collision {
                     this.GetCircleCollider2DProperties(c2d as CircleCollider2D, out origin, out radius);
                     origin += originOffset;
 
-                    numResults = Physics2D.CircleCastNonAlloc(origin, radius, directionVec, this._tempCastResults, castDistance, layerMask);
+                    numResults = Physics2D.CircleCastNonAlloc(origin, radius, directionVec, _tempCastResults, castDistance, layerMask);
 
                 } else if (c2d is BoxCollider2D) {
 
@@ -460,7 +474,7 @@ namespace Core.Unity.Collision {
                     this.GetBoxCollider2DProperties(c2d as BoxCollider2D, out origin, out size, out angle);
                     origin += originOffset;
 
-                    numResults = Physics2D.BoxCastNonAlloc(origin, size, angle, directionVec, this._tempCastResults, castDistance, layerMask);
+                    numResults = Physics2D.BoxCastNonAlloc(origin, size, angle, directionVec, _tempCastResults, castDistance, layerMask);
                     
                 } else if (c2d is CapsuleCollider2D) {
 
@@ -470,7 +484,7 @@ namespace Core.Unity.Collision {
                     this.GetCapsuleCollider2DProperties(c2d as CapsuleCollider2D, out origin, out size, out capsuleDirection, out angle);
                     origin += originOffset;
 
-                    numResults = Physics2D.CapsuleCastNonAlloc(origin, size, capsuleDirection, angle, directionVec, this._tempCastResults, castDistance, layerMask);
+                    numResults = Physics2D.CapsuleCastNonAlloc(origin, size, capsuleDirection, angle, directionVec, _tempCastResults, castDistance, layerMask);
 
                 }
 
@@ -484,8 +498,8 @@ namespace Core.Unity.Collision {
                         continue;
 
                     // skip colliders that are being ignored
-                    if (this._ignoreCollisionColliders.Count > 0 &&
-                        this._ignoreCollisionColliders.Contains(castResult.collider.GetInstanceID()))
+                    if (_ignoreCollisionColliders.Count > 0 &&
+                        _ignoreCollisionColliders.Contains(castResult.collider.GetInstanceID()))
                         continue;
                     
                     // check one-way platform effector, if used
@@ -565,11 +579,11 @@ namespace Core.Unity.Collision {
 
             int retIndex = 0;
             for (int i = 1; i < numResults; i++) {
-                if (this._tempResults[i].fraction < this._tempResults[retIndex].fraction) {
+                if (_tempResults[i].fraction < _tempResults[retIndex].fraction) {
                     retIndex = i;
                 }
             }
-            return this._tempResults[retIndex];
+            return _tempResults[retIndex];
         }
 
         private List<Collider2D> _colliders = new List<Collider2D>();
