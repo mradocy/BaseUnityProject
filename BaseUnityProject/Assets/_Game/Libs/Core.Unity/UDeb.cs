@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Core.Unity {
 
@@ -25,7 +25,7 @@ namespace Core.Unity {
         }
 
         /// <summary>
-        /// If the windows are currently visible (press `)
+        /// Gets if the windows are currently visible (press `)
         /// </summary>
         public static bool IsWindowVisible { get; private set; }
 
@@ -35,31 +35,31 @@ namespace Core.Unity {
         /// Post a string value to the UDeb screen.  This is only for showing the value, and can't be changed in-game.
         /// </summary>
         public static void Post(string propName, string value) {
-            PostValue(propName, Type.String, value, 0);
+            PostValue(propName, PropertyType.String, value, 0);
         }
         /// <summary>
         /// Post a float value to the UDeb screen.  This is only for showing the value, and can't be changed in-game.
         /// </summary>
         public static void Post(string propName, float value) {
-            PostValue(propName, Type.Float, "", value);
+            PostValue(propName, PropertyType.Float, "", value);
         }
         /// <summary>
         /// Post an int value to the UDeb screen.  This is only for showing the value, and can't be changed in-game.
         /// </summary>
         public static void Post(string propName, int value) {
-            PostValue(propName, Type.Int, "", value);
+            PostValue(propName, PropertyType.Int, "", value);
         }
         /// <summary>
         /// Post a bool value to the UDeb screen.  This is only for showing the value, and can't be changed in-game.
         /// </summary>
         public static void Post(string propName, bool value) {
-            PostValue(propName, Type.Bool, "", value ? 1 : 0);
+            PostValue(propName, PropertyType.Bool, "", value ? 1 : 0);
         }
         /// <summary>
         /// Post an object value to the UDeb screen (value.ToString() is called).  This is only for showing the value, and can't be changed in-game.
         /// </summary>
         public static void Post(string propName, object value) {
-            PostValue(propName, Type.String, value == null ? "null" : value.ToString(), 0);
+            PostValue(propName, PropertyType.String, value == null ? "null" : value.ToString(), 0);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Core.Unity {
         /// Returns the new value of the property.
         /// </summary>
         public static string Expose(string propName, string value) {
-            return ExposeValue(propName, Type.String, value);
+            return ExposeValue(propName, PropertyType.String, value);
         }
         /// <summary>
         /// Exposes a float value to the screen.  This can be changed in-game with a slider.
@@ -76,7 +76,7 @@ namespace Core.Unity {
         /// <param name="min">The min value of the slider.</param>
         /// <param name="max">The max value of the slider.</param>
         public static float Expose(string propName, float value, float min, float max) {
-            return ExposeValue(propName, Type.Float, value, min, max);
+            return ExposeValue(propName, PropertyType.Float, value, min, max);
         }
         /// <summary>
         /// Exposes an int value to the screen.  This can be changed in-game with a slider.
@@ -85,92 +85,95 @@ namespace Core.Unity {
         /// <param name="min">The min value of the slider.</param>
         /// <param name="max">The max value of the slider.</param>
         public static int Expose(string propName, int value, int min, int max) {
-            return Mathf.FloorToInt(ExposeValue(propName, Type.Int, value, min, max));
+            return Mathf.FloorToInt(ExposeValue(propName, PropertyType.Int, value, min, max));
         }
         /// <summary>
         /// Exposes a bool value to the screen.  This can be changed in-game.
         /// Returns the new value of the property.
         /// </summary>
         public static bool Expose(string propName, bool value) {
-            return ExposeValue(propName, Type.Bool, value ? 1 : 0, 0, 1) != 0;
+            return ExposeValue(propName, PropertyType.Bool, value ? 1 : 0, 0, 1) != 0;
         }
 
         #endregion
 
-        #region Register Functions
-
-        public delegate void Function0Args();
-        public delegate void Function1Arg(string arg0);
-        public delegate void Function2Args(string arg0, string arg1);
+        #region Registering Actions
 
         /// <summary>
-        /// Registers a function with no arguments.  Functions should only be registered once.
+        /// Registers an action with no arguments.
         /// </summary>
-        /// <param name="function">The function to be called when the corresponding button is pressed.</param>
-        public static void RegisterFunction(string name, Function0Args function) {
-            if (function == null) {
-                Debug.LogError($"Cannot register null function (name: \"{name}\")");
+        /// <param name="action">The method to be called when the corresponding button is pressed.</param>
+        public static void RegisterAction(string name, System.Action action) {
+            if (!IsEnabled)
+                return;
+            if (action == null) {
+                Debug.LogError($"Cannot register null action (name: \"{name}\")");
                 return;
             }
-            if (_functions.ContainsKey(name)) {
-                Debug.LogError($"Function with name \"{name}\" already exists.  Function not registered.");
-                return;
-            }
-            FunctionContainer container = new FunctionContainer();
-            container.Function0 = function;
-            _functions[name] = container;
+
+            RegisterAction(name, new ActionContainer(action));
         }
         /// <summary>
-        /// Registers a function with 1 string argument.  Functions should only be registered once.
+        /// Registers an action with 1 string argument.
         /// </summary>
-        /// <param name="function">The function to be called when the corresponding button is pressed.</param>
-        public static void RegisterFunction(string name, Function1Arg function, string defaultArg = "") {
-            if (function == null) {
-                Debug.LogError("Cannot register null function (name: " + name + ")");
+        /// <param name="action">The method to be called when the corresponding button is pressed.</param>
+        public static void RegisterAction(string name, System.Action<string> action, string defaultArg = "") {
+            if (!IsEnabled)
+                return;
+            if (action == null) {
+                Debug.LogError($"Cannot register null action (name: \"{name}\")");
                 return;
             }
-            if (_functions.ContainsKey(name)) {
-                Debug.LogError("Function with name " + name + " already exists.  Function not registered.");
-                return;
-            }
-            FunctionContainer container = new FunctionContainer();
-            container.Function1 = function;
-            container.Args.Add(defaultArg);
-            _functions[name] = container;
+
+            RegisterAction(name, new ActionContainerS(action, defaultArg));
         }
         /// <summary>
-        /// Registers a function with 2 string arguments.  Functions should only be registered once.
+        /// Registers an action with 1 int argument.
         /// </summary>
-        /// <param name="function">The function to be called when the corresponding button is pressed.</param>
-        public static void RegisterFunction(string name, Function2Args function, string defaultArg0 = "", string defaultArg1 = "") {
-            if (function == null) {
-                Debug.LogError("Cannot register null function (name: " + name + ")");
+        /// <param name="action">The method to be called when the corresponding button is pressed.</param>
+        public static void RegisterAction(string name, System.Action<int> action, int defaultArg = 0) {
+            if (!IsEnabled)
+                return;
+            if (action == null) {
+                Debug.LogError($"Cannot register null action (name: \"{name}\")");
                 return;
             }
-            if (_functions.ContainsKey(name)) {
-                Debug.LogError("Function with name " + name + " already exists.  Function not registered.");
+
+            RegisterAction(name, new ActionContainerI(action, defaultArg));
+        }
+        /// <summary>
+        /// Registers an action with 1 float argument.
+        /// </summary>
+        /// <param name="action">The method to be called when the corresponding button is pressed.</param>
+        public static void RegisterAction(string name, System.Action<float> action, float defaultArg = 0) {
+            if (!IsEnabled)
+                return;
+            if (action == null) {
+                Debug.LogError($"Cannot register null action (name: \"{name}\")");
                 return;
             }
-            FunctionContainer container = new FunctionContainer();
-            container.Function2 = function;
-            container.Args.Add(defaultArg0);
-            container.Args.Add(defaultArg1);
-            _functions[name] = container;
+
+            RegisterAction(name, new ActionContainerF(action, defaultArg));
         }
 
         /// <summary>
-        /// Gets if the function with the given name is already registered.
+        /// Gets if an action with the given name is registered.
         /// </summary>
-        public static bool IsFunctionRegistered(string name) {
-            return _functions.ContainsKey(name);
+        /// <param name="name">Name of the action.</param>
+        /// <returns>Is registered.</returns>
+        public static bool IsActionRegistered(string name) {
+            return _actions.ContainsKey(name);
         }
 
         /// <summary>
-        /// Unregisters the function with the given name.
+        /// Unregisters the action with the given name.
         /// </summary>
-        public static void UnregisterFunction(string name) {
-            if (!_functions.Remove(name)) {
-                Debug.LogError("Function " + name + " not removed because it wasn't registered");
+        public static void UnregisterAction(string name) {
+            if (!IsEnabled)
+                return;
+
+            if (!_actions.Remove(name)) {
+                Debug.LogWarning($"Action \"{name}\" not removed because it wasn't registered");
             }
         }
 
@@ -179,7 +182,7 @@ namespace Core.Unity {
         #region Keyboard Input
 
         /// <summary>
-        /// Gets if the given key was pressed this frame.  Returns false if debug == false.
+        /// Gets if the given key was pressed this frame.  Returns false if <see cref="IsEnabled"/> is false.
         /// </summary>
         public static bool IsKeyPressed(KeyCode keyCode) {
             if (!IsEnabled)
@@ -187,77 +190,12 @@ namespace Core.Unity {
             return Input.GetKeyDown(keyCode);
         }
         /// <summary>
-        /// Gets if the given key is being held this frame.  Returns false if debug == false.
+        /// Gets if the given key is being held this frame.  Returns false if <see cref="IsEnabled"/> is false.
         /// </summary>
         public static bool IsKeyHeld(KeyCode keyCode) {
             if (!IsEnabled)
                 return false;
             return Input.GetKey(keyCode);
-        }
-
-        /// <summary>
-        /// Gets if the 1 key was pressed this frame.  Returns false if debug == false.
-        /// </summary>
-        public static bool Num1Pressed {
-            get {
-                return IsKeyPressed(KeyCode.Alpha1);
-            }
-        }
-        /// <summary>
-        /// Gets if the 1 key is being held this frame.  Returns false if debug == false.
-        /// </summary>
-        public static bool Num1Held {
-            get {
-                return IsKeyHeld(KeyCode.Alpha1);
-            }
-        }
-        /// <summary>
-        /// Gets if the 2 key was pressed this frame.  Returns false if debug == false.
-        /// </summary>
-        public static bool Num2Pressed {
-            get {
-                return IsKeyPressed(KeyCode.Alpha2);
-            }
-        }
-        /// <summary>
-        /// Gets if the 2 key is being held this frame.  Returns false if debug == false.
-        /// </summary>
-        public static bool Num2Held {
-            get {
-                return IsKeyHeld(KeyCode.Alpha2);
-            }
-        }
-        /// <summary>
-        /// Gets if the 3 key was pressed this frame.  Returns false if debug == false.
-        /// </summary>
-        public static bool Num3Pressed {
-            get {
-                return IsKeyPressed(KeyCode.Alpha3);
-            }
-        }
-        /// <summary>
-        /// Gets if the 3 key is being held this frame.  Returns false if debug == false.
-        /// </summary>
-        public static bool Num3Held {
-            get {
-                return IsKeyHeld(KeyCode.Alpha3);
-            }
-        }
-        /// <summary>
-        /// Gets if the 4 key was pressed this frame.  Returns false if debug == false.
-        /// </summary>
-        public static bool Num4Pressed {
-            get {
-                return IsKeyPressed(KeyCode.Alpha4);
-            }
-        }
-        /// <summary>
-        /// Gets if the 4 key is being held this frame.  Returns false if debug == false.
-        /// </summary>
-        public static bool Num4Held {
-            get {
-                return IsKeyHeld(KeyCode.Alpha4);
-            }
         }
 
         #endregion
@@ -266,9 +204,6 @@ namespace Core.Unity {
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnBeforeSceneLoadRuntimeMethod() {
-            // Remove dependency from Initialization, and thus all Core.Unity files
-            //Initialization.CallOnInitialize(Initialize);
-
             Initialize();
         }
 
@@ -278,8 +213,6 @@ namespace Core.Unity {
 
             GameObject mbGO = new GameObject("UDeb");
             _mb = mbGO.AddComponent<MB>();
-
-            // default functions here?
         }
 
         private static MB _mb = null;
@@ -304,7 +237,6 @@ namespace Core.Unity {
         #region Receiving Unity messages
 
         private static void Update() {
-
             if (!IsEnabled)
                 return;
 
@@ -312,7 +244,6 @@ namespace Core.Unity {
             if (Input.GetKeyDown(KeyCode.BackQuote)) {
                 IsWindowVisible = !IsWindowVisible;
             }
-
         }
 
         private static void OnGUI() {
@@ -321,23 +252,31 @@ namespace Core.Unity {
             if (!IsWindowVisible)
                 return;
 
-            _propertyWindowRect = GUILayout.Window(123400, _propertyWindowRect, PropertyWindowFunction, "Properties", GUILayout.MaxWidth(WindowWidth));
-            _functionWindowRect = GUILayout.Window(123401, _functionWindowRect, FunctionWindowFunction, "Functions", GUILayout.MaxWidth(WindowWidth));
+            _propertyWindowRect = GUILayout.Window(222200, _propertyWindowRect, PropertyWindowFunction, "Properties", GUILayout.MaxWidth(_windowWidth));
+            _actionWindowRect = GUILayout.Window(222201, _actionWindowRect, ActionWindowFunction, "Actions", GUILayout.MaxWidth(_windowWidth));
         }
+
+        #endregion
+
+        #region Private Window Dimension Consts
+
+        private const int _windowMargin = 20;
+        private const int _windowWidth = 300;
+        private const int _windowHeight = 100;
+        private const int _labelWidth = 100;
+        private const int _exposedNumWidth = 45;
+        private const int _actionWindowMargin = 20;
+        private const int _actionWindowWidth = 300;
+        private const int _actionWindowHeight = 100;
 
         #endregion
 
         #region Private Posting and Exposing Values
 
-        private const int WindowMargin = 20;
-        private const int WindowWidth = 300;
-        private const int WindowHeight = 100;
-        private const int LabelWidth = 100;
-        private const int ExposedNumWidth = 45;
-        private static Rect _propertyWindowRect = new Rect(WindowMargin, WindowMargin, WindowWidth, WindowHeight);
-        private static Rect _propertyTitleBarRect = new Rect(0, 0, 10000, 20);
+        private static Rect _propertyWindowRect = new Rect(_windowMargin, _windowMargin, _windowWidth, _windowHeight);
+        private static readonly Rect _propertyTitleBarRect = new Rect(0, 0, 10000, 20);
 
-        private enum Type {
+        private enum PropertyType {
             None,
             String,
             Float,
@@ -348,8 +287,8 @@ namespace Core.Unity {
         /// <summary>
         /// Value can be changed, so shouldn't be a struct
         /// </summary>
-        private class Value {
-            public Type Type;
+        private class PropertyValue {
+            public PropertyType Type;
             public bool Editable;
             public bool Changed;
             public string StrValue;
@@ -358,12 +297,13 @@ namespace Core.Unity {
             public float NumMax;
         }
 
-        private static void PostValue(string propName, Type type, string strValue, float numValue) {
-            if (!IsEnabled) return;
-            Value v;
+        private static void PostValue(string propName, PropertyType type, string strValue, float numValue) {
+            if (!IsEnabled)
+                return;
+            PropertyValue v;
             // create value if not created yet
             if (!_values.TryGetValue(propName, out v)) {
-                v = new Value();
+                v = new PropertyValue();
                 _values[propName] = v;
             }
             // update value
@@ -374,12 +314,13 @@ namespace Core.Unity {
             v.Changed = false;
         }
 
-        private static string ExposeValue(string propName, Type type, string strValue) {
-            if (!IsEnabled) return strValue;
-            Value v;
+        private static string ExposeValue(string propName, PropertyType type, string strValue) {
+            if (!IsEnabled)
+                return strValue;
+            PropertyValue v;
             // create value if not created yet
             if (!_values.TryGetValue(propName, out v)) {
-                v = new Value();
+                v = new PropertyValue();
                 _values[propName] = v;
                 v.Changed = false;
             }
@@ -395,8 +336,9 @@ namespace Core.Unity {
             return strValue;
         }
 
-        private static float ExposeValue(string propName, Type type, float numValue, float numMin, float numMax) {
-            if (!IsEnabled) return numValue;
+        private static float ExposeValue(string propName, PropertyType type, float numValue, float numMin, float numMax) {
+            if (!IsEnabled)
+                return numValue;
 
             // bounds checking
             if (numMin > numMax) {
@@ -408,10 +350,10 @@ namespace Core.Unity {
                 return numValue;
             }
 
-            Value v;
+            PropertyValue v;
             // create value if not created yet
             if (!_values.TryGetValue(propName, out v)) {
-                v = new Value();
+                v = new PropertyValue();
                 _values[propName] = v;
                 v.Changed = false;
             }
@@ -422,7 +364,7 @@ namespace Core.Unity {
             }
             // value wasn't changed in GUI, so set to given value
             v.Type = type;
-            if (type == Type.Int) {
+            if (type == PropertyType.Int) {
                 // only change if int value is different
                 if (Mathf.Floor(v.NumValue) != numValue) {
                     v.NumValue = numValue;
@@ -437,23 +379,22 @@ namespace Core.Unity {
         }
 
         /// <summary>
-        /// A window that displays the posted and exposed properties.
+        /// Draws a window that displays the posted and exposed properties.
         /// </summary>
-        /// <param name="windowID">Window ID.</param>
-        private static void PropertyWindowFunction(int windowID) {
+        private static void PropertyWindowFunction(int windowId) {
 
             // printing properties
             GUILayout.BeginVertical();
 
             foreach (string propName in _values.Keys) {
 
-                Value value = _values[propName];
+                PropertyValue value = _values[propName];
 
                 GUILayout.BeginHorizontal();
-                GUILayout.Label(propName + ":", GUILayout.Width(LabelWidth));
+                GUILayout.Label(propName + ":", GUILayout.Width(_labelWidth));
 
                 switch (value.Type) {
-                case Type.String:
+                case PropertyType.String:
                     if (value.Editable) {
                         string outVal = GUILayout.TextField(value.StrValue);
                         if (outVal != value.StrValue) {
@@ -464,31 +405,31 @@ namespace Core.Unity {
                         GUILayout.Label(value.StrValue);
                     }
                     break;
-                case Type.Float:
+                case PropertyType.Float:
                     if (value.Editable) {
-                        GUILayout.Label(value.NumValue.ToString("0.00"), GUILayout.Width(ExposedNumWidth));
+                        GUILayout.Label(value.NumValue.ToString("0.00"), GUILayout.Width(_exposedNumWidth));
                         float outVal = GUILayout.HorizontalSlider(value.NumValue, value.NumMin, value.NumMax);
                         if (value.NumValue != outVal) {
                             value.NumValue = outVal;
                             value.Changed = true;
                         }
                     } else {
-                        GUILayout.Label(value.NumValue.ToString("0.00"), GUILayout.Width(ExposedNumWidth));
+                        GUILayout.Label(value.NumValue.ToString("0.00"), GUILayout.Width(_exposedNumWidth));
                     }
                     break;
-                case Type.Int:
+                case PropertyType.Int:
                     if (value.Editable) {
-                        GUILayout.Label("" + Mathf.FloorToInt(value.NumValue), GUILayout.Width(ExposedNumWidth));
+                        GUILayout.Label("" + Mathf.FloorToInt(value.NumValue), GUILayout.Width(_exposedNumWidth));
                         float outVal = GUILayout.HorizontalSlider(value.NumValue, value.NumMin, value.NumMax);
                         if (Mathf.Floor(value.NumValue) != Mathf.Floor(outVal)) {
                             value.Changed = true;
                         }
                         value.NumValue = outVal;
                     } else {
-                        GUILayout.Label("" + Mathf.FloorToInt(value.NumValue), GUILayout.Width(ExposedNumWidth));
+                        GUILayout.Label("" + Mathf.FloorToInt(value.NumValue), GUILayout.Width(_exposedNumWidth));
                     }
                     break;
-                case Type.Bool:
+                case PropertyType.Bool:
                     if (value.Editable) {
                         bool outVal = GUILayout.Toggle(value.NumValue != 0, "");
                         if ((value.NumValue != 0) != outVal) {
@@ -510,73 +451,112 @@ namespace Core.Unity {
             GUI.DragWindow(_propertyTitleBarRect);
         }
 
-        private static Dictionary<string, Value> _values = new Dictionary<string, Value>();
+        private static Dictionary<string, PropertyValue> _values = new Dictionary<string, PropertyValue>();
 
         #endregion
 
-        #region Private Registering Functions
+        #region Private Registering Actions
 
-        private const int FUNCTION_WINDOW_MARGIN = 20;
-        private const int FUNCTION_WINDOW_WIDTH = 300;
-        private const int FUNCTION_WINDOW_HEIGHT = 100;
-        private static Rect _functionWindowRect = new Rect(WindowMargin + WindowWidth + FUNCTION_WINDOW_MARGIN, FUNCTION_WINDOW_MARGIN, FUNCTION_WINDOW_WIDTH, FUNCTION_WINDOW_HEIGHT);
-        private static Rect _functionTitleBarRect = new Rect(0, 0, 10000, 20);
+        private static Rect _actionWindowRect = new Rect(_windowMargin + _windowWidth + _actionWindowMargin, _actionWindowMargin, _actionWindowWidth, _actionWindowHeight);
+        private static readonly Rect _actionTitleBarRect = new Rect(0, 0, 10000, 20);
+
+        private abstract class ActionContainerBase {
+            public ActionContainerBase(int argCount) {
+                Args = new string[argCount];
+            }
+            public string[] Args = null;
+            public abstract void InvokeAction();
+        }
+
+        private class ActionContainer : ActionContainerBase {
+            public ActionContainer(System.Action action) : base(0) {
+                _action = action;
+            }
+            public override void InvokeAction() {
+                _action.Invoke();
+            }
+            private System.Action _action;
+        }
+
+        private class ActionContainerS : ActionContainerBase {
+            public ActionContainerS(System.Action<string> action, string defaultArg) : base(1) {
+                _action = action;
+                Args[0] = defaultArg;
+            }
+            public override void InvokeAction() {
+                _action.Invoke(Args[0]);
+            }
+            private System.Action<string> _action;
+        }
+
+        private class ActionContainerI : ActionContainerBase {
+            public ActionContainerI(System.Action<int> action, int defaultArg) : base(1) {
+                _action = action;
+                Args[0] = defaultArg.ToString();
+            }
+            public override void InvokeAction() {
+                if (!int.TryParse(Args[0], out int i)) {
+                    i = 0;
+                }
+                _action.Invoke(i);
+            }
+            private System.Action<int> _action;
+        }
+
+        private class ActionContainerF : ActionContainerBase {
+            public ActionContainerF(System.Action<float> action, float defaultArg) : base(1) {
+                _action = action;
+                Args[0] = defaultArg.ToString();
+            }
+            public override void InvokeAction() {
+                if (!float.TryParse(Args[0], out float f)) {
+                    f = 0;
+                }
+                _action.Invoke(f);
+            }
+            private System.Action<float> _action;
+        }
+
+        private static void RegisterAction(string name, ActionContainerBase actionContainer) {
+            if (IsActionRegistered(name)) {
+                Debug.LogWarning($"Action with name \"{name}\" has already been registered.  Previous action will be replaced with new action");
+            }
+            _actions[name] = actionContainer;
+        }
 
         /// <summary>
-        /// A window that displays buttons that calls functions
+        /// Draws the window that displays buttons that calls actions
         /// </summary>
         /// <param name="windowID">Window ID.</param>
-        private static void FunctionWindowFunction(int windowID) {
-
-            // printing functions
+        private static void ActionWindowFunction(int windowID) {
 
             GUILayout.BeginVertical();
 
-            foreach (string name in _functions.Keys) {
-
-                FunctionContainer container = _functions[name];
+            foreach (KeyValuePair<string, ActionContainerBase> kvp in _actions) {
+                ActionContainerBase actionContainer = kvp.Value;
 
                 GUILayout.BeginHorizontal();
 
-                if (GUILayout.Button(name)) {
-                    // call function
-                    switch (container.Args.Count) {
-                    case 0:
-                        container.Function0();
-                        break;
-                    case 1:
-                        container.Function1(container.Args[0]);
-                        break;
-                    case 2:
-                        container.Function2(container.Args[0], container.Args[1]);
-                        break;
-                    }
+                // draw button
+                if (GUILayout.Button(kvp.Key)) {
+                    actionContainer.InvokeAction();
                 }
-                // argument input
-                for (int i = 0; i < container.Args.Count; i++) {
-                    container.Args[i] = GUILayout.TextField(container.Args[i]);
+                // draw arguments
+                for (int i = 0; i < actionContainer.Args.Length; i++) {
+                    actionContainer.Args[i] = GUILayout.TextField(actionContainer.Args[i]);
                 }
 
                 GUILayout.EndHorizontal();
-
             }
 
             GUILayout.EndVertical();
 
-
             // Allow the window to be dragged by its title bar.
-            GUI.DragWindow(_functionTitleBarRect);
+            GUI.DragWindow(_actionTitleBarRect);
         }
 
-        private class FunctionContainer {
-            public List<string> Args = new List<string>();
-            public Function0Args Function0;
-            public Function1Arg Function1;
-            public Function2Args Function2;
-        }
-        private static Dictionary<string, FunctionContainer> _functions = new Dictionary<string, FunctionContainer>();
+        private static Dictionary<string, ActionContainerBase> _actions = new Dictionary<string, ActionContainerBase>();
 
         #endregion
-
     }
 }
