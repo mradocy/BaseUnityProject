@@ -116,8 +116,9 @@ namespace Core.Unity {
         /// <summary>
         /// Registers an action with 1 string argument.
         /// </summary>
+        /// <param name="name">Name to identify the action.</param>
         /// <param name="action">The method to be called when the corresponding button is pressed.</param>
-        public static void RegisterAction(string name, System.Action<string> action, string defaultArg = "") {
+        public static void RegisterAction(string name, System.Action<string> action) {
             if (!IsEnabled)
                 return;
             if (action == null) {
@@ -125,13 +126,23 @@ namespace Core.Unity {
                 return;
             }
 
-            RegisterAction(name, new ActionContainerS(action, defaultArg));
+            RegisterAction(name, new ActionContainerS(action, ""));
         }
         /// <summary>
         /// Registers an action with 1 int argument.
         /// </summary>
+        /// <param name="name">Name to identify the action.</param>
         /// <param name="action">The method to be called when the corresponding button is pressed.</param>
-        public static void RegisterAction(string name, System.Action<int> action, int defaultArg = 0) {
+        public static void RegisterAction(string name, System.Action<int> action) {
+            RegisterAction(name, 0, action);
+        }
+        /// <summary>
+        /// Registers an action with 1 int argument.
+        /// </summary>
+        /// <param name="name">Name to identify the action.</param>
+        /// <param name="defaultArg">Default argument to the action.</param>
+        /// <param name="action">The method to be called when the corresponding button is pressed.</param>
+        public static void RegisterAction(string name, int defaultArg, System.Action<int> action) {
             if (!IsEnabled)
                 return;
             if (action == null) {
@@ -144,8 +155,18 @@ namespace Core.Unity {
         /// <summary>
         /// Registers an action with 1 float argument.
         /// </summary>
+        /// <param name="name">Name to identify the action.</param>
         /// <param name="action">The method to be called when the corresponding button is pressed.</param>
-        public static void RegisterAction(string name, System.Action<float> action, float defaultArg = 0) {
+        public static void RegisterAction(string name, System.Action<float> action) {
+            RegisterAction(name, 0, action);
+        }
+        /// <summary>
+        /// Registers an action with 1 float argument.
+        /// </summary>
+        /// <param name="name">Name to identify the action.</param>
+        /// <param name="defaultArg">Default argument to the action.</param>
+        /// <param name="action">The method to be called when the corresponding button is pressed.</param>
+        public static void RegisterAction(string name, float defaultArg, System.Action<float> action) {
             if (!IsEnabled)
                 return;
             if (action == null) {
