@@ -99,13 +99,15 @@ namespace Core.Unity.SaveData {
 
             // parse values
             _values.Clear();
-            string[] valStrs = valAttr.Value.Split(',');
-            foreach (string valStr in valStrs) {
-                int i;
-                if (int.TryParse(valStr.Trim(), out i)) {
-                    _values.Add(i);
-                } else {
-                    return LoadStatus.ParseError;
+            if (!string.IsNullOrWhiteSpace(valAttr.Value)) {
+                string[] valStrs = valAttr.Value.Split(',');
+                foreach (string valStr in valStrs) {
+                    int i;
+                    if (int.TryParse(valStr.Trim(), out i)) {
+                        _values.Add(i);
+                    } else {
+                        return LoadStatus.ParseError;
+                    }
                 }
             }
 
