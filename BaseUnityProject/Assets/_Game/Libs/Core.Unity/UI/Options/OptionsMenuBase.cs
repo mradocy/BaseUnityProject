@@ -25,7 +25,7 @@ namespace Core.Unity.UI.Options {
         /// <summary>
         /// Gets the number of options.
         /// </summary>
-        public int OptionsCount => _options?.Count ?? 0;
+        public int OptionsCount => _options.Count;
 
         #endregion
 
@@ -148,18 +148,17 @@ namespace Core.Unity.UI.Options {
 
         /// <summary>
         /// Sets the options of this menu.
+        /// A shallow copy of the provided list is made.
         /// </summary>
         /// <param name="options">Options</param>
         protected virtual void SetOptions(IList<IOption> options) {
-            if (_options == options)
-                return;
-
-            _options = options;
-
-            // ensure selected option index is valid
-            if (this.SelectedIndex >= this.OptionsCount) {
-                this.SelectedIndex = -1;
+            _options.Clear();
+            foreach (IOption option in options) {
+                _options.Add(option);
             }
+
+            // need to re-select option
+            this.SelectedIndex = -1;
         }
 
         #endregion
@@ -283,7 +282,7 @@ namespace Core.Unity.UI.Options {
 
         #region Private
 
-        private IList<IOption> _options = null;
+        private List<IOption> _options = new List<IOption>();
 
         private float _leftPressedTime = -9999;
         private float _rightPressedTime = -9999;
