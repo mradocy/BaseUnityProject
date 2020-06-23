@@ -2,6 +2,7 @@
 using Core.Unity.Settings;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -62,17 +63,23 @@ namespace Core.Unity.Assets {
                 return null;
 
             // TODO: this isn't a great way of finding the property value
-            int keyIndex = text.IndexOf($"{propertyKey}:");
-            if (keyIndex == -1) {
-                return null;
-            }
-            int valueStartIndex = keyIndex + propertyKey.Length + 1; // +1 for ":"
-            int valueEndIndex = text.IndexOf('\n', valueStartIndex);
-            string value;
-            if (valueEndIndex == -1) {
-                value = text.Substring(valueStartIndex).Trim();
-            } else {
-                value = text.Substring(valueStartIndex, valueEndIndex - valueStartIndex).Trim();
+            string value = null;
+            using (StringReader stringReader = new StringReader(text)) {
+                while (true) {
+                    string line = stringReader.ReadLine();
+                    if (line == null)
+                        break;
+
+                    int colonIndex = line.IndexOf(':');
+                    if (colonIndex == -1)
+                        continue;
+                    string key = line.Substring(0, colonIndex).Trim();
+                    if (!string.Equals(propertyKey, key, System.StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    value = line.Substring(colonIndex + 1).Trim();
+                    break;
+                }
             }
 
             return value;
