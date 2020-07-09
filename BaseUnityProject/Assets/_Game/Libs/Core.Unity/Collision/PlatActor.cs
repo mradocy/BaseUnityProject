@@ -133,7 +133,7 @@ namespace Core.Unity.Collision {
         /// <param name="distance"></param>
         public bool SnapDown(float distance) {
 
-            Vector2 pos = transform.position;
+            Vector2 pos = this.transform.position;
 
             // check raycast from bottom center first
             Rect rect = _collisionCaster.GetBounds(0);
@@ -150,7 +150,7 @@ namespace Core.Unity.Collision {
                     Vector2 diff = Vector2.down * distance * rh2d.fraction;
                     if (diff.sqrMagnitude > _collisionCaster.TouchCastDistance * _collisionCaster.TouchCastDistance) {
                         // .01 added so that collider isn't intersecting the platform below
-                        transform.position = pos + diff + new Vector2(0, .01f);
+                        this.transform.position = pos + diff + new Vector2(0, .01f);
                     }
 
                     return true;
@@ -225,25 +225,31 @@ namespace Core.Unity.Collision {
             if (!Application.isPlaying)
                 return;
 
-            _collisionCaster = GetComponent<CollisionCaster>();
-            _rb2d = GetComponent<Rigidbody2D>();
+            _collisionCaster = this.GetComponent<CollisionCaster>();
+            _rb2d = this.GetComponent<Rigidbody2D>();
 
         }
 
         private void Start() {
-            // set script execution order when not playing
 #if UNITY_EDITOR
             if (Application.isEditor && !Application.isPlaying) {
+                // set script execution order when not playing
                 UnityEditor.MonoScript thisScript = UnityEditor.MonoScript.FromMonoBehaviour(this);
                 if (UnityEditor.MonoImporter.GetExecutionOrder(thisScript) != SCRIPT_EXECUTION_ORDER) {
                     UnityEditor.MonoImporter.SetExecutionOrder(thisScript, SCRIPT_EXECUTION_ORDER);
                     Debug.Log("PlatActor script execution order set to " + SCRIPT_EXECUTION_ORDER);
                 }
+
+                // ensure autoSyncTransforms is true
+                if (!Physics2D.autoSyncTransforms) {
+                    Debug.LogWarning("Physics2D.autoSyncTransforms set to True.  Since Unity 2019.4 there have been issues when this is false");
+                    Physics2D.autoSyncTransforms = true;
+                }
             }
 #endif
 
-            _collisionCaster = GetComponent<CollisionCaster>();
-            _rb2d = GetComponent<Rigidbody2D>();
+            _collisionCaster = this.GetComponent<CollisionCaster>();
+            _rb2d = this.GetComponent<Rigidbody2D>();
 
             // only run when playing
             if (!Application.isPlaying)
