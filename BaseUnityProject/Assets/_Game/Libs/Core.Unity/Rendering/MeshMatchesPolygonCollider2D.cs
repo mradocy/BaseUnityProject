@@ -21,26 +21,29 @@ namespace Core.Unity.Rendering {
         public void UpdateMesh() {
             this.InitMesh();
 
-            // TODO: apply pc2d offset first?
-
-            Vector2[] points = this.Pc2d == null ? null : this.Pc2d.points;
-            if (points == null || points.Length < 3) {
+            if (this.Pc2d.points == null || this.Pc2d.points.Length < 3) {
                 // no points, clear mesh
                 _vertices.Clear();
                 _uvs.Clear();
                 _triangles.Clear();
             } else {
+                // get points from pc2d
+                _points.Clear();
+                for (int i=0; i < this.Pc2d.points.Length; i++) {
+                    _points.Add(this.Pc2d.points[i] + this.Pc2d.offset);
+                }
+
                 // resize vertices and uvs
-                Resize(_vertices, points.Length);
-                Resize(_uvs, points.Length);
+                Resize(_vertices, _points.Count);
+                Resize(_uvs, _points.Count);
 
                 // get bounds
                 float minX = float.MaxValue;
                 float maxX = float.MinValue;
                 float minY = float.MaxValue;
                 float maxY = float.MinValue;
-                for (int i=0; i < points.Length; i++) {
-                    Vector2 pt = points[i];
+                for (int i=0; i < _points.Count; i++) {
+                    Vector2 pt = _points[i];
                     minX = Mathf.Min(minX, pt.x);
                     maxX = Mathf.Max(maxX, pt.x);
                     minY = Mathf.Min(minY, pt.y);
@@ -48,8 +51,8 @@ namespace Core.Unity.Rendering {
                 }
 
                 // get v3 vertices and uvs
-                for (int i = 0; i < points.Length; i++) {
-                    Vector2 pt = points[i];
+                for (int i = 0; i < _points.Count; i++) {
+                    Vector2 pt = _points[i];
                     _vertices[i] = pt;
                     _uvs[i] = new Vector2(
                         (pt.x - minX) / (maxX - minX),
@@ -58,7 +61,7 @@ namespace Core.Unity.Rendering {
 
                 // get triangles
                 _triangles.Clear();
-                Triangulator triangulator = new Triangulator(points);
+                Triangulator triangulator = new Triangulator(_points);
                 int[] indices = triangulator.Triangulate();
                 _triangles.AddRange(indices);
             }
@@ -136,6 +139,8 @@ namespace Core.Unity.Rendering {
                 }
             }
         }
+
+        private List<Vector2> _points = new List<Vector2>();
 
         private Mesh _mesh = null;
         private List<Vector3> _vertices = new List<Vector3>();

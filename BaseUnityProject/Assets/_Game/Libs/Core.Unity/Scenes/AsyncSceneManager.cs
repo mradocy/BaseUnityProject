@@ -103,6 +103,9 @@ namespace Core.Unity.Scenes {
             if (currentLoadState == SceneLoadState.Loading || currentLoadState == SceneLoadState.Unloading)
                 return;
 
+            // ensure best background loading
+            Application.backgroundLoadingPriority = ThreadPriority.Low;
+
             // start scene load
             SetSceneLoadState(GetFullScenePath(sceneName), SceneLoadState.Loading);
             Debug.Log($"Start scene load: {GetFullScenePath(sceneName)}");

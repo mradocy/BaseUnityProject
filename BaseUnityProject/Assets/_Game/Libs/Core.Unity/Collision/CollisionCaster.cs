@@ -227,7 +227,11 @@ namespace Core.Unity.Collision {
             Vector2 origin = new Vector2(bounds.xMin - leftOffset, bounds.yMin + .02f);
             int layerMask = this.GetUnionLayerMask();
 
-            return Physics2D.Raycast(origin, Vector2.down, depthCheck, layerMask).collider == null;
+            bool prevQueriesHitTriggers = Physics2D.queriesHitTriggers;
+            Physics2D.queriesHitTriggers = false;
+            bool walkoff = Physics2D.Raycast(origin, Vector2.down, depthCheck, layerMask).collider == null;
+            Physics2D.queriesHitTriggers = prevQueriesHitTriggers;
+            return walkoff;
         }
 
         /// <summary>
@@ -242,7 +246,11 @@ namespace Core.Unity.Collision {
             Vector2 origin = new Vector2(bounds.xMax + rightOffset, bounds.yMin + .02f);
             int layerMask = this.GetUnionLayerMask();
 
-            return Physics2D.Raycast(origin, Vector2.down, depthCheck, layerMask).collider == null;
+            bool prevQueriesHitTriggers = Physics2D.queriesHitTriggers;
+            Physics2D.queriesHitTriggers = false;
+            bool walkoff = Physics2D.Raycast(origin, Vector2.down, depthCheck, layerMask).collider == null;
+            Physics2D.queriesHitTriggers = prevQueriesHitTriggers;
+            return walkoff;
         }
 
         /// <summary>

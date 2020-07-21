@@ -9,7 +9,7 @@ namespace Core.Unity.Rendering {
     /// </summary>
     public class Triangulator {
         
-        public Triangulator(Vector2[] points) {
+        public Triangulator(IEnumerable<Vector2> points) {
             _points = new List<Vector2>(points);
         }
 

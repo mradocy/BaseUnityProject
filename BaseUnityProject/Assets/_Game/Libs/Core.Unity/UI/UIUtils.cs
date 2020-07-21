@@ -16,7 +16,7 @@ namespace Core.Unity.UI {
         /// <param name="parentRectTransform">The <see cref="RectTransform"/> of the parent of the UI object to position.</param>
         /// <returns>Local position.</returns>
         public static Vector2 WorldToUILocalPosition(Vector3 worldPosition, RectTransform parentRectTransform) {
-            return WorldToUILocalPosition(worldPosition, parentRectTransform, Camera.main);
+            return WorldToUILocalPosition(worldPosition, parentRectTransform, UnityEngine.Camera.main);
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Core.Unity.UI {
         /// <param name="parentRectTransform">The <see cref="RectTransform"/> of the parent of the UI object to position.</param>
         /// <param name="worldCamera">The world camera to use.</param>
         /// <returns>Local position.</returns>
-        public static Vector2 WorldToUILocalPosition(Vector3 worldPosition, RectTransform parentRectTransform, Camera worldCamera) {
+        public static Vector2 WorldToUILocalPosition(Vector3 worldPosition, RectTransform parentRectTransform, UnityEngine.Camera worldCamera) {
             if (parentRectTransform == null) {
                 throw new System.ArgumentNullException(nameof(parentRectTransform));
             }
