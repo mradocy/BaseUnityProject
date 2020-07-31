@@ -59,14 +59,14 @@ Shader "Custom/UIDefault" {
             struct appdata_t {
                 float4 vertex : POSITION;
                 float4 color : COLOR;
-                float2 texcoord : TEXCOORD0;
+                float2 uv : TEXCOORD0;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f {
                 float4 vertex : SV_POSITION;
                 fixed4 color : COLOR;
-                float2 texcoord : TEXCOORD0;
+                float2 uv : TEXCOORD0;
                 float4 worldPosition : TEXCOORD1;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -84,14 +84,14 @@ Shader "Custom/UIDefault" {
                 OUT.worldPosition = v.vertex;
                 OUT.vertex = UnityObjectToClipPos(OUT.worldPosition);
 
-                OUT.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
+                OUT.uv = TRANSFORM_TEX(v.uv, _MainTex);
 
                 OUT.color = v.color * _Color;
                 return OUT;
             }
 
             fixed4 frag(v2f IN) : SV_Target {
-                half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
+                half4 color = (tex2D(_MainTex, IN.uv) + _TextureSampleAdd) * IN.color;
 
 #ifdef UNITY_UI_CLIP_RECT
                 color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
