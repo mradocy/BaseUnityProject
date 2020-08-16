@@ -11,6 +11,16 @@ namespace Core.Unity.UI {
     [RequireComponent(typeof(RectTransform))]
     public class UIScaler : MonoBehaviour {
 
+        #region Inspector Fields
+
+        [SerializeField]
+        private bool _scaleX = true;
+
+        [SerializeField]
+        private bool _scaleY = true;
+
+        #endregion
+
         /// <summary>
         /// Called by Unity when the script instance is being loaded.
         /// </summary>
@@ -23,7 +33,14 @@ namespace Core.Unity.UI {
         /// </summary>
         private void Update() {
 
-            _rectTransform.localScale = new Vector3(UISettings.UIScale, UISettings.UIScale, 1);
+            Vector3 scale = _rectTransform.localScale;
+            if (_scaleX) {
+                scale.x = UISettings.UIScale;
+            }
+            if (_scaleY) {
+                scale.y = UISettings.UIScale;
+            }
+            _rectTransform.localScale = scale;
 
         }
 
