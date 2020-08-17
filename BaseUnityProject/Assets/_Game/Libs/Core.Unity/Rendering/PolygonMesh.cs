@@ -11,12 +11,9 @@ namespace Core.Unity.Rendering {
     /// </summary>
     [RequireComponent(typeof(MeshFilter))]
     [ExecuteInEditMode]
-    public class PolygonMesh : MonoBehaviour {
+    public class PolygonMesh : PolygonPoints {
 
         #region Inspector Fields
-
-        [SerializeField]
-        public Vector2[] _localPoints = new Vector2[] { new Vector2(-2, -2), new Vector2(0, 2), new Vector2(2, -2) };
 
         [SerializeField, LongLabel]
         [Tooltip("If the mesh should update every frame while the application is playing.  If not, it must be manually updated with UpdateMesh().")]
@@ -34,7 +31,7 @@ namespace Core.Unity.Rendering {
 
             this.InitMesh();
 
-            Vector2[] points = _localPoints;
+            Vector2[] points = LocalPoints;
             if (points == null || points.Length < 3) {
                 // no points, clear mesh
                 _vertices.Clear();
@@ -129,7 +126,7 @@ namespace Core.Unity.Rendering {
         /// <summary>
         /// Called by Unity when the script instance is being loaded.
         /// </summary>
-        private void Awake() {
+        protected void Awake() {
             if (!Application.isPlaying)
                 return;
 
@@ -141,7 +138,7 @@ namespace Core.Unity.Rendering {
         /// <summary>
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
         /// </summary>
-        private void Update() {
+        protected void Update() {
 
             // update meshes
             if (!Application.isPlaying || _alwaysUpdateWhenPlaying) {
