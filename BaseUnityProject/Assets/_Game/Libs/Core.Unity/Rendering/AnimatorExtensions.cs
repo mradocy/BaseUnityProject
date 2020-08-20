@@ -19,7 +19,7 @@ namespace Core.Unity.Rendering {
         }
 
         /// <summary>
-        /// Gets the duration of the current state.
+        /// Gets the duration of the current state.  This is affected by Animator.speed
         /// </summary>
         /// <param name="animator">This animator.</param>
         /// <returns>Duration</returns>

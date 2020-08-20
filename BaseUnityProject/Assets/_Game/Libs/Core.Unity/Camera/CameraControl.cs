@@ -50,6 +50,11 @@ namespace Core.Unity.Camera {
         /// </summary>
         public static event UnityAction CameraUpdate;
 
+        /// <summary>
+        /// Event invoked when <see cref="Shake(float, float)"/> is called.
+        /// </summary>
+        public static event UnityAction<float, float> ShakeStarted;
+
         #endregion
 
         #region Properties
@@ -141,6 +146,11 @@ namespace Core.Unity.Camera {
         /// </summary>
         public CameraLimits CameraLimits { get; private set; } = CameraLimits.NoLimit;
 
+        /// <summary>
+        /// Gets the current offset to position from the camera shaking.
+        /// </summary>
+        public Vector2 ShakeOffset => _shakeMagnitude * this.Size;
+
         #endregion
 
         #region Methods
@@ -212,6 +222,7 @@ namespace Core.Unity.Camera {
         /// <param name="velocityY">Velocity of shake in y direction.</param>
         public void Shake(float velocityX, float velocityY) {
             _shakeVelocity.Set(velocityX, velocityY);
+            ShakeStarted?.Invoke(velocityX, velocityY);
         }
 
         /// <summary>
@@ -352,8 +363,8 @@ namespace Core.Unity.Camera {
 
             // update transform
             this.transform.position = new Vector3(
-                this.Position.x + _shakeMagnitude.x * this.Size,
-                this.Position.y + _shakeMagnitude.y * this.Size,
+                this.Position.x + this.ShakeOffset.x,
+                this.Position.y + this.ShakeOffset.y,
                 this.transform.position.z);
             this.transform.localRotation = MathUtils.RotToQuat(this.Rotation + _shakeRotMagnitude);
 
