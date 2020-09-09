@@ -10,6 +10,6 @@ Anything in the Testing folder will NOT be copied over to a new project.  Files 
 
 ## Creating a new project
 
-* Copy create-base-unity-project.cmd (located at the root of BaseUnityProject) into the root project folder.
+* Copy `create-base-unity-project.cmd` (located at the root of BaseUnityProject) into the root project folder.
 
-* Run create-base-unity-project.cmd.  It will use robocopy to copy the files from BaseUnityProject to the new Unity project.  This file will then delete itself.
+* Run `create-base-unity-project.cmd`.  It will use robocopy to copy the files from BaseUnityProject to the new Unity project.  This file will then delete itself.
