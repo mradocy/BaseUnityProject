@@ -28,6 +28,9 @@ namespace Core.Unity.SaveData {
 
         [Description("The save data is incompatible with what the game expects.")]
         CompatibilityError = 6,
+
+        [Description("Attempt to load data from cache, when the cache does not yet exist.")]
+        CacheDoesNotExist = 7,
     }
 
     public static class LoadStatusExtensions {

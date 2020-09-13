@@ -15,8 +15,10 @@ namespace Core.Unity.Rendering {
         /// <param name="renderer">This renderer.</param>
         /// <param name="shaderName">Name of the shader.</param>
         public static Shader EnsureShader(this Renderer renderer, string shaderName) {
-            Shader shader = renderer?.material?.shader;
-            if (string.Compare(shader?.name, shaderName, true) != 0) {
+            if (renderer == null || renderer.material == null || renderer.material.shader == null)
+                return null;
+            Shader shader = renderer.material.shader;
+            if (string.Compare(shader.name, shaderName, true) != 0) {
                 throw new System.Exception($"Renderer's material does not contain shader with the name {shaderName}");
             }
             return shader;

@@ -91,8 +91,14 @@ namespace Core.Unity.SaveData {
 
         /// <summary>
         /// Gets if the save data has been parsed already.  If so, then no more properties can be registered.
+        /// This becomes true when data gets loaded.
         /// </summary>
         public bool IsParsed { get; private set; }
+
+        /// <summary>
+        /// Gets if save data was successfully loaded from or saved to a file at least once.
+        /// </summary>
+        public bool IsDataCached => _cachedFileString != null;
 
         // TODO: Does this need to be public?  Should loading from an index in the save directory be the only option?
 
@@ -195,6 +201,34 @@ namespace Core.Unity.SaveData {
             }
 
             return loadStatus;
+        }
+
+        /// <summary>
+        /// Loads data from cached save data that was last loaded from or saved to a file (this cached data only changes if the load/save operation was a success).
+        /// This is essentially the same as reloading a save file, without needing to read from the actual file.
+        /// Ensure that <see cref="IsDataCached"/> is true before calling.
+        /// </summary>
+        public LoadStatus LoadFromCachedData() {
+            if (!this.IsDataCached) {
+                return LoadStatus.CacheDoesNotExist;
+            }
+
+            return this.LoadFromString(_cachedFileString);
+        }
+
+        /// <summary>
+        /// Loads from the data properties' default values.  The same as calling <see cref="SaveGroup.ResetToDefault"/>, but treats the action as a load.
+        /// This means that the <see cref="PreLoad"/> and <see cref="Loaded"/> events are invoked.
+        /// </summary>
+        public LoadStatus LoadFromDefault() {
+            this.PreLoad?.Invoke(this);
+
+            this.ResetToDefault();
+            this.IsParsed = true;
+
+            this.Loaded?.Invoke(this);
+
+            return LoadStatus.Ok;
         }
 
         /// <summary>
@@ -445,22 +479,6 @@ namespace Core.Unity.SaveData {
             }
 
             return this.SaveToFileCoroutine(GetSaveDirectoryPath(index), prettyPrint, callback);
-        }
-
-        /// <summary>
-        /// Gets the string representation of the save data that was last loaded from or saved to a file.
-        /// The string only changes if the load or save was a success.
-        /// </summary>
-        public string GetCachedFileString() {
-            return _cachedFileString;
-        }
-
-        /// <summary>
-        /// Gets if save data was successfully loaded from or saved to a file at least once.
-        /// </summary>
-        /// <returns>Exists</returns>
-        public bool GetCachedFileStringExists() {
-            return _cachedFileString != null;
         }
 
         #endregion

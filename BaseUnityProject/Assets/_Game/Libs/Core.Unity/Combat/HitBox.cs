@@ -236,7 +236,7 @@ namespace Core.Unity.Combat {
                 contactPoint = collisionContactPoint.point;
             } else {
                 // (may need a better way to do this for trigger interaction)
-                contactPoint = collider2d.ClosestPoint(transform.position);
+                contactPoint = collider2d.ClosestPoint(this.transform.position);
             }
 
             // get heading
