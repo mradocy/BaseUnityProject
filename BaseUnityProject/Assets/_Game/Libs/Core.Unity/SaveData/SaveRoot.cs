@@ -418,31 +418,76 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Returns a coroutine <see cref="IEnumerator"/> that will save data to the given <paramref name="path"/> in another thread,
+        /// Calls StartCoroutine() on the <paramref name="coroutineStarter"/>, which will save data to the given <paramref name="path"/> in another thread,
         /// then call <paramref name="callback"/> in the main Unity thread on completion, even if there was an error.
-        /// Usage: this.StartCoroutine(saveRoot.SaveToFileCoroutine)
+        /// A string version of the data is saved immediately when this method is called.  Writing the string to the file is done asyncronously.
         /// </summary>
+        /// <param name="coroutineStarter">The MonoBehaviour that will start the coroutine.</param>
         /// <param name="path">Path to save the data to.</param>
         /// <param name="prettyPrint">If the output string should be formatted.</param>
         /// <param name="callback">Callback function to call once the save is complete.  The given <see cref="SaveStatus"/> param is the status of the save.</param>
-        /// <returns>Coroutine IEnumerator.</returns>
-        public IEnumerator SaveToFileCoroutine(string path, bool prettyPrint, UnityAction<SaveStatus> callback) {
-
+        public void SaveToFileCoroutine(MonoBehaviour coroutineStarter, string path, bool prettyPrint, UnityAction<SaveStatus> callback) {
+            if (coroutineStarter == null) {
+                throw new System.ArgumentNullException(nameof(coroutineStarter));
+            }
             if (callback == null) {
                 throw new System.ArgumentNullException(nameof(callback));
             }
+
             if (this.IsSaving) {
                 Debug.LogError(string.Format(_saveFailMessage, path, SaveStatus.AlreadySaving));
                 callback(SaveStatus.AlreadySaving);
-                yield break;
+                return;
             }
             this.IsSaving = true;
+
+            // get save string ready in main thread
+            string dataString = this.SaveToString(prettyPrint);
+            if (dataString == null) {
+                callback(SaveStatus.StringError);
+                return;
+            }
+
+            // tell starter to start the coroutine
+            coroutineStarter.StartCoroutine(this.SaveStringToFileCoroutine(dataString, path, callback));
+        }
+
+        /// <summary>
+        /// Calls StartCoroutine() on the <paramref name="coroutineStarter"/>, which will save data to the data to <see cref="SaveDirectory"/> in another thread,
+        /// then call <paramref name="callback"/> in the main Unity thread on completion, even if there was an error.
+        /// A string version of the data is saved immediately when this method is called.  Writing the string to the file is done asyncronously.
+        /// </summary>
+        /// <param name="coroutineStarter">The MonoBehaviour that will start the coroutine.</param>
+        /// <param name="index">File index</param>
+        /// <param name="prettyPrint">If the output string should be formatted.</param>
+        /// <param name="callback">Callback function to call once the save is complete.  The given <see cref="SaveStatus"/> param is the status of the save.</param>
+        public void SaveToSaveDirectoryCoroutine(MonoBehaviour coroutineStarter, int index, bool prettyPrint, UnityAction<SaveStatus> callback) {
+            if (!Directory.Exists(SaveDirectory)) {
+                Directory.CreateDirectory(SaveDirectory);
+            }
+
+            this.SaveToFileCoroutine(coroutineStarter, GetSaveDirectoryPath(index), prettyPrint, callback);
+        }
+
+        #endregion
+
+        #region Saving - Private
+
+        /// <summary>
+        /// Saves from a string to a file, wrapped in a coroutine.
+        /// </summary>
+        /// <param name="dataString">String data to save</param>
+        /// <param name="path">Path to save the data to.</param>
+        /// <param name="callback">Callback when the save operation completes.</param>
+        /// <returns>The status of the save.</returns>
+        private IEnumerator SaveStringToFileCoroutine(string dataString, string path, UnityAction<SaveStatus> callback) {
+            yield return null;
 
             // run save to file asyncronously
             SaveStatus? saveStatus = null;
             Task.Run(async () => {
                 try {
-                    saveStatus = await this.SaveToFileAsync(path, prettyPrint);
+                    saveStatus = await this.SaveStringToFileAsync(dataString, path);
                 } catch {
                     saveStatus = SaveStatus.IOError;
                 }
@@ -465,39 +510,12 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Returns a coroutine <see cref="IEnumerator"/> that will save data to the data to <see cref="SaveDirectory"/> in another thread,
-        /// then call <paramref name="callback"/> in the main Unity thread on completion, even if there was an error.
-        /// Usage: this.StartCoroutine(saveRoot.SaveToPersistentDataCoroutine)
+        /// Async method for saving from a string to a file.
         /// </summary>
-        /// <param name="index">File index</param>
-        /// <param name="prettyPrint">If the output string should be formatted.</param>
-        /// <param name="callback">Callback function to call once the save is complete.  The given <see cref="SaveStatus"/> param is the status of the save.</param>
-        /// <returns>Coroutine IEnumerator.</returns>
-        public IEnumerator SaveToSaveDirectoryCoroutine(int index, bool prettyPrint, UnityAction<SaveStatus> callback) {
-            if (!Directory.Exists(SaveDirectory)) {
-                Directory.CreateDirectory(SaveDirectory);
-            }
-
-            return this.SaveToFileCoroutine(GetSaveDirectoryPath(index), prettyPrint, callback);
-        }
-
-        #endregion
-
-        #region Saving - Private
-
-        /// <summary>
-        /// Async method for saving to a file.
-        /// </summary>
+        /// <param name="dataString">String data to save</param>
         /// <param name="path">Path to save the data to.</param>
-        /// <param name="prettyPrint">If the output string should be formatted.</param>
         /// <returns>The status of the save.</returns>
-        private async Task<SaveStatus> SaveToFileAsync(string path, bool prettyPrint) {
-
-            string str = this.SaveToString(prettyPrint);
-            if (str == null) {
-                return SaveStatus.StringError;
-            }
-
+        private async Task<SaveStatus> SaveStringToFileAsync(string dataString, string path) {
             //// so function won't finish almost immediately
             //System.Threading.Thread.Sleep(1000);
 
@@ -510,12 +528,12 @@ namespace Core.Unity.SaveData {
             }
             try {
                 using (StreamWriter outputFile = new StreamWriter(tempPath, false, Encoding)) {
-                    await outputFile.WriteAsync(str);
+                    await outputFile.WriteAsync(dataString);
                 }
             } catch (System.Exception) {
                 return SaveStatus.IOError;
             }
-            
+
             // override previous file if successful
             string backupPath = GetBackupPath(path);
             try {
@@ -523,9 +541,9 @@ namespace Core.Unity.SaveData {
             } catch (System.Exception) {
                 return SaveStatus.IOError;
             }
-            
+
             // set cached file string after successful save
-            _cachedFileString = str;
+            _cachedFileString = dataString;
 
             return SaveStatus.Ok;
         }

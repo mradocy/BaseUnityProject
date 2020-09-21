@@ -52,6 +52,8 @@ namespace Core.Unity.Camera {
 
         /// <summary>
         /// Event invoked when <see cref="Shake(float, float)"/> is called.
+        /// arg0 is velocity of shake in x direction.
+        /// arg1 is velocity of shake in y direction.
         /// </summary>
         public static event UnityAction<float, float> ShakeStarted;
 
