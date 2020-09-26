@@ -8,7 +8,7 @@ namespace Core.Unity.SaveData {
     /// <summary>
     /// Represents a saved float value.
     /// </summary>
-    public class SaveFloat : SaveProperty {
+    public sealed class SaveFloat : SaveProperty {
 
         /// <summary>
         /// Constructor, do not call.  All save properties, except for the root, have to be registered.
@@ -17,7 +17,7 @@ namespace Core.Unity.SaveData {
         /// <param name="parent">Parent <see cref="SaveGroup"/></param>
         /// <param name="defaultValue">Value for the property to start with.</param>
         public SaveFloat(string key, SaveGroup parent, float defaultValue) : base(key, parent) {
-            this._defaultValue = defaultValue;
+            _defaultValue = defaultValue;
             this.Value = defaultValue;
         }
 
@@ -29,8 +29,8 @@ namespace Core.Unity.SaveData {
         /// <summary>
         /// Resets value to the value provided when the property was registered.
         /// </summary>
-        public override void ResetToDefault() {
-            this.Value = this._defaultValue;
+        public sealed override void ResetToDefault() {
+            this.Value = _defaultValue;
         }
 
         /// <summary>
@@ -64,6 +64,13 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Caches a copy of the value.  This will be used when creating the save xml.
+        /// </summary>
+        public override void CacheValue() {
+            _cachedValue = this.Value;
+        }
+
+        /// <summary>
         /// Create an XmlElement that represents this float property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
@@ -71,10 +78,11 @@ namespace Core.Unity.SaveData {
         public override XmlElement CreateXML(XmlDocument xmlDoc) {
             XmlElement element = xmlDoc.CreateElement("Float");
             element.SetAttribute("key", this.Key);
-            element.SetAttribute("value", $"{this.Value}");
+            element.SetAttribute("value", _cachedValue.ToString());
             return element;
         }
 
         private float _defaultValue;
+        private float _cachedValue;
     }
 }

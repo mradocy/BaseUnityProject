@@ -29,7 +29,7 @@ namespace Core.Unity.SaveData {
         /// <summary>
         /// Resets values to the values provided when the property was registered.
         /// </summary>
-        public override void ResetToDefault() {
+        public sealed override void ResetToDefault() {
             _values.Clear();
             foreach (int val in _defaultValues) {
                 _values.Add(val);
@@ -115,6 +115,16 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Caches a copy of the value.  This will be used when creating the save xml.
+        /// </summary>
+        public sealed override void CacheValue() {
+            _cachedValues.Clear();
+            foreach (int val in _values) {
+                _cachedValues.Add(val);
+            }
+        }
+
+        /// <summary>
         /// Create an XmlElement that represents this int set property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
@@ -124,14 +134,14 @@ namespace Core.Unity.SaveData {
             element.SetAttribute("key", this.Key);
 
             // sorted would be nice
-            List<int> valList = new List<int>(_values);
+            List<int> valList = new List<int>(_cachedValues);
             valList.Sort();
 
             StringBuilder sb = new StringBuilder();
             int i = 0;
             foreach (int val in valList) {
                 sb.Append(val);
-                if (i < _values.Count - 1) {
+                if (i < _cachedValues.Count - 1) {
                     sb.Append(',');
                 }
                 i++;
@@ -142,5 +152,6 @@ namespace Core.Unity.SaveData {
 
         protected HashSet<int> _values;
         protected HashSet<int> _defaultValues;
+        protected HashSet<int> _cachedValues = new HashSet<int>();
     }
 }

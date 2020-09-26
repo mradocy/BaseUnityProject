@@ -11,7 +11,7 @@ namespace Core.Unity.SaveData {
     /// <summary>
     /// The root of all save groups.
     /// </summary>
-    public class SaveRoot : SaveGroup {
+    public sealed class SaveRoot : SaveGroup {
 
         /// <summary>
         /// Constructor.  The <see cref="CompatibilityId"/> is set to <see cref="System.Guid.Empty"/>.
@@ -325,22 +325,8 @@ namespace Core.Unity.SaveData {
         /// <param name="prettyPrint">If the output string should be formatted.</param>
         /// <returns>string</returns>
         public string SaveToString(bool prettyPrint) {
-
-            this.PreSave?.Invoke(this);
-
-            // create xml document, starting with root node
-            XmlDocument xmlDoc = new XmlDocument();
-            XmlElement root = this.CreateXML(xmlDoc, true);
-            xmlDoc.AppendChild(root);
-
-            // create warning comment at top
-            if (!string.IsNullOrEmpty(this.WarningComment)) {
-                XmlComment warningComment = xmlDoc.CreateComment(this.WarningComment);
-                xmlDoc.InsertBefore(warningComment, root);
-            }
-
-            // write to string
-            return WriteXmlToString(xmlDoc, prettyPrint);
+            this.PrepareForSaveToString();
+            return this.SaveToStringAfterPrepared(prettyPrint);
         }
 
         /// <summary>
@@ -420,7 +406,7 @@ namespace Core.Unity.SaveData {
         /// <summary>
         /// Calls StartCoroutine() on the <paramref name="coroutineStarter"/>, which will save data to the given <paramref name="path"/> in another thread,
         /// then call <paramref name="callback"/> in the main Unity thread on completion, even if there was an error.
-        /// A string version of the data is saved immediately when this method is called.  Writing the string to the file is done asyncronously.
+        /// Save data is cached immediately when this method is called.  Writing to the file from the cached data is done asyncronously.
         /// </summary>
         /// <param name="coroutineStarter">The MonoBehaviour that will start the coroutine.</param>
         /// <param name="path">Path to save the data to.</param>
@@ -441,15 +427,11 @@ namespace Core.Unity.SaveData {
             }
             this.IsSaving = true;
 
-            // get save string ready in main thread
-            string dataString = this.SaveToString(prettyPrint);
-            if (dataString == null) {
-                callback(SaveStatus.StringError);
-                return;
-            }
+            // get ready for save in main thread
+            this.PrepareForSaveToString();
 
             // tell starter to start the coroutine
-            coroutineStarter.StartCoroutine(this.SaveStringToFileCoroutine(dataString, path, callback));
+            coroutineStarter.StartCoroutine(this.SaveToFileCoroutineAfterPrepared(path, prettyPrint, callback));
         }
 
         /// <summary>
@@ -474,20 +456,56 @@ namespace Core.Unity.SaveData {
         #region Saving - Private
 
         /// <summary>
-        /// Saves from a string to a file, wrapped in a coroutine.
+        /// Takes necessary steps before saving to a string.
+        /// Includes invoking <see cref="PreSave"/> and caching values.
+        /// </summary>
+        private void PrepareForSaveToString() {
+
+            this.PreSave?.Invoke(this);
+
+            // cache values, preparing for writing xml files
+            this.CacheValue();
+        }
+
+        /// <summary>
+        /// Saves the data to a string.  Make sure <see cref="PrepareForSaveToString"/> was called first!
+        /// Can be done asyncronously.
+        /// Returns null if there was a problem.
+        /// </summary>
+        /// <param name="prettyPrint">If the output string should be formatted.</param>
+        /// <returns>string</returns>
+        private string SaveToStringAfterPrepared(bool prettyPrint) {
+            // create xml document, starting with root node
+            XmlDocument xmlDoc = new XmlDocument();
+            XmlElement root = this.CreateXML(xmlDoc, true);
+            xmlDoc.AppendChild(root);
+
+            // create warning comment at top
+            if (!string.IsNullOrEmpty(this.WarningComment)) {
+                XmlComment warningComment = xmlDoc.CreateComment(this.WarningComment);
+                xmlDoc.InsertBefore(warningComment, root);
+            }
+
+            // write to string
+            return WriteXmlToString(xmlDoc, prettyPrint);
+        }
+
+        /// <summary>
+        /// Saves to a file asyncronously, wrapped in a coroutine.  Make sure <see cref="PrepareForSaveToString"/> was called first!
         /// </summary>
         /// <param name="dataString">String data to save</param>
         /// <param name="path">Path to save the data to.</param>
+        /// <param name="prettyPrint">If the output string should be formatted.</param>
         /// <param name="callback">Callback when the save operation completes.</param>
         /// <returns>The status of the save.</returns>
-        private IEnumerator SaveStringToFileCoroutine(string dataString, string path, UnityAction<SaveStatus> callback) {
+        private IEnumerator SaveToFileCoroutineAfterPrepared(string path, bool prettyPrint, UnityAction<SaveStatus> callback) {
             yield return null;
 
             // run save to file asyncronously
             SaveStatus? saveStatus = null;
             Task.Run(async () => {
                 try {
-                    saveStatus = await this.SaveStringToFileAsync(dataString, path);
+                    saveStatus = await this.SaveToFileAsync(path, prettyPrint);
                 } catch {
                     saveStatus = SaveStatus.IOError;
                 }
@@ -510,14 +528,18 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Async method for saving from a string to a file.
+        /// Async method for saving to a file.
         /// </summary>
         /// <param name="dataString">String data to save</param>
         /// <param name="path">Path to save the data to.</param>
+        /// <param name="prettyPrint">If the output string should be formatted.</param>
         /// <returns>The status of the save.</returns>
-        private async Task<SaveStatus> SaveStringToFileAsync(string dataString, string path) {
-            //// so function won't finish almost immediately
+        private async Task<SaveStatus> SaveToFileAsync(string path, bool prettyPrint) {
+            //// uncomment for function to not finish almost immediately
             //System.Threading.Thread.Sleep(1000);
+
+            // get string to save
+            string str = this.SaveToStringAfterPrepared(prettyPrint);
 
             // save to temporary file first
             string tempPath;
@@ -528,7 +550,7 @@ namespace Core.Unity.SaveData {
             }
             try {
                 using (StreamWriter outputFile = new StreamWriter(tempPath, false, Encoding)) {
-                    await outputFile.WriteAsync(dataString);
+                    await outputFile.WriteAsync(str);
                 }
             } catch (System.Exception) {
                 return SaveStatus.IOError;
@@ -543,7 +565,7 @@ namespace Core.Unity.SaveData {
             }
 
             // set cached file string after successful save
-            _cachedFileString = dataString;
+            _cachedFileString = str;
 
             return SaveStatus.Ok;
         }

@@ -8,7 +8,7 @@ namespace Core.Unity.SaveData {
     /// <summary>
     /// Represents a saved int value.
     /// </summary>
-    public class SaveEnum<TEnum> : SaveEnum where TEnum : System.Enum {
+    public sealed class SaveEnum<TEnum> : SaveEnum where TEnum : System.Enum {
 
         /// <summary>
         /// Constructor, do not call.  All save properties, except for the root, have to be registered.
@@ -66,7 +66,7 @@ namespace Core.Unity.SaveData {
         /// <summary>
         /// Resets value to the value provided when the property was registered.
         /// </summary>
-        public override void ResetToDefault() {
+        public sealed override void ResetToDefault() {
             this.IntValue = _defaultValue;
         }
 
@@ -76,7 +76,7 @@ namespace Core.Unity.SaveData {
         /// </summary>
         /// <param name="xmlNode">Node to parse.</param>
         /// <returns>LoadStatus</returns>
-        public override LoadStatus ParseXML(XmlNode xmlNode) {
+        public sealed override LoadStatus ParseXML(XmlNode xmlNode) {
             if (xmlNode == null) {
                 throw new System.ArgumentNullException();
             }
@@ -101,17 +101,25 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Caches a copy of the value.  This will be used when creating the save xml.
+        /// </summary>
+        public sealed override void CacheValue() {
+            _cachedValue = this.IntValue;
+        }
+
+        /// <summary>
         /// Create an XmlElement that represents this int property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
         /// <returns>XmlElement</returns>
-        public override XmlElement CreateXML(XmlDocument xmlDoc) {
+        public sealed override XmlElement CreateXML(XmlDocument xmlDoc) {
             XmlElement element = xmlDoc.CreateElement("Enum");
             element.SetAttribute("key", this.Key);
-            element.SetAttribute("value", $"{this.IntValue}");
+            element.SetAttribute("value", _cachedValue.ToString());
             return element;
         }
 
         private int _defaultValue;
+        private int _cachedValue;
     }
 }

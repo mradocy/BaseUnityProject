@@ -10,7 +10,7 @@ namespace Core.Unity.SaveData {
     /// Represents a saved bit array of enums.  Values are represented as ints internally.
     /// </summary>
     /// <typeparam name="TEnum">The enum type.</typeparam>
-    public class SaveEnumBitArray<TEnum> : SaveIntBitArray where TEnum : System.Enum {
+    public sealed class SaveEnumBitArray<TEnum> : SaveIntBitArray where TEnum : System.Enum {
 
         /// <summary>
         /// Constructor, do not call.  All save properties, except for the root, have to be registered.
@@ -66,8 +66,8 @@ namespace Core.Unity.SaveData {
             element.SetAttribute("key", this.Key);
 
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < _bits.Length; i++) {
-                byte b = _bits[i];
+            for (int i = 0; i < _cachedBits.Length; i++) {
+                byte b = _cachedBits[i];
                 for (int j = 0; j < 8; j++) {
                     if ((b & (1 << j)) != 0) {
                         sb.Append(i * 8 + j);

@@ -60,19 +60,19 @@ namespace Core.Unity.SaveData {
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
         /// <returns>XmlElement</returns>
-        public override XmlElement CreateXML(XmlDocument xmlDoc) {
+        public sealed override XmlElement CreateXML(XmlDocument xmlDoc) {
             XmlElement element = xmlDoc.CreateElement("EnumSet");
             element.SetAttribute("key", this.Key);
 
             // sorted would be nice
-            List<int> valList = new List<int>(_values);
+            List<int> valList = new List<int>(_cachedValues);
             valList.Sort();
 
             StringBuilder sb = new StringBuilder();
             int i = 0;
             foreach (int val in valList) {
                 sb.Append(val);
-                if (i < _values.Count - 1) {
+                if (i < _cachedValues.Count - 1) {
                     sb.Append(',');
                 }
                 i++;

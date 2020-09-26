@@ -8,7 +8,7 @@ namespace Core.Unity.SaveData {
     /// <summary>
     /// Represents a typed saved serializable value.
     /// </summary>
-    public class SaveSerializable<T> : SaveSerializable
+    public sealed class SaveSerializable<T> : SaveSerializable
         where T : class, ISerializable {
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Core.Unity.SaveData {
         /// <summary>
         /// Resets value to the value provided when the property was registered.
         /// </summary>
-        public override void ResetToDefault() {
+        public sealed override void ResetToDefault() {
             this.UntypedValue.Deserialize(_defaultSerValue);
         }
 
@@ -91,7 +91,7 @@ namespace Core.Unity.SaveData {
         /// </summary>
         /// <param name="xmlNode">Node to parse.</param>
         /// <returns>LoadStatus</returns>
-        public override LoadStatus ParseXML(XmlNode xmlNode) {
+        public sealed override LoadStatus ParseXML(XmlNode xmlNode) {
             if (xmlNode == null) {
                 throw new System.ArgumentNullException();
             }
@@ -108,18 +108,26 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Caches a copy of the values of all the properties in this group.  These cached values will be used when creating the save xml.
+        /// </summary>
+        public sealed override void CacheValue() {
+            _cachedSerValue = this.UntypedValue.Serialize(false);
+        }
+
+        /// <summary>
         /// Create an XmlElement that represents this string property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
         /// <returns>XmlElement</returns>
-        public override XmlElement CreateXML(XmlDocument xmlDoc) {
+        public sealed override XmlElement CreateXML(XmlDocument xmlDoc) {
             XmlElement element = xmlDoc.CreateElement("Serializable");
             element.SetAttribute("key", this.Key);
-            element.InnerText = this.UntypedValue.Serialize(false);
+            element.InnerText = _cachedSerValue;
             return element;
         }
 
         private ISerializable _untypedValue;
         private string _defaultSerValue;
+        private string _cachedSerValue;
     }
 }

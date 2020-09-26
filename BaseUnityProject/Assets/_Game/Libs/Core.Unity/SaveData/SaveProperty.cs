@@ -25,10 +25,10 @@ namespace Core.Unity.SaveData {
         /// </summary>
         public virtual SaveRoot Root {
             get {
-                if (this._root == null) {
-                    this._root = this.Parent?.Root;
+                if (_root == null) {
+                    _root = this.Parent?.Root;
                 }
-                return this._root;
+                return _root;
             }
         }
 
@@ -38,7 +38,12 @@ namespace Core.Unity.SaveData {
         public abstract void ResetToDefault();
 
         /// <summary>
-        /// Create an XmlElement that represents this string property.
+        /// Caches a copy of the value.  This cached value will be used when creating the save xml.
+        /// </summary>
+        public abstract void CacheValue();
+
+        /// <summary>
+        /// Create an XmlElement that represents this property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
         /// <returns>XmlElement</returns>

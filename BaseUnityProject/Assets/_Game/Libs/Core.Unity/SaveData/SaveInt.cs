@@ -8,7 +8,7 @@ namespace Core.Unity.SaveData {
     /// <summary>
     /// Represents a saved int value.
     /// </summary>
-    public class SaveInt : SaveProperty {
+    public sealed class SaveInt : SaveProperty {
 
         /// <summary>
         /// Constructor, do not call.  All save properties, except for the root, have to be registered.
@@ -64,6 +64,13 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Caches a copy of the value.  This will be used when creating the save xml.
+        /// </summary>
+        public override void CacheValue() {
+            _cachedValue = this.Value;
+        }
+
+        /// <summary>
         /// Create an XmlElement that represents this int property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
@@ -71,10 +78,11 @@ namespace Core.Unity.SaveData {
         public override XmlElement CreateXML(XmlDocument xmlDoc) {
             XmlElement element = xmlDoc.CreateElement("Int");
             element.SetAttribute("key", this.Key);
-            element.SetAttribute("value", $"{this.Value}");
+            element.SetAttribute("value", _cachedValue.ToString());
             return element;
         }
 
         private int _defaultValue;
+        private int _cachedValue;
     }
 }

@@ -10,7 +10,7 @@ namespace Core.Unity.SaveData {
     /// Represents a saved list of enums.  Values are represented as ints internally.
     /// </summary>
     /// <typeparam name="TEnum">The enum type.</typeparam>
-    public class SaveEnumList<TEnum> : SaveIntList where TEnum : System.Enum {
+    public sealed class SaveEnumList<TEnum> : SaveIntList where TEnum : System.Enum {
 
         /// <summary>
         /// Constructor, do not call.  All save properties, except for the root, have to be registered.
@@ -86,9 +86,9 @@ namespace Core.Unity.SaveData {
 
             StringBuilder sb = new StringBuilder();
             int i = 0;
-            foreach (int val in _values) {
+            foreach (int val in _cachedValues) {
                 sb.Append(val);
-                if (i < _values.Count - 1) {
+                if (i < _cachedValues.Count - 1) {
                     sb.Append(',');
                 }
                 i++;

@@ -33,6 +33,7 @@ namespace Core.Unity.SaveData {
             this.Max = max;
             _bits = new byte[max / 8 + 1];
             _defaultBits = new byte[_bits.Length];
+            _cachedBits = new byte[_bits.Length];
 
             // set default values
             if (defaultValues != null) {
@@ -48,7 +49,7 @@ namespace Core.Unity.SaveData {
         /// <summary>
         /// Resets values to the values provided when the property was registered.
         /// </summary>
-        public override void ResetToDefault() {
+        public sealed override void ResetToDefault() {
             for (int i=0; i < _bits.Length; i++) {
                 _bits[i] = _defaultBits[i];
             }
@@ -109,7 +110,7 @@ namespace Core.Unity.SaveData {
         /// </summary>
         /// <param name="xmlNode">Node to parse.</param>
         /// <returns>LoadStatus</returns>
-        public override LoadStatus ParseXML(XmlNode xmlNode) {
+        public sealed override LoadStatus ParseXML(XmlNode xmlNode) {
             if (xmlNode == null) {
                 throw new System.ArgumentNullException();
             }
@@ -141,6 +142,15 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Caches a copy of the value.  This will be used when creating the save xml.
+        /// </summary>
+        public sealed override void CacheValue() {
+            for (int i=0; i < _bits.Length; i++) {
+                _cachedBits[i] = _bits[i];
+            }
+        }
+
+        /// <summary>
         /// Create an XmlElement that represents this int set property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
@@ -150,8 +160,8 @@ namespace Core.Unity.SaveData {
             element.SetAttribute("key", this.Key);
 
             StringBuilder sb = new StringBuilder();
-            for (int i=0; i < _bits.Length; i++) {
-                byte b = _bits[i];
+            for (int i=0; i < _cachedBits.Length; i++) {
+                byte b = _cachedBits[i];
                 for (int j=0; j < 8; j++) {
                     if ((b & (1 << j)) != 0) {
                         sb.Append(i * 8 + j);
@@ -169,5 +179,6 @@ namespace Core.Unity.SaveData {
 
         protected byte[] _bits;
         protected byte[] _defaultBits;
+        protected byte[] _cachedBits;
     }
 }

@@ -29,7 +29,7 @@ namespace Core.Unity.SaveData {
         /// <summary>
         /// Resets values to the values provided when the property was registered.
         /// </summary>
-        public override void ResetToDefault() {
+        public sealed override void ResetToDefault() {
             _values.Clear();
             foreach (int val in _defaultValues) {
                 _values.Add(val);
@@ -99,7 +99,7 @@ namespace Core.Unity.SaveData {
         /// </summary>
         /// <param name="xmlNode">Node to parse.</param>
         /// <returns>LoadStatus</returns>
-        public override LoadStatus ParseXML(XmlNode xmlNode) {
+        public sealed override LoadStatus ParseXML(XmlNode xmlNode) {
             if (xmlNode == null) {
                 throw new System.ArgumentNullException();
             }
@@ -129,6 +129,14 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Caches a copy of the value.  This will be used when creating the save xml.
+        /// </summary>
+        public sealed override void CacheValue() {
+            _cachedValues.Clear();
+            _cachedValues.AddRange(_values);
+        }
+
+        /// <summary>
         /// Create an XmlElement that represents this int list property.
         /// </summary>
         /// <param name="xmlDoc">XmlDocument to use to create the element.</param>
@@ -139,9 +147,9 @@ namespace Core.Unity.SaveData {
 
             StringBuilder sb = new StringBuilder();
             int i = 0;
-            foreach (int val in _values) {
+            foreach (int val in _cachedValues) {
                 sb.Append(val);
-                if (i < _values.Count - 1) {
+                if (i < _cachedValues.Count - 1) {
                     sb.Append(',');
                 }
                 i++;
@@ -152,5 +160,6 @@ namespace Core.Unity.SaveData {
 
         protected List<int> _values;
         protected List<int> _defaultValues;
+        protected List<int> _cachedValues = new List<int>();
     }
 }

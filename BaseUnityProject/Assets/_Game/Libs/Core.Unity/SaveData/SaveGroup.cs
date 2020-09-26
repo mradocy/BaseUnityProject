@@ -360,9 +360,18 @@ namespace Core.Unity.SaveData {
         /// <summary>
         /// Resets the values of all this group's properties.
         /// </summary>
-        public override void ResetToDefault() {
+        public sealed override void ResetToDefault() {
             foreach (SaveProperty prop in _properties.Values) {
                 prop.ResetToDefault();
+            }
+        }
+
+        /// <summary>
+        /// Caches a copy of the values of all the properties in this group.  These cached values will be used when creating the save xml.
+        /// </summary>
+        public sealed override void CacheValue() {
+            foreach (SaveProperty prop in _properties.Values) {
+                prop.CacheValue();
             }
         }
 
@@ -492,7 +501,6 @@ namespace Core.Unity.SaveData {
 
             return element;
         }
-
         /// <summary>
         /// Logs an error if there would be a problem registering a property with the given key.
         /// Returns if there was an error.
