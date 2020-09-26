@@ -1,7 +1,7 @@
 ﻿// Extension of the SpritesDefault shader, while acting as a masked object using the stencil buffer
 // http://vinaybourai.com/blog/masking-unity-sprites-with-stencils/
 // Do not generate mip-maps on the sprites.  This will cause weird artifacts with the texture wrapping.
-Shader "Custom/SpritesMasked" {
+Shader "Custom/SpritesMaskedInverted" {
 
     Properties {
         _MainTex("Sprite Texture", 2D) = "white" {}
@@ -34,7 +34,7 @@ Shader "Custom/SpritesMasked" {
             Stencil {
                 Ref [_StencilRef] // value to compare against the stencil buffer when deciding to draw a pixel
 				ReadMask [_StencilReadMask] // Masks the bits that the stencil buffer will be read from
-                Comp equal // 'equal' means pixel will be drawn only if the Ref value is already in the buffer
+                Comp notequal // 'notequal' means pixel will be drawn only if the Ref value is not in the buffer
                 Pass keep // 'keep' means the current contents of the stencil buffer will stay as they are
             }
 
