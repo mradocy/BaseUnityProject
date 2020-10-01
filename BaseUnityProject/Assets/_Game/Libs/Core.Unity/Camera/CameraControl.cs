@@ -7,17 +7,8 @@ using UnityEngine.Events;
 namespace Core.Unity.Camera {
 
     [RequireComponent(typeof(UnityEngine.Camera))]
-    [ExecuteInEditMode]
+    [DefaultExecutionOrder(999)] // this script should execute late.  NOTE: This attribute works, despite not showing up in the Script Execution Order window
     public class CameraControl : MonoBehaviour {
-
-        #region Constants
-
-        /// <summary>
-        /// Value set to the script execution order of this script (should be late).
-        /// </summary>
-        public const int ScriptExecutionOrder = 999;
-
-        #endregion
 
         #region Inspector Fields
 
@@ -257,10 +248,6 @@ namespace Core.Unity.Camera {
         /// Called by Unity when the script instance is being loaded.
         /// </summary>
         private void Awake() {
-
-            // only run when playing
-            if (!Application.isPlaying)
-                return;
             // singleton
             if (Main != null) {
                 Debug.LogError("Cannot use more than one CameraControl");
@@ -274,26 +261,12 @@ namespace Core.Unity.Camera {
 
         private void Start() {
 
-            // set script execution order when not playing
-#if UNITY_EDITOR
-            if (Application.isEditor && !Application.isPlaying) {
-                UnityEditor.MonoScript thisScript = UnityEditor.MonoScript.FromMonoBehaviour(this);
-                if (UnityEditor.MonoImporter.GetExecutionOrder(thisScript) != ScriptExecutionOrder) {
-                    UnityEditor.MonoImporter.SetExecutionOrder(thisScript, ScriptExecutionOrder);
-                    Debug.Log($"CameraControl script execution order set to {ScriptExecutionOrder}");
-                }
-            }
-#endif
-
         }
 
         /// <summary>
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
         /// </summary>
         private void Update() {
-
-            if (!Application.isPlaying)
-                return;
 
         }
 
@@ -317,9 +290,6 @@ namespace Core.Unity.Camera {
         /// Called after all Update functions have been called.
         /// </summary>
         private void LateUpdate() {
-
-            if (!Application.isPlaying)
-                return;
 
             // get camera position
             Vector2 pos = this.Position;
@@ -378,9 +348,6 @@ namespace Core.Unity.Camera {
         /// Called when this behavior is destroyed.
         /// </summary>
         private void OnDestroy() {
-
-            if (!Application.isPlaying)
-                return;
 
             // set Main to null
             if (Main == this) {

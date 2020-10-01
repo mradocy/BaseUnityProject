@@ -12,13 +12,8 @@ namespace Core.Unity.Collision {
     /// </summary>
     [RequireComponent(typeof(CollisionCaster))]
     [RequireComponent(typeof(Rigidbody2D))]
-    [ExecuteInEditMode] // only done to automatically set own script execution order
+    [DefaultExecutionOrder(999)] // this script should execute late.  NOTE: This attribute works, despite not showing up in the Script Execution Order window
     public class PlatActor : MonoBehaviour {
-
-        /// <summary>
-        /// Value set to the script execution order of this script (should be late).
-        /// </summary>
-        public const int SCRIPT_EXECUTION_ORDER = 999;
 
         #region Inspector Fields
 
@@ -220,50 +215,22 @@ namespace Core.Unity.Collision {
         #region Private
 
         private void Awake() {
-
-            // only run when playing
-            if (!Application.isPlaying)
-                return;
-
-            _collisionCaster = this.GetComponent<CollisionCaster>();
-            _rb2d = this.GetComponent<Rigidbody2D>();
-
-        }
-
-        private void Start() {
-#if UNITY_EDITOR
-            if (Application.isEditor && !Application.isPlaying) {
-                // set script execution order when not playing
-                UnityEditor.MonoScript thisScript = UnityEditor.MonoScript.FromMonoBehaviour(this);
-                if (UnityEditor.MonoImporter.GetExecutionOrder(thisScript) != SCRIPT_EXECUTION_ORDER) {
-                    UnityEditor.MonoImporter.SetExecutionOrder(thisScript, SCRIPT_EXECUTION_ORDER);
-                    Debug.Log("PlatActor script execution order set to " + SCRIPT_EXECUTION_ORDER);
-                }
-
-                // ensure autoSyncTransforms is true
-                if (!Physics2D.autoSyncTransforms) {
-                    Debug.LogWarning("Physics2D.autoSyncTransforms set to True.  Since Unity 2019.4 there have been issues when this is false");
-                    Physics2D.autoSyncTransforms = true;
-                }
+            if (!Physics2D.autoSyncTransforms) {
+                Debug.LogWarning("Physics2D.autoSyncTransforms is false.  Since Unity 2019.4 there have been issues when this is false, set this setting to true.");
+                Physics2D.autoSyncTransforms = true;
             }
-#endif
 
-            _collisionCaster = this.GetComponent<CollisionCaster>();
-            _rb2d = this.GetComponent<Rigidbody2D>();
+            _collisionCaster = this.EnsureComponent<CollisionCaster>();
+            _rb2d = this.EnsureComponent<Rigidbody2D>();
 
-            // only run when playing
-            if (!Application.isPlaying)
-                return;
-
+            if (_rb2d.gravityScale != 0) {
+                Debug.LogWarning("Attached RigidBody2D.gravityScale has been set to 0, as required by PlatActor");
+                _rb2d.gravityScale = 0;
+            }
         }
+
 
         private void Update() {
-            // ensure rb2d's gravityScale is always set to 0.
-            _rb2d.gravityScale = 0;
-
-            // only run when playing
-            if (!Application.isPlaying)
-                return;
 
         }
 
@@ -271,10 +238,6 @@ namespace Core.Unity.Collision {
         /// PlatActor is set very late in the script execution order, so this should be the last thing that modifies rigidBody2D before the internal physics update
         /// </summary>
         private void FixedUpdate() {
-
-            // only run when playing
-            if (!Application.isPlaying)
-                return;
 
             // unignore temporary ignore colliders
             if (_temporaryIgnoreColliders.Keys.Count > 0) {
