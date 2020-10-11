@@ -1,7 +1,5 @@
-﻿// Extension of the SpritesDefault shader, while acting as a masked object using the stencil buffer
-// http://vinaybourai.com/blog/masking-unity-sprites-with-stencils/
-// Do not generate mip-maps on the sprites.  This will cause weird artifacts with the texture wrapping.
-Shader "Custom/SpritesMasked" {
+﻿// Combination of SpritesMasked and SpritesLinearDodge.
+Shader "Custom/SpritesMaskedLinearDodge" {
 
     Properties {
         _MainTex("Sprite Texture", 2D) = "white" {}
@@ -26,7 +24,9 @@ Shader "Custom/SpritesMasked" {
         Cull Off
         Lighting Off
         ZWrite Off
-        Blend One OneMinusSrcAlpha
+
+        BlendOp Add
+        Blend SrcAlpha One, One Zero
 
         Pass {
 

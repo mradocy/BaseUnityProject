@@ -16,7 +16,7 @@ namespace Core.Unity.BuildAutomation {
         /// <summary>
         /// How long to run the zip process before killing it.
         /// </summary>
-        private static readonly System.TimeSpan _zipProcessTimeout = System.TimeSpan.FromSeconds(10);
+        private static readonly System.TimeSpan _zipProcessTimeout = System.TimeSpan.FromSeconds(20);
 
         #endregion
 

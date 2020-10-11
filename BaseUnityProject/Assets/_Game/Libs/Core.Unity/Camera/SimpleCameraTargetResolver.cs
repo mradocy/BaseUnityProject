@@ -15,8 +15,6 @@ namespace Core.Unity.Camera {
             this.CameraTarget = target;
         }
 
-        /// <inheritdoc />
         public Vector2 CameraTarget { get; set; }
-
     }
 }
