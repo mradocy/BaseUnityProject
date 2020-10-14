@@ -26,6 +26,11 @@ namespace Core.Unity.Settings {
         /// </summary>
         private const string _effectsVolumeInitializationKey = "effects_volume";
 
+        /// <summary>
+        /// Key for accessing the music volume from <see cref="Initialization.Settings"/>.
+        /// </summary>
+        private const string _musicVolumeInitializationKey = "music_volume";
+
         #endregion
 
         #region Initialization
@@ -44,6 +49,7 @@ namespace Core.Unity.Settings {
 
             // get initial values from .ini file
             _effectsVolume = Initialization.Settings.GetFloat(_effectsVolumeInitializationKey, DefaultVolume);
+            _musicVolume = Initialization.Settings.GetFloat(_musicVolumeInitializationKey, DefaultVolume);
 
             _isInitialized = true;
         }
@@ -72,6 +78,26 @@ namespace Core.Unity.Settings {
             }
         }
 
+        /// <summary>
+        /// Gets or sets the current music volume.
+        /// </summary>
+        public static float MusicVolume {
+            get { return _musicVolume; }
+            set {
+                if (_musicVolume == value)
+                    return;
+
+                _musicVolume = value;
+                Initialization.Settings.SetFloat(_musicVolumeInitializationKey, value);
+                if (_audioMixer == null) {
+                    LogAudioMixerNotSet();
+                    return;
+                }
+
+                SetAudioMixerValue(_musicVolumeParameterKey, VolumeToAudioMixerVolume(_musicVolume));
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -81,7 +107,8 @@ namespace Core.Unity.Settings {
         /// </summary>
         /// <param name="audioMixer">The AudioMixer to modify.</param>
         /// <param name="effectsVolumeParameterKey">The name of the parameter in the AudioMixer to change when the <see cref="EffectsVolume"/> changes.</param>
-        public static void SetAudioMixer(AudioMixer audioMixer, string effectsVolumeParameterKey) {
+        /// <param name="musicVolumeParameterKey">The name of the parameter in the AudioMixer to change when the <see cref="MusicVolume"/> changes.</param>
+        public static void SetAudioMixer(AudioMixer audioMixer, string effectsVolumeParameterKey, string musicVolumeParameterKey) {
             if (!_isInitialized) {
                 Debug.LogError("SoundSettings has not been initialized yet");
                 return;
@@ -93,9 +120,11 @@ namespace Core.Unity.Settings {
 
             _audioMixer = audioMixer;
             _effectsVolumeParameterKey = effectsVolumeParameterKey;
+            _musicVolumeParameterKey = musicVolumeParameterKey;
 
             // set initial values
             SetAudioMixerValue(_effectsVolumeParameterKey, VolumeToAudioMixerVolume(_effectsVolume));
+            SetAudioMixerValue(_musicVolumeParameterKey, VolumeToAudioMixerVolume(_musicVolume));
         }
 
         /// <summary>
@@ -130,9 +159,11 @@ namespace Core.Unity.Settings {
         private static bool _isInitialized = false;
 
         private static float _effectsVolume;
+        private static float _musicVolume;
 
         private static AudioMixer _audioMixer = null;
         private static string _effectsVolumeParameterKey = null;
+        private static string _musicVolumeParameterKey = null;
 
         #endregion
     }
