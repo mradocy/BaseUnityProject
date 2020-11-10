@@ -88,6 +88,15 @@ namespace Core.Unity {
             return Mathf.FloorToInt(ExposeValue(propName, PropertyType.Int, value, min, max));
         }
         /// <summary>
+        /// Exposes a long value to the screen.  This can be changed in-game with a slider.
+        /// Returns the new value of the property.
+        /// </summary>
+        /// <param name="min">The min value of the slider.</param>
+        /// <param name="max">The max value of the slider.</param>
+        public static long Expose(string propName, long value, long min, long max) {
+            return (long)Mathf.Floor(ExposeValue(propName, PropertyType.Long, value, min, max));
+        }
+        /// <summary>
         /// Exposes a bool value to the screen.  This can be changed in-game.
         /// Returns the new value of the property.
         /// </summary>
@@ -302,6 +311,7 @@ namespace Core.Unity {
             String,
             Float,
             Int,
+            Long,
             Bool
         }
 
@@ -385,7 +395,7 @@ namespace Core.Unity {
             }
             // value wasn't changed in GUI, so set to given value
             v.Type = type;
-            if (type == PropertyType.Int) {
+            if (type == PropertyType.Int || type == PropertyType.Long) {
                 // only change if int value is different
                 if (Mathf.Floor(v.NumValue) != numValue) {
                     v.NumValue = numValue;
@@ -448,6 +458,18 @@ namespace Core.Unity {
                         value.NumValue = outVal;
                     } else {
                         GUILayout.Label("" + Mathf.FloorToInt(value.NumValue), GUILayout.Width(_exposedNumWidth));
+                    }
+                    break;
+                case PropertyType.Long:
+                    if (value.Editable) {
+                        GUILayout.Label("" + (long)Mathf.Floor(value.NumValue), GUILayout.Width(_exposedNumWidth));
+                        float outVal = GUILayout.HorizontalSlider(value.NumValue, value.NumMin, value.NumMax);
+                        if (Mathf.Floor(value.NumValue) != Mathf.Floor(outVal)) {
+                            value.Changed = true;
+                        }
+                        value.NumValue = outVal;
+                    } else {
+                        GUILayout.Label("" + (long)Mathf.Floor(value.NumValue), GUILayout.Width(_exposedNumWidth));
                     }
                     break;
                 case PropertyType.Bool:

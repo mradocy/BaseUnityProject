@@ -111,7 +111,7 @@ namespace Core.Unity.Combat {
             }
 
             // deal damage
-            AttackResult result = hurtBox.ReceivesDamage.ReceiveDamage(attackInfo);
+            AttackResult result = receiver.ReceiveDamage(attackInfo);
 
             // notify attacker of result
             if (attackInfo.Attacker != null) {

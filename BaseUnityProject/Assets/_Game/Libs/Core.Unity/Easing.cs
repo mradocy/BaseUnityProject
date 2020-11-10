@@ -184,6 +184,29 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Exponential growth from <paramref name="a"/> to <paramref name="b"/>.
+        /// <paramref name="a"/> and <paramref name="b"/> must both be positive.
+        /// </summary>
+        public static float ExponentialGrowth(float a, float b, float t, float d = 1) {
+            return ExponentialGrowthUnclamped(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+
+        /// <summary>
+        /// Exponential growth from <paramref name="a"/> to <paramref name="b"/>.
+        /// <paramref name="a"/> and <paramref name="b"/> must both be positive.
+        /// </summary>
+        public static float ExponentialGrowthUnclamped(float a, float b, float t, float d = 1) {
+            if (Mathf.Approximately(a, 0) || Mathf.Approximately(b, 0)) {
+                return float.NaN;
+            }
+            if ((a > 0) != (b > 0)) {
+                return float.NaN;
+            }
+
+            return a * Mathf.Pow(b / a, t / d);
+        }
+
+        /// <summary>
         /// Given a bezier curve defined by a start point p0, control point, and end point p2, find the point on the curve at t in [0,1]
         /// </summary>
         /// /// <param name="t">in [0,1]</param>

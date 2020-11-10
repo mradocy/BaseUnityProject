@@ -38,7 +38,7 @@ namespace Core.Unity {
         /// <param name="list">This list.</param>
         /// <remarks>https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm</remarks>
         public static void Randomize<T>(this List<T> list) {
-            for (int i=0; i < list.Count - 2; i++) {
+            for (int i=0; i < list.Count - 1; i++) {
                 int j = Random.Range(i, list.Count);
                 T temp = list[i];
                 list[i] = list[j];
