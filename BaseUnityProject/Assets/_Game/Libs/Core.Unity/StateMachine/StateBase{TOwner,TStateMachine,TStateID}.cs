@@ -26,17 +26,17 @@ namespace Core.Unity.StateMachine {
         /// <summary>
         /// Reference to the owner of the state machine.
         /// </summary>
-        public TOwner Owner { get { return _owner; } }
+        public TOwner Owner => _owner;
 
         /// <summary>
         /// Reference to the state machine this state belongs to.
         /// </summary>
-        public TStateMachine StateMachine { get { return _stateMachine; } }
+        public TStateMachine StateMachine => _stateMachine;
 
         /// <summary>
         /// Gets if this state is the current state in the state machine.
         /// </summary>
-        public bool IsCurrentState { get { return _stateMachine.CurrentStateObject == this; } }
+        public bool IsCurrentState => _stateMachine.CurrentStateObject == this;
 
         #endregion
 
@@ -76,6 +76,19 @@ namespace Core.Unity.StateMachine {
         #endregion
 
         #region IState Implementation
+
+        int IState.IdInt {
+            get {
+                if (_idInt == 0) {
+                    _idInt = System.Convert.ToInt32(this.Id);
+                    if (_idInt == 0) {
+                        throw new System.Exception($"Cannot have state with a state with id \"{this.Id}\" because its integer value is 0.  This is reserved for the null state.");
+                    }
+                }
+
+                return _idInt;
+            }
+        }
 
         void IState.OnRegistered() {
             this.OnRegistered();
@@ -129,6 +142,8 @@ namespace Core.Unity.StateMachine {
         private TStateMachine _stateMachine;
         [System.NonSerialized]
         private TOwner _owner;
+        [System.NonSerialized]
+        private int _idInt = 0;
 
         #endregion
     }

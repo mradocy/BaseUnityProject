@@ -122,15 +122,14 @@ namespace Core.Unity.Settings {
             _effectsVolumeParameterKey = effectsVolumeParameterKey;
             _musicVolumeParameterKey = musicVolumeParameterKey;
 
-            // set initial values
-            SetAudioMixerValue(_effectsVolumeParameterKey, VolumeToAudioMixerVolume(_effectsVolume));
-            SetAudioMixerValue(_musicVolumeParameterKey, VolumeToAudioMixerVolume(_musicVolume));
+            // for some reason, audio mixer values can only be set in Start(), not Awake()
+            new GameObject("SoundSettingsStartInvoker", typeof(SoundSettingsStartInvoker));
         }
 
         /// <summary>
         /// Converts a volume in [0, 1] to a value to be set as the volume in the Attenuation effect of an AudioMixerGroup.
         /// </summary>
-        /// <param name="volume02">Volume</param>
+        /// <param name="volume01">Volume</param>
         /// <returns></returns>
         public static float VolumeToAudioMixerVolume(float volume01) {
             if (volume01 <= 0) {
@@ -154,6 +153,20 @@ namespace Core.Unity.Settings {
 
         private static void LogAudioMixerNotSet() {
             Debug.LogError("Cannot set sound setting because AudioMixer has not been set.");
+        }
+
+        /// <summary>
+        /// Hack to set initial audio mixer values in Start() rather than Awake()
+        /// </summary>
+        private class SoundSettingsStartInvoker : MonoBehaviour {
+            private void Awake() {
+                DontDestroyOnLoad(this.gameObject);
+            }
+            private void Start() {
+                SetAudioMixerValue(_effectsVolumeParameterKey, VolumeToAudioMixerVolume(_effectsVolume));
+                SetAudioMixerValue(_musicVolumeParameterKey, VolumeToAudioMixerVolume(_musicVolume));
+                Destroy(this.gameObject);
+            }
         }
 
         private static bool _isInitialized = false;

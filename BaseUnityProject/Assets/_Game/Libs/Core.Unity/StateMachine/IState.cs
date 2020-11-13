@@ -10,9 +10,9 @@ namespace Core.Unity.StateMachine {
     public interface IState {
 
         /// <summary>
-        /// Gets if this state is the current state in the state machine.
+        /// Gets the id of the state as an int.
         /// </summary>
-        bool IsCurrentState { get; }
+        int IdInt { get; }
 
         void Initialize(IStateMachine stateMachine);
 

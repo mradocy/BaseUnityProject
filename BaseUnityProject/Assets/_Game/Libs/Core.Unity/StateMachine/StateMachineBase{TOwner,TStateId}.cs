@@ -92,7 +92,7 @@ namespace Core.Unity.StateMachine {
         /// <param name="stateID">State ID</param>
         /// <returns>state</returns>
         public IState GetStateObject(TStateId stateID) {
-            if (this.IsNullStateID(stateID)) {
+            if (stateID.Equals(this.NullStateId)) {
                 return null;
             }
             IState state;
@@ -139,31 +139,38 @@ namespace Core.Unity.StateMachine {
         /// <summary>
         /// To be called by a derived class's implementation of <see cref="RegisterStates()"/>.
         /// </summary>
-        /// <param name="stateId"></param>
-        /// <param name="state"></param>
-        protected void Register(TStateId stateId, IState state) {
-            if (this.IsNullStateID(stateId)) {
-                throw new System.ArgumentException($"Cannot register state id \"{stateId}\" because its integer value is 0.  This is reserved for the null state.", nameof(stateId));
-            }
+        /// <param name="state">The state to register</param>
+        protected void Register(IState state) {
             if (state == null) {
                 throw new System.ArgumentNullException(nameof(state));
             }
-            if (_states.ContainsKey(stateId)) {
-                throw new System.ArgumentException($"State with id \"{stateId}\" has already been registered.", nameof(stateId));
+            if (state.IdInt == 0) {
+                throw new System.ArgumentException($"Cannot register state because its integer id value is 0.  This is reserved for the null state.", nameof(state));
+            }
+
+            TStateId id = (TStateId)(object)state.IdInt;
+            if (_states.ContainsKey(id)) {
+                throw new System.ArgumentException($"State with id \"{id}\" has already been registered.", nameof(state));
             }
 
             state.Initialize(this);
 
-            _states.Add(stateId, state);
+            _states.Add(id, state);
+        }
+
+        /// <summary>
+        /// To be called by a derived class's implementation of <see cref="RegisterStates()"/>.  Registers several states.
+        /// </summary>
+        /// <param name="states">The states to register</param>
+        protected void Register(params IState[] states) {
+            foreach (IState state in states) {
+                this.Register(state);
+            }
         }
 
         #endregion
 
         #region Private
-
-        private bool IsNullStateID(TStateId stateId) {
-            return System.Convert.ToInt32(stateId) == 0;
-        }
 
         [System.NonSerialized]
         private TOwner _owner = null;
