@@ -13,6 +13,12 @@ namespace Core.Unity.UI {
     /// </summary>
     public class ModalWindow : MonoBehaviour {
 
+        #region Constants
+
+        public const int TimeScalePriority = 10000;
+
+        #endregion
+
         #region Public Static
 
         /// <summary>
@@ -57,14 +63,8 @@ namespace Core.Unity.UI {
             }
 
             // handle time scale
-            window._prevTimeScale = Time.timeScale;
-            if (window.ZeroTimeScaleOnLaunch && Time.timeScale != 0) {
-                Time.timeScale = 0;
-                window._restoreTimeScaleOnClose = true;
-
-                // TODO: call event handler?
-            } else {
-                window._restoreTimeScaleOnClose = false;
+            if (window.ZeroTimeScaleOnLaunch) {
+                window._timeScaleToken = TimeScaleManager.CreateToken(TimeScalePriority, 0);
             }
 
             // ensure window is active
@@ -151,8 +151,8 @@ namespace Core.Unity.UI {
             }
 
             // restore time scale
-            if (_restoreTimeScaleOnClose) {
-                Time.timeScale = _prevTimeScale;
+            if (_timeScaleToken >= 0) {
+                _timeScaleToken = TimeScaleManager.DestroyToken(_timeScaleToken);
             }
 
             this.OnClose();
@@ -272,17 +272,8 @@ namespace Core.Unity.UI {
 
         private static List<ModalWindow> _windowStack = new List<ModalWindow>();
 
+        private int _timeScaleToken = -1;
         private UnityAction<ModalWindowCallbackArgs> _closeCallbackFunction = null;
-
-        /// <summary>
-        /// The time scale before the window was launched.
-        /// </summary>
-        private float _prevTimeScale = 1;
-
-        /// <summary>
-        /// If the previous time scale should be set when this window closes.
-        /// </summary>
-        private bool _restoreTimeScaleOnClose = false;
 
         #endregion
     }

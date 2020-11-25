@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace Core.Unity.Scenes {
@@ -45,21 +46,27 @@ namespace Core.Unity.Scenes {
         /// Gets the current state of the scene with the given name.
         /// </summary>
         /// <param name="sceneName">The name of the scene.</param>
-        /// <returns>SceneLoadState</returns>
         public static SceneLoadState GetSceneLoadState(string sceneName) {
-            if (!IsSceneInBuild(sceneName))
+            int buildIndex = SceneUtility.GetBuildIndexByScenePath(sceneName);
+            if (buildIndex == -1)
                 throw new System.ArgumentException(string.Format(_sceneNotInBuildError, sceneName));
 
-            string key = GetFullScenePath(sceneName);
-            SceneLoadState loadState;
-            if (_sceneStates.TryGetValue(key, out loadState)) {
+            return GetSceneLoadState(buildIndex);
+        }
+
+        /// <summary>
+        /// Gets the current state of the scene with the given build index.
+        /// </summary>
+        /// <param name="buildIndex">The build index of the scene.</param>
+        public static SceneLoadState GetSceneLoadState(int buildIndex) {
+            if (_sceneStates.TryGetValue(buildIndex, out SceneLoadState loadState)) {
                 return loadState;
             }
 
             // add scene to _sceneStates since not added already
-            Scene scene = SceneManager.GetSceneByName(sceneName);
+            Scene scene = SceneManager.GetSceneByBuildIndex(buildIndex);
             SceneLoadState sceneLoadState = scene.IsValid() ? SceneLoadState.Loaded : SceneLoadState.NotLoaded;
-            SetSceneLoadState(key, sceneLoadState);
+            SetSceneLoadState(buildIndex, sceneLoadState);
             return sceneLoadState;
         }
 
@@ -67,8 +74,8 @@ namespace Core.Unity.Scenes {
         /// Gets if the list of scenes with the given names are all loaded.
         /// </summary>
         /// <param name="sceneNames"></param>
-        public static bool AreScenesLoaded(string[] sceneNames) {
-            if (sceneNames == null || sceneNames.Length == 0)
+        public static bool AreScenesLoaded(IEnumerable<string> sceneNames) {
+            if (sceneNames == null)
                 return true;
 
             foreach (string sceneName in sceneNames) {
@@ -80,11 +87,10 @@ namespace Core.Unity.Scenes {
         }
 
         /// <summary>
-        /// Gets an array of the full scene paths of all the scenes that are currently loaded.
+        /// Gets an array of the build indices of all the scenes that are currently loaded.
         /// </summary>
-        /// <returns>Full scene paths.</returns>
-        public static string[] GetLoadedScenes() {
-            return _loadedScenes.ToArray();
+        public static int[] GetLoadedScenes() {
+            return _loadedScenes.ToArray(); // needs to be a copy because loaded scenes can change
         }
 
         /// <summary>
@@ -94,22 +100,57 @@ namespace Core.Unity.Scenes {
         /// </summary>
         /// <param name="sceneName">The name of the scene.</param>
         /// <param name="loadSceneMode">Load scene mode.  If <see cref="LoadSceneMode.Single"/>, then all scenes will be unloaded before loading.</param>
-        public static void LoadSceneAsync(string sceneName, LoadSceneMode loadSceneMode) {
-            if (!IsSceneInBuild(sceneName))
+        /// <param name="callbackAction">Optional callback invoked when the scene is loaded.  Can be null.</param>
+        public static void LoadSceneAsync(string sceneName, LoadSceneMode loadSceneMode, UnityAction<int> callbackAction) {
+            int buildIndex = SceneUtility.GetBuildIndexByScenePath(sceneName);
+            if (buildIndex == -1) {
                 throw new System.ArgumentException(string.Format(_sceneNotInBuildError, sceneName));
+            }
+
+            LoadSceneAsync(buildIndex, loadSceneMode, callbackAction);
+        }
+
+        /// <summary>
+        /// Loads the scene with the given build index asyncronously.
+        /// The scene is not loaded if it is already loading, or unloading.
+        /// It CAN be loaded again if the scene was already loaded.
+        /// </summary>
+        /// <param name="buildIndex">The build index of the scene.</param>
+        /// <param name="loadSceneMode">Load scene mode.  If <see cref="LoadSceneMode.Single"/>, then all scenes will be unloaded before loading.</param>
+        /// <param name="callbackAction">Optional callback invoked when the scene is loaded.  Can be null.</param>
+        public static void LoadSceneAsync(int buildIndex, LoadSceneMode loadSceneMode, UnityAction<int> callbackAction) {
+            string sceneName = SceneUtility.GetScenePathByBuildIndex(buildIndex);
 
             // don't load scene if it's already loading or unloading
             SceneLoadState currentLoadState = GetSceneLoadState(sceneName);
-            if (currentLoadState == SceneLoadState.Loading || currentLoadState == SceneLoadState.Unloading)
+            if (currentLoadState == SceneLoadState.Loading) {
+                if (callbackAction == null) {
+                    Debug.LogWarning($"Cannot start loading scene {sceneName} because it is already loading.");
+                } else {
+                    Debug.LogWarning($"Cannot start loading scene {sceneName} because it is already loading, but the given callback will be invoked");
+                    AddSceneLoadedCallback(buildIndex, callbackAction);
+                }
                 return;
+            }
+            if (currentLoadState == SceneLoadState.Unloading) {
+                if (callbackAction == null) {
+                    Debug.LogWarning($"Cannot start loading scene {sceneName} because it is currently unloading.");
+                } else {
+                    Debug.LogWarning($"Cannot start loading scene {sceneName} because it is currently unloading.  The given callback will be ignored");
+                }
+                return;
+            }
 
             // ensure best background loading
             Application.backgroundLoadingPriority = ThreadPriority.Low;
 
             // start scene load
-            SetSceneLoadState(GetFullScenePath(sceneName), SceneLoadState.Loading);
-            Debug.Log($"Start scene load: {GetFullScenePath(sceneName)}");
-            SceneManager.LoadSceneAsync(sceneName, loadSceneMode);
+            SetSceneLoadState(buildIndex, SceneLoadState.Loading);
+            if (callbackAction != null) {
+                AddSceneLoadedCallback(buildIndex, callbackAction);
+            }
+            Debug.Log($"Start scene load: {sceneName}");
+            SceneManager.LoadSceneAsync(buildIndex, loadSceneMode);
         }
 
         /// <summary>
@@ -119,11 +160,25 @@ namespace Core.Unity.Scenes {
         /// </summary>
         /// <param name="sceneName">The name of the scene.</param>
         public static void UnloadSceneAsync(string sceneName) {
-            if (!IsSceneInBuild(sceneName))
+            int buildIndex = SceneUtility.GetBuildIndexByScenePath(sceneName);
+            if (buildIndex == -1) {
                 throw new System.ArgumentException(string.Format(_sceneNotInBuildError, sceneName));
+            }
+
+            UnloadSceneAsync(buildIndex);
+        }
+
+        /// <summary>
+        /// Unloads the scene with the given build index asyncronously.
+        /// Does nothing if it's the only scene currently loaded (Unity's rule).
+        /// The scene is not unloaded if it is already not loaded or unloading.
+        /// </summary>
+        /// <param name="buildIndex">The build index of the scene.</param>
+        public static void UnloadSceneAsync(int buildIndex) {
+            string sceneName = SceneUtility.GetScenePathByBuildIndex(buildIndex);
 
             // don't unload scene if it's already not loaded or unloading
-            SceneLoadState currentLoadState = GetSceneLoadState(sceneName);
+            SceneLoadState currentLoadState = GetSceneLoadState(buildIndex);
             if (currentLoadState == SceneLoadState.NotLoaded || currentLoadState == SceneLoadState.Unloading)
                 return;
 
@@ -132,30 +187,30 @@ namespace Core.Unity.Scenes {
                 return;
 
             // start scene unload
-            SetSceneLoadState(GetFullScenePath(sceneName), SceneLoadState.Unloading);
-            Debug.Log($"Start scene unload: {GetFullScenePath(sceneName)}");
-            SceneManager.UnloadSceneAsync(sceneName);
+            SetSceneLoadState(buildIndex, SceneLoadState.Unloading);
+            Debug.Log($"Start scene unload: {sceneName}");
+            SceneManager.UnloadSceneAsync(buildIndex);
         }
 
         #endregion
 
         #region Private Methods
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void OnBeforeSceneLoadRuntimeMethod() {
-            Initialize();
-        }
-
         /// <summary>
         /// Initializes this scene manager.
         /// </summary>
-        private static void Initialize() {
-            if (_isInitialized)
-                return;
-
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void OnBeforeSceneLoadRuntimeMethod() {
             SceneManager.sceneLoaded += OnSceneLoaded;
             SceneManager.sceneUnloaded += OnSceneUnloaded;
-            _isInitialized = true;
+        }
+
+        private static void AddSceneLoadedCallback(int buildIndex, UnityAction<int> callbackAction) {
+            if (!_sceneLoadedCallbacks.TryGetValue(buildIndex, out List<UnityAction<int>> callbacks)) {
+                callbacks = new List<UnityAction<int>>();
+                _sceneLoadedCallbacks.Add(buildIndex, callbacks);
+            }
+            callbacks.Add(callbackAction);
         }
 
         /// <summary>
@@ -170,7 +225,15 @@ namespace Core.Unity.Scenes {
 
             Debug.Log($"Scene loaded: {GetFullScenePath(scene.path)}");
 
-            SetSceneLoadState(GetFullScenePath(scene.path), SceneLoadState.Loaded);
+            SetSceneLoadState(scene.buildIndex, SceneLoadState.Loaded);
+
+            // invoke callbacks
+            if (_sceneLoadedCallbacks.TryGetValue(scene.buildIndex, out List<UnityAction<int>> callbacks)) {
+                foreach (UnityAction<int> callback in callbacks) {
+                    callback.Invoke(scene.buildIndex);
+                }
+                callbacks.Clear();
+            }
         }
 
         /// <summary>
@@ -180,33 +243,33 @@ namespace Core.Unity.Scenes {
         private static void OnSceneUnloaded(Scene scene) {
             Debug.Log($"Scene unloaded: {GetFullScenePath(scene.path)}");
 
-            SetSceneLoadState(GetFullScenePath(scene.path), SceneLoadState.NotLoaded);
+            SetSceneLoadState(scene.buildIndex, SceneLoadState.NotLoaded);
         }
 
         /// <summary>
         /// Sets the load state in <see cref="_sceneStates"/> for the given scene.
         /// </summary>
-        /// <param name="fullScenePath">Full path of the scene.</param>
+        /// <param name="buildIndex">Build index of the scene.</param>
         /// <param name="loadState">Load state</param>
-        private static void SetSceneLoadState(string fullScenePath, SceneLoadState loadState) {
+        private static void SetSceneLoadState(int buildIndex, SceneLoadState loadState) {
             // update _loadedScenes
             SceneLoadState prevState;
-            if (_sceneStates.TryGetValue(fullScenePath, out prevState)) {
+            if (_sceneStates.TryGetValue(buildIndex, out prevState)) {
                 if (prevState == loadState) {
                     return;
                 }
 
                 if (prevState == SceneLoadState.Loaded) {
-                    _loadedScenes.Remove(fullScenePath);
+                    _loadedScenes.Remove(buildIndex);
                 }
             }
 
             if (loadState == SceneLoadState.Loaded) {
-                _loadedScenes.Add(fullScenePath);
+                _loadedScenes.Add(buildIndex);
             }
 
             // update _sceneStates
-            _sceneStates[fullScenePath] = loadState;
+            _sceneStates[buildIndex] = loadState;
         }
 
         #endregion
@@ -214,19 +277,16 @@ namespace Core.Unity.Scenes {
         #region Private Fields
 
         /// <summary>
-        /// Gets if <see cref="Initialize"/>() was called.
+        /// Maps the build indices of scenes to their load state
         /// </summary>
-        private static bool _isInitialized = false;
+        private static Dictionary<int, SceneLoadState> _sceneStates = new Dictionary<int, SceneLoadState>();
 
         /// <summary>
-        /// Maps the names of scenes to their load state
+        /// List of the build indices of all the scenes that are currently loaded.
         /// </summary>
-        private static Dictionary<string, SceneLoadState> _sceneStates = new Dictionary<string, SceneLoadState>();
+        private static List<int> _loadedScenes = new List<int>();
 
-        /// <summary>
-        /// Index of all the scenes that are currently loaded.
-        /// </summary>
-        private static List<string> _loadedScenes = new List<string>();
+        private static Dictionary<int, List<UnityAction<int>>> _sceneLoadedCallbacks = new Dictionary<int, List<UnityAction<int>>>();
 
         #endregion
     }
