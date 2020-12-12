@@ -208,6 +208,19 @@ namespace Core.Unity.Camera {
         }
 
         /// <summary>
+        /// Removes the given target resolver from the internal list of prev target resolvers.
+        /// Useful when deleting a target resolver.
+        /// </summary>
+        public void RemovePrevTargetResolver(ICameraTargetResolver targetResolver) {
+            for (int i=0; i < _prevTargetResolvers.Count; i++) {
+                if (_prevTargetResolvers[i].TargetResolver == targetResolver) {
+                    _prevTargetResolvers.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
+        /// <summary>
         /// Starts a camera shake.
         /// Good starter values: <paramref name="velocityX"/>: 1, <paramref name="velocityY"/>: 4
         /// </summary>

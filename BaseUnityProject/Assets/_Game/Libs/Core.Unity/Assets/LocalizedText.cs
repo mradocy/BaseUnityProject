@@ -52,18 +52,45 @@ namespace Core.Unity.Assets {
         }
 
         /// <summary>
+        /// Tries to get the value for a property defined in this text.  Assumes text contains lines in the form of 'prop_key: val'.
+        /// </summary>
+        /// <param name="propertyKey">Key of the property.</param>
+        /// <param name="value">out param representing the found value.</param>
+        /// <returns>If property was found</returns>
+        public bool TryGetPropertyValue(string propertyKey, out string value) {
+            return this.TryGetPropertyValue(LocalizationSettings.Localization, propertyKey, out value);
+        }
+
+        /// <summary>
         /// Gets the value for a property defined in this text.  Assumes text contains lines in the form of 'prop_key: val'.
         /// </summary>
         /// <param name="localization">Localization code to use.</param>
         /// <param name="propertyKey">Key of the property.</param>
         /// <returns>Property value</returns>
         public string GetPropertyValue(LocalizationCode localization, string propertyKey) {
+            if (this.TryGetPropertyValue(localization, propertyKey, out string value)) {
+                return value;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Tries to get the value for a property defined in this text.  Assumes text contains lines in the form of 'prop_key: val'.
+        /// </summary>
+        /// <param name="localization">Localization code to use.</param>
+        /// <param name="propertyKey">Key of the property.</param>
+        /// <param name="value">out param representing the found value.</param>
+        /// <returns>If property was found</returns>
+        public bool TryGetPropertyValue(LocalizationCode localization, string propertyKey, out string value) {
             string text = this.GetText(localization);
-            if (text == null || string.IsNullOrEmpty(propertyKey))
-                return null;
+            if (text == null || string.IsNullOrEmpty(propertyKey)) {
+                value = null;
+                return false;
+            }
 
             // TODO: this isn't a great way of finding the property value
-            string value = null;
+            value = null;
             using (StringReader stringReader = new StringReader(text)) {
                 while (true) {
                     string line = stringReader.ReadLine();
@@ -82,7 +109,11 @@ namespace Core.Unity.Assets {
                 }
             }
 
-            return value;
+            if (value == null) {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

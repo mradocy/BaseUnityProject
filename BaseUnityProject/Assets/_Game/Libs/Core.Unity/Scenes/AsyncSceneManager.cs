@@ -73,7 +73,6 @@ namespace Core.Unity.Scenes {
         /// <summary>
         /// Gets if the list of scenes with the given names are all loaded.
         /// </summary>
-        /// <param name="sceneNames"></param>
         public static bool AreScenesLoaded(IEnumerable<string> sceneNames) {
             if (sceneNames == null)
                 return true;
@@ -87,10 +86,37 @@ namespace Core.Unity.Scenes {
         }
 
         /// <summary>
-        /// Gets an array of the build indices of all the scenes that are currently loaded.
+        /// Gets if the list of scenes with the given build indices are all loaded.
         /// </summary>
-        public static int[] GetLoadedScenes() {
-            return _loadedScenes.ToArray(); // needs to be a copy because loaded scenes can change
+        public static bool AreScenesLoaded(IEnumerable<int> sceneBuildIndices) {
+            if (sceneBuildIndices == null)
+                return true;
+
+            foreach (int buildIndex in sceneBuildIndices) {
+                if (GetSceneLoadState(buildIndex) != SceneLoadState.Loaded)
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the build indices of all the scenes that are currently loaded.
+        /// </summary>
+        /// <param name="loadedSceneBuildIndices">Array to set loaded scenes into</param>
+        /// <returns>The number of loaded scenes.</returns>
+        public static int GetLoadedScenes(int[] loadedSceneBuildIndices) {
+            int i = 0;
+            for (;i < _loadedScenes.Count; i++) {
+                if (i >= loadedSceneBuildIndices.Length) {
+                    Debug.LogError($"Given array cannot contain all {_loadedScenes.Count} loaded scenes");
+                    return i - 1;
+                }
+
+                loadedSceneBuildIndices[i] = _loadedScenes[i];
+            }
+
+            return i;
         }
 
         /// <summary>
