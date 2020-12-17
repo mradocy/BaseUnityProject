@@ -45,12 +45,33 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Sets the value at the given index.
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="item">Value</param>
+        public void SetAt(int index, int item) {
+            if (index < 0 || index >= _values.Count) {
+                Debug.LogError($"Index {index} is invalid");
+                return;
+            }
+            _values[index] = item;
+        }
+
+        /// <summary>
         /// Removes the given int from the list of values.  Returns if an item was removed (i.e. was already in the list).
         /// </summary>
         /// <param name="item">Item to remove.</param>
         /// <returns>Was removed</returns>
         public bool Remove(int item) {
             return _values.Remove(item);
+        }
+
+        /// <summary>
+        /// Removes the item at the given index from the list of values.
+        /// </summary>
+        /// <param name="index">Index of item to remove.</param>
+        public void RemoveAt(int index) {
+            _values.RemoveAt(index);
         }
 
         /// <summary>

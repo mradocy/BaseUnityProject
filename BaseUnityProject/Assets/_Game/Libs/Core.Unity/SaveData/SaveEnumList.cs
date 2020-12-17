@@ -37,6 +37,15 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Sets the value at the given index.
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="item">Value</param>
+        public void SetAt(int index, TEnum item) {
+            this.SetAt(index, System.Convert.ToInt32(item));
+        }
+
+        /// <summary>
         /// Removes the given item from the set of values.  Returns if an item was removed (i.e. was already in the set).
         /// </summary>
         /// <param name="item">Item to remove.</param>
