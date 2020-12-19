@@ -126,15 +126,20 @@ namespace Core.Unity.SaveData {
 
             // parse values
             this.Clear();
-            if (!string.IsNullOrWhiteSpace(valAttr.Value)) {
-                string[] valStrs = valAttr.Value.Split(',');
-                foreach (string valStr in valStrs) {
-                    int i;
-                    if (int.TryParse(valStr.Trim(), out i)) {
+            string str = valAttr.Value;
+            if (!string.IsNullOrEmpty(str)) {
+                int startIndex = 0;
+                while (startIndex < str.Length) {
+                    int delimIndex = str.IndexOf(',', startIndex);
+                    if (delimIndex == -1) {
+                        delimIndex = str.Length;
+                    }
+                    if (int.TryParse(str.Substring(startIndex, delimIndex - startIndex).Trim(), out int i)) {
                         this.Add(i);
                     } else {
                         return LoadStatus.ParseError;
                     }
+                    startIndex = delimIndex + 1;
                 }
             }
 
