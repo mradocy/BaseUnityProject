@@ -145,6 +145,37 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Cubic ease in-out interpolation between a and b.  t is clamped between 0 and d.
+        /// </summary>
+        public static float CubicInOut(float a, float b, float t, float d = 1) {
+            return CubicInOutUnclamp(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+        /// <summary>
+        /// Cubic ease in-out interpolation between a and b.  No clamping is done.
+        /// </summary>
+        public static float CubicInOutUnclamp(float a, float b, float t, float d = 1) {
+            t /= d / 2;
+            if (t < 1) return (b - a) / 2 * t * t * t + a;
+            t -= 2;
+            return (b - a) / 2 * (t * t * t + 2) + a;
+        }
+        /// <summary>
+        /// Cubic ease in-out interpolation between a and b.  t is clamped between 0 and d.
+        /// </summary>
+        public static Vector2 CubicInOut(Vector2 a, Vector2 b, float t, float d = 1) {
+            return CubicInOutUnclamp(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+        /// <summary>
+        /// Cubic ease in-out interpolation between a and b.  No clamping is done.
+        /// </summary>
+        public static Vector2 CubicInOutUnclamp(Vector2 a, Vector2 b, float t, float d = 1) {
+            t /= d / 2;
+            if (t < 1) return (b - a) / 2 * t * t * t + a;
+            t -= 2;
+            return (b - a) / 2 * (t * t * t + 2) + a;
+        }
+
+        /// <summary>
         /// Elastic ease out interpolation between a and b.  t is clamped between 0 and d.
         /// </summary>
         public static float ElasticOut(float a, float b, float t, float d = 1) {
