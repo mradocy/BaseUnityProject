@@ -10,6 +10,21 @@ namespace Core.Unity {
     public static class ListExtensions {
 
         /// <summary>
+        /// Removes the last element from the given list and returns it.
+        /// </summary>
+        /// <param name="list">This list.</param>
+        public static T Pop<T>(this List<T> list) {
+            if (list.Count <= 0) {
+                Debug.LogError("Cannot pop element off list because the list has no elements");
+                return default;
+            }
+
+            T element = list[list.Count - 1];
+            list.RemoveAt(list.Count - 1);
+            return element;
+        }
+
+        /// <summary>
         /// Destroys every <see cref="GameObject"/> in the list, then clears the list.
         /// </summary>
         /// <param name="list">This list.</param>
