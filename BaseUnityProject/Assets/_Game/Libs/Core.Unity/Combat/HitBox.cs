@@ -258,7 +258,6 @@ namespace Core.Unity.Combat {
             AttackResult result = CombatUtils.ExecuteAttack(attackData, heading, this.DealsDamage, hurtBox.ReceivesDamage, contactPoint, collision2d, this, hurtBox);
 
             if (result.Success) {
-
                 // add hurt box record
                 this.AddHurtBoxRecord(hurtBox, _fixedTime + _hurtRecordDuration);
 
@@ -287,7 +286,7 @@ namespace Core.Unity.Combat {
         /// Record of a <see cref="HurtBox"/> that was hit by this hit box.
         /// </summary>
         private class HurtBoxRecord {
-            public int HitBoxId;
+            public int HurtBoxId;
             public float TimeHit;
             public float TimeRemove;
         }
@@ -300,7 +299,7 @@ namespace Core.Unity.Combat {
         private HurtBoxRecord GetHurtBoxRecord(HurtBox hurtBox) {
             int id = hurtBox.UniqueId;
             foreach (HurtBoxRecord record in _hurtBoxRecords) {
-                if (record.HitBoxId == id)
+                if (record.HurtBoxId == id)
                     return record;
             }
             return null;
@@ -312,7 +311,7 @@ namespace Core.Unity.Combat {
         /// <param name="hurtBox">Hurt box.</param>
         /// <param name="timeRemove">The time (in <see cref="Time.time"/> to automatically remove the record.</param>
         /// <returns>Record.</returns>
-        private HurtBoxRecord AddHurtBoxRecord(HurtBox hurtBox, float timeRemove) {
+        private void AddHurtBoxRecord(HurtBox hurtBox, float timeRemove) {
             HurtBoxRecord record;
             if (_recycledHurtBoxRecords.Count == 0) {
                 record = new HurtBoxRecord();
@@ -321,11 +320,11 @@ namespace Core.Unity.Combat {
                 _recycledHurtBoxRecords.RemoveAt(_recycledHurtBoxRecords.Count - 1);
             }
 
-            record.HitBoxId = hurtBox.UniqueId;
+            record.HurtBoxId = hurtBox.UniqueId;
             record.TimeHit = _fixedTime;
             record.TimeRemove = timeRemove;
             _hurtBoxRecords.Add(record);
-            return record;
+            return;
         }
 
         /// <summary>
