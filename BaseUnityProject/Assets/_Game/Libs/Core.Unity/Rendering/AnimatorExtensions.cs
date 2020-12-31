@@ -19,6 +19,15 @@ namespace Core.Unity.Rendering {
         }
 
         /// <summary>
+        /// Gets if the current state matches the given name.
+        /// </summary>
+        /// <param name="animator">This animator.</param>
+        /// <param name="stateHash">Hash of the name of the state.</param>
+        public static bool CurrentStateIs(this Animator animator, int stateHash) {
+            return animator.GetCurrentAnimatorStateInfo(0).shortNameHash == stateHash;
+        }
+
+        /// <summary>
         /// Gets the duration of the current state.  This is affected by Animator.speed
         /// </summary>
         /// <param name="animator">This animator.</param>
@@ -50,6 +59,16 @@ namespace Core.Unity.Rendering {
         /// <param name="stateName">Name of the state expected to be running.  If the current state is different, this function returns false.</param>
         public static bool IsAtEnd(this Animator animator, string stateName) {
             if (!animator.CurrentStateIs(stateName)) return false;
+            return animator.GetStateNormalizedTime() >= 1;
+        }
+
+        /// <summary>
+        /// Gets if animator is currently at the end of the given state.
+        /// </summary>
+        /// <param name="animator">This animator.</param>
+        /// <param name="stateNameHash">Hash of the name of the state expected to be running.  If the current state is different, this function returns false.</param>
+        public static bool IsAtEnd(this Animator animator, int stateNameHash) {
+            if (!animator.CurrentStateIs(stateNameHash)) return false;
             return animator.GetStateNormalizedTime() >= 1;
         }
 
