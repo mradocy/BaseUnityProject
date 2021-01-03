@@ -14,54 +14,66 @@ namespace Core.Unity.SaveData {
     public sealed class SaveRoot : SaveGroup {
 
         /// <summary>
-        /// Constructor.  The <see cref="CompatibilityId"/> is set to <see cref="System.Guid.Empty"/>.
+        /// Constructor providing default values.
         /// </summary>
-        public SaveRoot() : this(System.Guid.Empty) { }
+        public SaveRoot() : this("data{0}.sav", System.Guid.Empty) { }
 
         /// <summary>
         /// Constructor.
         /// </summary>
+        /// <param name="fileName">The formattable name of a save file, including the extension (e.g. "data{0}.sav").  Can include "{0}" to represent an index number.</param>
         /// <param name="compatibilityId">The <see cref="CompatibilityId"/> expected from the save data.</param>
-        public SaveRoot(System.Guid compatibilityId) : base("<Root>", null) {
+        public SaveRoot(string fileName, System.Guid compatibilityId) : base("<Root>", null) {
+            if (string.IsNullOrEmpty(fileName))
+                throw new System.ArgumentNullException(nameof(fileName));
+            _saveFileName = fileName;
+
             this.CompatibilityId = compatibilityId;
         }
 
-        /// <inheritdoc />
-        public override SaveRoot Root {
-            get { return this; }
-        }
+        public override SaveRoot Root => this;
 
         #region File Properties
 
         /// <summary>
         /// Encoding used for file operations.
         /// </summary>
-        public static System.Text.Encoding Encoding {
-            get { return System.Text.Encoding.Unicode; }
-        }
+        public static System.Text.Encoding Encoding => System.Text.Encoding.Unicode;
 
         /// <summary>
         /// The full path of the directory reserved for save files.  Is contained in Unity's <see cref="Application.persistentDataPath"/>.
         /// </summary>
-        public static string SaveDirectory { get { return Path.Combine(Application.persistentDataPath, "SaveData"); } }
+        public static string SaveDirectory => Path.Combine(Application.persistentDataPath, "SaveData");
+
+        /// <summary>
+        /// Gets the file name for a save file at the given index (includes extension, does not include path)
+        /// </summary>
+        /// <param name="index">File index</param>
+        public string GetSaveFileName(int index) {
+            return string.Format(_saveFileName, index);
+        }
 
         /// <summary>
         /// Gets the full file path for data saved to the <see cref="SaveDirectory"/>.
         /// </summary>
         /// <param name="index">File index</param>
-        /// <returns>Path</returns>
-        public static string GetSaveDirectoryPath(int index) {
-            return Path.Combine(SaveDirectory, $"data{index}.sav");
+        public string GetSavePath(int index) {
+            return Path.Combine(SaveDirectory, this.GetSaveFileName(index));
         }
 
         /// <summary>
         /// Gets the full file path for the backup of a given file.
         /// </summary>
         /// <param name="savePath">Original save path.</param>
-        /// <returns>Path</returns>
         public static string GetBackupPath(string savePath) {
-            return $"{Path.ChangeExtension(savePath, null)}_backup.sav";
+            int extIndex = savePath.LastIndexOf('.');
+            if (extIndex == -1) {
+                return savePath + "_backup";
+            }
+            return $"{savePath.Substring(0, extIndex)}_backup{savePath.Substring(extIndex)}";
         }
+
+        private string _saveFileName;
 
         #endregion
 
@@ -160,7 +172,7 @@ namespace Core.Unity.SaveData {
         /// <param name="index">File index</param>
         /// <returns>Load status</returns>
         public LoadStatus LoadFromSaveDirectory(int index) {
-            return this.LoadFromFile(GetSaveDirectoryPath(index));
+            return this.LoadFromFile(this.GetSavePath(index));
         }
 
         /// <summary>
@@ -237,7 +249,7 @@ namespace Core.Unity.SaveData {
         /// <param name="index">File index</param>
         /// <returns>File exists</returns>
         public bool SaveFileExists(int index) {
-            return File.Exists(GetSaveDirectoryPath(index));
+            return File.Exists(this.GetSavePath(index));
         }
 
         #endregion
@@ -400,7 +412,7 @@ namespace Core.Unity.SaveData {
                 Directory.CreateDirectory(SaveDirectory);
             }
 
-            return this.SaveToFile(GetSaveDirectoryPath(index), prettyPrint);
+            return this.SaveToFile(this.GetSavePath(index), prettyPrint);
         }
 
         /// <summary>
@@ -448,7 +460,7 @@ namespace Core.Unity.SaveData {
                 Directory.CreateDirectory(SaveDirectory);
             }
 
-            this.SaveToFileCoroutine(coroutineStarter, GetSaveDirectoryPath(index), prettyPrint, callback);
+            this.SaveToFileCoroutine(coroutineStarter, this.GetSavePath(index), prettyPrint, callback);
         }
 
         #endregion
