@@ -176,6 +176,59 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Generalizes k-In where k is the power value.
+        /// </summary>
+        /// <param name="k">Power value (e.g. k=1 is linear, k=2 is quad, etc.)</param>
+        public static float PowIn(float k, float a, float b, float t, float d = 1) {
+            return PowInUnclamp(k, a, b, Mathf.Clamp(t, 0, d), d);
+        }
+
+        /// <summary>
+        /// Generalizes k-InUnclamp where k is the power value.
+        /// </summary>
+        /// <param name="k">Power value (e.g. k=1 is linear, k=2 is quad, etc.)</param>
+        public static float PowInUnclamp(float k, float a, float b, float t, float d = 1) {
+            t /= d;
+            return (b - a) * Mathf.Pow(t, k) + a;
+        }
+
+        /// <summary>
+        /// Generalizes k-Out where k is the power value.
+        /// </summary>
+        /// <param name="k">Power value (e.g. k=1 is linear, k=2 is quad, etc.)</param>
+        public static float PowOut(float k, float a, float b, float t, float d = 1) {
+            return PowOutUnclamp(k, a, b, Mathf.Clamp(t, 0, d), d);
+        }
+
+        /// <summary>
+        /// Generalizes k-OutUnclamp where k is the power value.
+        /// </summary>
+        /// <param name="k">Power value (e.g. k=1 is linear, k=2 is quad, etc.)</param>
+        public static float PowOutUnclamp(float k, float a, float b, float t, float d = 1) {
+            t /= d;
+            return (b - a) * (1 - Mathf.Pow(1 - t, k)) + a;
+        }
+
+        /// <summary>
+        /// Generalizes k-InOut where k is the power value.
+        /// </summary>
+        /// <param name="k">Power value (e.g. k=1 is linear, k=2 is quad, etc.)</param>
+        public static float PowInOut(float k, float a, float b, float t, float d = 1) {
+            return PowInOutUnclamp(k, a, b, Mathf.Clamp(t, 0, d), d);
+        }
+
+        /// <summary>
+        /// Generalizes k-InOutUnclamp where k is the power value.
+        /// </summary>
+        /// <param name="k">Power value (e.g. k=1 is linear, k=2 is quad, etc.)</param>
+        /// <remarks>I made this! https://www.desmos.com/calculator/4vvj51dsun</remarks>
+        public static float PowInOutUnclamp(float k, float a, float b, float t, float d = 1) {
+            t /= d;
+            if (t < 0.5f) return (b - a) * Mathf.Pow(2, k - 1) * Mathf.Pow(t, k) + a;
+            else return (b - a) * (1 - Mathf.Pow(2, k - 1) * Mathf.Pow(1 - t, k)) + a;
+        }
+
+        /// <summary>
         /// Elastic ease out interpolation between a and b.  t is clamped between 0 and d.
         /// </summary>
         public static float ElasticOut(float a, float b, float t, float d = 1) {
