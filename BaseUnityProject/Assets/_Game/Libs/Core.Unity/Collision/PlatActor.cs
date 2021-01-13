@@ -279,7 +279,8 @@ namespace Core.Unity.Collision {
             _rb2d.velocity = v;
 
             // setting new position with MovePosition()
-            Vector2 pos = new Vector2(transform.position.x, transform.position.y) + _rb2d.velocity * Time.fixedDeltaTime;
+            Vector2 currentPos = this.transform.position;
+            Vector2 pos = currentPos + _rb2d.velocity * Time.fixedDeltaTime;
 
             // project reposition
             if (_projectReposition) {
@@ -288,26 +289,28 @@ namespace Core.Unity.Collision {
 
             // moving platform
             if (_movedByDownPlatform) {
+
                 if (touchDown) {
                     Rigidbody2D downRb2d = touchDown.rigidbody;
-                    if (downRb2d != null) { // can be null if collider hit wasn't attached to a rigidbody
-                        Vector2 touchPoint = touchDown.point;
-                        Vector2 p1 = new Vector2();
+                    Vector2 touchPoint = touchDown.point;
+                    Vector2 p1 = touchPoint;
 
-                        // applying platform's angular velocity
+                    while (downRb2d != null) {
+
+                        // apply platform's angular velocity
                         Vector2 centerPoint = downRb2d.worldCenterOfMass;
                         float rotationRad = downRb2d.angularVelocity * Time.fixedDeltaTime * Mathf.Deg2Rad;
-                        float c = Mathf.Cos(rotationRad);
-                        float s = Mathf.Sin(rotationRad);
-                        p1.x = centerPoint.x + (touchPoint.x - centerPoint.x) * c - (touchPoint.y - centerPoint.y) * s;
-                        p1.y = centerPoint.y + (touchPoint.x - centerPoint.x) * s + (touchPoint.y - centerPoint.y) * c;
+                        p1 = MathUtils.RotateAroundPoint(p1, centerPoint, rotationRad);
 
                         // applying platform's velocity
                         p1 += downRb2d.velocity * Time.fixedDeltaTime;
 
-                        // add to position
-                        pos += p1 - touchPoint;
+                        // apply movement of parent RB2D if present
+                        downRb2d = downRb2d.transform.parent == null ? null : downRb2d.transform.parent.GetComponentInParent<Rigidbody2D>();
                     }
+
+                    // add to position
+                    pos += p1 - touchPoint;
                 }
             }
 
