@@ -40,6 +40,8 @@ namespace Core.Unity {
                 if (EditorGUI.EndChangeCheck()) {
                     Undo.RecordObject(polygonPoints, "Change PolygonPoints Point");
                     polygonPoints.LocalPoints[i] = polygonPoints.transform.InverseTransformPoint(newPosition);
+
+                    EditorUtility.SetDirty(polygonPoints.gameObject); // ensures mesh is updated immediately in the editor
                 }
 
                 _polygonPoints.Add(newPosition);
