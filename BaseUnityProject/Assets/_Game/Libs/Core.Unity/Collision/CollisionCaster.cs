@@ -13,11 +13,27 @@ namespace Core.Unity.Collision {
 
         #region Inspector Fields
 
+        [SerializeField]
         [Range(.1f, 89.9f), Tooltip("Determines which of 4 directions a normal angle will be.  The higher the value, the steeper the slope needed for a collision to be considered Right instead of Down.")]
-        public float SlopeAngle = 50;
+        private float _slopeAngle = 50;
 
+        [SerializeField]
         [Tooltip("Distance of a cast for colliders to be considered touching.")]
-        public float TouchCastDistance = .04f;
+        private float _touchCastDistance = .06f;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// Determines which of 4 directions a normal angle will be.  The higher the value, the steeper the slope needed for a collision to be considered Right instead of Down.
+        /// </summary>
+        public float SlopeAngle => _slopeAngle;
+
+        /// <summary>
+        /// Gets the distance used for a cast of colliders to be considered touching.
+        /// </summary>
+        public float TouchCastDistance => _touchCastDistance;
 
         #endregion
 
@@ -61,8 +77,7 @@ namespace Core.Unity.Collision {
         /// Performs casts in the given direction, and return if any of them hit something.
         /// </summary>
         public bool Touch(Direction direction) {
-            int numResults = 0;
-            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out int numResults, _touchCastDistance, Vector2.zero);
             return numResults > 0;
         }
 
@@ -70,8 +85,7 @@ namespace Core.Unity.Collision {
         /// Performs casts in the given direction, and returns the results in an array.
         /// </summary>
         public RaycastHit2D[] TouchResults(Direction direction) {
-            int numResults = 0;
-            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out int numResults, _touchCastDistance, Vector2.zero);
             RaycastHit2D[] ret = new RaycastHit2D[numResults];
             Array.Copy(_tempResults, ret, numResults);
             return ret;
@@ -81,8 +95,7 @@ namespace Core.Unity.Collision {
         /// Performs casts in the given direction, and stores the results in the given array.  Returns the number of results.
         /// </summary>
         public int TouchResultsNonAlloc(Direction direction, RaycastHit2D[] results) {
-            int numResults = 0;
-            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out int numResults, _touchCastDistance, Vector2.zero);
             Array.Copy(_tempResults, results, numResults);
             return numResults;
         }
@@ -91,8 +104,7 @@ namespace Core.Unity.Collision {
         /// Performs casts in the given direction, and returns the first result.  If nothing was hit, the collider property of the returned RaycastHit2D will be null.
         /// </summary>
         public RaycastHit2D TouchResult(Direction direction) {
-            int numResults = 0;
-            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out int numResults, _touchCastDistance, Vector2.zero);
             if (numResults == 0) {
                 RaycastHit2D noHit = new RaycastHit2D();
                 return noHit;
@@ -107,7 +119,7 @@ namespace Core.Unity.Collision {
         /// </summary>
         public Vector2 TouchNormal(Direction direction) {
             int numResults = 0;
-            this.CheckCasts(direction, out numResults, this.TouchCastDistance, Vector2.zero);
+            this.CheckCasts(direction, out numResults, _touchCastDistance, Vector2.zero);
             if (numResults == 0) {
                 return Vector2.zero;
             }
@@ -298,7 +310,7 @@ namespace Core.Unity.Collision {
                 hitPt = pos0 + displacement * rh2d.fraction;
                 slope.Set(rh2d.normal.y, -rh2d.normal.x);
 
-                Direction nDir = GetNormalDirection(rh2d.normal, SlopeAngle);
+                Direction nDir = GetNormalDirection(rh2d.normal, _slopeAngle);
                 if (nDir == Direction.Left || nDir == Direction.Right) {
                     // project horizontally
                     ret = new Vector2(
@@ -307,9 +319,9 @@ namespace Core.Unity.Collision {
 
                     // add a tiny bit of distance between the projected position and the wall
                     if (nDir == Direction.Left) {
-                        ret.x -= TouchCastDistance / 2;
+                        ret.x -= _touchCastDistance / 2;
                     } else {
-                        ret.x += TouchCastDistance / 2;
+                        ret.x += _touchCastDistance / 2;
                     }
                 } else {
                     // project vertically
@@ -319,9 +331,9 @@ namespace Core.Unity.Collision {
 
                     // add a tiny bit of distance between the projected position and the wall
                     if (nDir == Direction.Down) {
-                        ret.y -= TouchCastDistance / 2;
+                        ret.y -= _touchCastDistance / 2;
                     } else {
-                        ret.y += TouchCastDistance / 2;
+                        ret.y += _touchCastDistance / 2;
                     }
                 }
 
@@ -528,7 +540,7 @@ namespace Core.Unity.Collision {
                     }
 
                     if (normalRestriction == Direction.None ||
-                        GetNormalDirection(castResult.normal, this.SlopeAngle) == normalRestriction) {
+                        GetNormalDirection(castResult.normal, _slopeAngle) == normalRestriction) {
                         // only count if normal points in given direction
                         if (totalResults < _tempResults.Length) { // failsafe
                             _tempResults[totalResults] = castResult;

@@ -318,6 +318,15 @@ namespace Core.Unity {
         public static Vector2 BezierDerivativeCubic(Vector2 p0, Vector2 controlPoint1, Vector2 controlPoint2, Vector2 p3, float t) {
             return 3 * (1 - t) * (1 - t) * (controlPoint1 - p0) + 6 * (1 - t) * t * (controlPoint2 - controlPoint1) + 3 * t * t * (p3 - controlPoint2);
         }
+        /// <summary>
+        /// Given a bezier curve defined by a start point p0, two control points, and end point p3, find the normalized normal on the curve at t in [0,1]
+        /// </summary>
+        /// /// <param name="t">in [0,1]</param>
+        public static Vector2 BezierNormalCubic(Vector2 p0, Vector2 controlPoint1, Vector2 controlPoint2, Vector2 p3, float t) {
+            Vector2 deriv = BezierDerivativeCubic(p0, controlPoint1, controlPoint2, p3, t);
+            Vector2 normal = new Vector2(-deriv.y, deriv.x);
+            return normal.normalized;
+        }
 
         /// <summary>
         /// Gradually changes a value towards a desired goal over time.
