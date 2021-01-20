@@ -138,6 +138,30 @@ namespace Core.Unity {
             RegisterAction(name, new ActionContainerS(action, ""));
         }
         /// <summary>
+        /// Registers an action with 1 bool argument.
+        /// </summary>
+        /// <param name="name">Name to identify the action.</param>
+        /// <param name="action">The method to be called when the corresponding button is pressed.</param>
+        public static void RegisterAction(string name, System.Action<bool> action) {
+            RegisterAction(name, false, action);
+        }
+        /// <summary>
+        /// Registers an action with 1 bool argument.
+        /// </summary>
+        /// <param name="name">Name to identify the action.</param>
+        /// <param name="defaultArg">Default argument to the action.</param>
+        /// <param name="action">The method to be called when the corresponding button is pressed.</param>
+        public static void RegisterAction(string name, bool defaultArg, System.Action<bool> action) {
+            if (!IsEnabled)
+                return;
+            if (action == null) {
+                Debug.LogError($"Cannot register null action (name: \"{name}\")");
+                return;
+            }
+
+            RegisterAction(name, new ActionContainerB(action, defaultArg));
+        }
+        /// <summary>
         /// Registers an action with 1 int argument.
         /// </summary>
         /// <param name="name">Name to identify the action.</param>
@@ -530,6 +554,20 @@ namespace Core.Unity {
                 _action.Invoke(Args[0]);
             }
             private System.Action<string> _action;
+        }
+
+        private class ActionContainerB : ActionContainerBase {
+            public ActionContainerB(System.Action<bool> action, bool defaultArg) : base(1) {
+                _action = action;
+                Args[0] = defaultArg.ToString();
+            }
+            public override void InvokeAction() {
+                if (!bool.TryParse(Args[0], out bool b)) {
+                    b = false;
+                }
+                _action.Invoke(b);
+            }
+            private System.Action<bool> _action;
         }
 
         private class ActionContainerI : ActionContainerBase {

@@ -1,5 +1,5 @@
 ﻿// A copy of the built-in UI/Default shader.
-Shader "Custom/UIDefault" {
+Shader "Custom/UI/UIDefault" {
 
     Properties {
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
