@@ -217,6 +217,23 @@ namespace Core.Unity.BuildAutomation {
             string buildDirectory = $"{BuildsDirectory}/{configDirectoryName}/{buildTargetDirectoryName}";
             string exeDirectory = $"{buildDirectory}/{Application.productName}";
 
+            // clean exe directory
+            if (System.IO.Directory.Exists(exeDirectory)) {
+                try {
+                    System.IO.DirectoryInfo exeDirectoryInfo = new System.IO.DirectoryInfo(exeDirectory);
+                    foreach (System.IO.FileInfo file in exeDirectoryInfo.EnumerateFiles()) {
+                        file.Delete();
+                    }
+                    foreach (System.IO.DirectoryInfo dir in exeDirectoryInfo.EnumerateDirectories()) {
+                        dir.Delete(true);
+                    }
+                } catch (System.Exception ex) {
+                    Debug.LogError($"Error cleaning exe directory \"{exeDirectory}\": {ex.Message}");
+                    return;
+                }
+                Debug.Log($"Successfully cleaned exe directory \"{exeDirectory}\".");
+            }
+            
             BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
             buildPlayerOptions.scenes = GetScenes();
             buildPlayerOptions.locationPathName = $"{exeDirectory}/{Application.productName}.exe";

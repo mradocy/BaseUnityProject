@@ -229,6 +229,21 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Ease out interpolation between a and b where the value overshoots a bit before returning to b.  t is clamped between 0 and d.
+        /// </summary>
+        public static float BackOut(float a, float b, float t, float d = 1) {
+            return BackOutUnclamp(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+        /// <summary>
+        /// Ease out interpolation between a and b where the value overshoots a bit before returning to b.
+        /// </summary>
+        public static float BackOutUnclamp(float a, float b, float t, float d = 1) {
+            float s = 1.70158f;
+            t = t / d - 1;
+            return (b - a) * (t * t * ((s + 1) * t + s) + 1) + a;
+        }
+
+        /// <summary>
         /// Elastic ease out interpolation between a and b.  t is clamped between 0 and d.
         /// </summary>
         public static float ElasticOut(float a, float b, float t, float d = 1) {
