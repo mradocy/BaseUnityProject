@@ -205,6 +205,33 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Calculates the 2 intersection points between circle 1 and circle 2.
+        /// </summary>
+        /// <param name="c1">Center of circle 1</param>
+        /// <param name="r1">Radius of circle 1</param>
+        /// <param name="c2">Center of circle 2</param>
+        /// <param name="r2">Radius of circle 2</param>
+        /// <param name="int1">Out param: the first intersection</param>
+        /// <param name="int2">Out param: the second intersection</param>
+        /// <returns>If the circles intersect</returns>
+        public static bool CircleCircleIntersection(Vector2 c1, float r1, Vector2 c2, float r2, out Vector2 int1, out Vector2 int2) {
+            float d = Vector2.Distance(c1, c2);
+            if (d > r1 + r2 || d < Mathf.Abs(r1 - r2)) {
+                int1 = Vector2.zero;
+                int2 = Vector2.zero;
+                return false;
+            }
+
+            float a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+            float h = Mathf.Sqrt(r1 * r1 - a * a);
+            Vector2 p2 = c1 + a * (c2 - c1) / d;
+
+            int1 = new Vector2(p2.x + h * (c2.y - c1.y) / d, p2.y - h * (c2.x - c1.x) / d);
+            int2 = new Vector2(p2.x - h * (c2.y - c1.y) / d, p2.y + h * (c2.x - c1.x) / d);
+            return true;
+        }
+
+        /// <summary>
         /// Calculates the intersection points between a line (defined by 2 points on the line) and a circle.  Returns array of the 2 Vector2 intersections.  If there are no intersections, the array is null.
         /// </summary>
         /// <param name="lineP0">First point that defines the line</param>

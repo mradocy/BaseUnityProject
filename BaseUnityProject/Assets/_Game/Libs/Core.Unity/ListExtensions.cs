@@ -10,7 +10,7 @@ namespace Core.Unity {
     public static class ListExtensions {
 
         /// <summary>
-        /// Removes the last element from the given list and returns it.
+        /// Removes the last element from this list and returns it.
         /// </summary>
         /// <param name="list">This list.</param>
         public static T Pop<T>(this List<T> list) {
@@ -22,6 +22,23 @@ namespace Core.Unity {
             T element = list[list.Count - 1];
             list.RemoveAt(list.Count - 1);
             return element;
+        }
+
+        /// <summary>
+        /// Resizes this list to contain the given number of elements.
+        /// </summary>
+        /// <param name="size">New size to give this list.</param>
+        /// <param name="defaultValue">If given size is larger than the current count, fill the additional elements with this value.</param>
+        public static void Resize<T>(this List<T> list, int size, T defaultValue = default) {
+            int count = list.Count;
+            if (size < count) {
+                list.RemoveRange(size, count - size);
+            } else if (size > count) {
+                if (size > list.Capacity) {
+                    list.Capacity = size; // this bit is purely an optimisation, to avoid multiple automatic capacity changes.
+                }
+                list.AddRange(System.Linq.Enumerable.Repeat(defaultValue, size - count));
+            }
         }
 
         /// <summary>
