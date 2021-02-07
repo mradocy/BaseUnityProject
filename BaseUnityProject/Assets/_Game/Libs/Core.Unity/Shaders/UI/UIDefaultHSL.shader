@@ -5,9 +5,9 @@ Shader "Custom/UI/UIDefaultHSL" {
         [PerRendererData] _MainTex("Sprite Texture", 2D) = "white" {}
         _Color("Tint", Color) = (1,1,1,1)
 
-        _HueOffset("Hue Offset", Range(0, 360)) = 0
-        _SaturationMult("Saturation Multiplier", Range(0, 2)) = 1
-        _LightnessMult("Lightness Multiplier", Range(0, 2)) = 1
+        _Hue("Hue", Range(0, 360)) = 0
+        _Saturation("Saturation", Range(0, 2)) = 1
+        _Lightness("Lightness", Range(0, 2)) = 1
 
         _StencilComp("Stencil Comparison", Float) = 8
         _Stencil("Stencil ID", Float) = 0
@@ -78,9 +78,9 @@ Shader "Custom/UI/UIDefaultHSL" {
             sampler2D _MainTex;
             fixed4 _Color;
 
-            float _HueOffset;
-            float _SaturationMult;
-            float _LightnessMult;
+            float _Hue;
+            float _Saturation;
+            float _Lightness;
 
             fixed4 _TextureSampleAdd;
             float4 _ClipRect;
@@ -142,9 +142,9 @@ Shader "Custom/UI/UIDefaultHSL" {
                 }
 
                 // apply offsets and multipliers
-                hue = fmod(hue + _HueOffset, 360);
-                saturation = saturate(saturation * _SaturationMult);
-                lightness = saturate(lightness * _LightnessMult);
+                hue = fmod(hue + _Hue, 360);
+                saturation = saturate(saturation * _Saturation);
+                lightness = saturate(lightness * _Lightness);
 
                 // HSL -> RGB calculation: https://www.rapidtables.com/convert/color/hsl-to-rgb.html
                 fixed c = (1 - abs(2 * lightness - 1)) * saturation;

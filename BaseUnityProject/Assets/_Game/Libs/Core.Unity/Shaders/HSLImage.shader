@@ -1,8 +1,9 @@
-﻿// allows hue/saturation/lightness adjustment on a grab pass texture
-Shader "Custom/HSLGrabPass" {
+﻿// allows hue/saturation/lightness adjustment on an image
+Shader "Custom/HSLImage" {
     
     // fields that can be accessed in Unity.  More info: https://docs.unity3d.com/Manual/SL-PropertiesInPrograms.html
     Properties {
+        _MainTex("Texture", 2D) = "white" {}
         _Hue("Hue", Range(0, 360)) = 0
         _Saturation("Saturation", Range(0, 2)) = 1
         _Lightness("Lightness", Range(0, 2)) = 1
@@ -13,11 +14,6 @@ Shader "Custom/HSLGrabPass" {
         Tags {
             "Queue" = "Transparent"
             "IgnoreProjector" = "True"
-        }
-        
-        // grab the screen behind the object into _BackgroundTexture
-        GrabPass {
-            "_BackgroundTexture"
         }
         
         Pass {
@@ -38,11 +34,10 @@ Shader "Custom/HSLGrabPass" {
             struct v2f {
                 float4 vertex : SV_POSITION;
                 float2 uv : TEXCOORD0;
-                float4 grabPos : TEXCOORD1;
             };
             
             // custom fields to be filled by the Shader Lab
-            sampler2D _BackgroundTexture; // used by grabPass
+            sampler2D _MainTex;
             float _Hue;
             float _Saturation;
             float _Lightness;
@@ -52,19 +47,14 @@ Shader "Custom/HSLGrabPass" {
                 v2f OUT;
                 OUT.vertex = UnityObjectToClipPos(v.vertex); // transforms model vertex positions based on the Unity camera
                 OUT.uv = v.uv;
-
-                OUT.grabPos = ComputeGrabScreenPos(OUT.vertex); // gets grab screen position
-
                 return OUT;
             }
             
             // fragment function that "colors the object"; takes an iterated pixel and gets its color
             fixed4 frag(v2f IN) : SV_Target {
+
+                fixed4 color = tex2D(_MainTex, IN.uv);
                 
-                float4 grabPos = IN.grabPos;
-
-                fixed4 color = tex2Dproj(_BackgroundTexture, grabPos);
-
                 // RGB -> HSL calculation: https://www.rapidtables.com/convert/color/rgb-to-hsl.html
                 fixed r = color.r;
                 fixed g = color.g;
