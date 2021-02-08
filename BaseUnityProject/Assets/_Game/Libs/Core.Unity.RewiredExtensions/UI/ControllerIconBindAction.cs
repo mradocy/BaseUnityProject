@@ -76,23 +76,22 @@ namespace Core.Unity.RewiredExtensions.UI {
             }
 
             // update icon
-            System.Guid? joystickGuid = RewiredUtils.GetFirstJoystickGuid();
-            if (joystickGuid == null) {
+            if (RewiredUtils.IsJoystickLastActiveController) {
+                // joystick is current input method
+                System.Guid joystickGuid = RewiredUtils.GetPrimaryJoystickGuid().Value;
+                ActionElementMap joystickMap = RewiredUtils.GetFirstJoystickActionElementMap(_inputAction, this.AxisDirection);
+                JoystickStyleID joystickStyleId = RewiredUtils.GetJoystickStyle(joystickGuid).ID;
+                ControllerElementType elementType = joystickMap?.elementType ?? ControllerElementType.Axis;
+                int elementIndex = joystickMap?.elementIndex ?? 0;
+
+                _controllerIcon.SetJoystickIcon(joystickStyleId, elementType, elementIndex, this.AxisDirection);
+            } else {
                 // keyboard is current input method
                 ActionElementMap keyboardMap = RewiredUtils.GetFirstKeyboardActionElementMap(_inputAction, this.AxisDirection);
                 KeyCode keyCode = keyboardMap?.keyCode ?? KeyCode.None;
 
                 _controllerIcon.SetKeyboardIcon(keyCode);
-            } else {
-                // joystick is current input method
-                ActionElementMap joystickMap = RewiredUtils.GetFirstJoystickActionElementMap(_inputAction, this.AxisDirection);
-                JoystickStyleID joystickStyleId = RewiredUtils.GetJoystickStyle(joystickGuid.Value).ID;
-                ControllerElementType elementType = joystickMap?.elementType ?? ControllerElementType.Axis;
-                int elementIndex = joystickMap?.elementIndex ?? 0;
-
-                _controllerIcon.SetJoystickIcon(joystickStyleId, elementType, elementIndex, this.AxisDirection);
             }
-
 
             if (_setsIsPressed) {
                 if (_inputAction.type == InputActionType.Button) {

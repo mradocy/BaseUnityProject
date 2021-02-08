@@ -28,12 +28,12 @@ namespace Core.Unity.RewiredExtensions.UI {
             }
             int elementIndex;
             if (RewiredUtils.GetAnyJoystickButtonPressed(out elementIndex)) {
-                _controllerIcon.SetJoystickIcon(RewiredUtils.GetFirstJoystickStyle().ID, ControllerElementType.Button, elementIndex, Pole.Positive);
+                _controllerIcon.SetJoystickIcon(RewiredUtils.GetPrimaryJoystickStyle().ID, ControllerElementType.Button, elementIndex, Pole.Positive);
             }
             int axisElementIndex;
             bool positive;
             if (RewiredUtils.GetAnyJoystickAxisPressed(0.5f, out axisElementIndex, out positive)) {
-                _controllerIcon.SetJoystickIcon(RewiredUtils.GetFirstJoystickStyle().ID, ControllerElementType.Axis, axisElementIndex, positive ? Pole.Positive : Pole.Negative);
+                _controllerIcon.SetJoystickIcon(RewiredUtils.GetPrimaryJoystickStyle().ID, ControllerElementType.Axis, axisElementIndex, positive ? Pole.Positive : Pole.Negative);
             }
         }
 

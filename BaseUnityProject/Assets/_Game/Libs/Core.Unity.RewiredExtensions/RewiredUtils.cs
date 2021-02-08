@@ -364,19 +364,43 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
-        /// Gets the Rewired hardware guid of the first listed connected joystick.  Returns null if no joysticks are connected.
+        /// Gets if the last active controller is the joystick (a joystick must be connected).  Otherwise it's the keyboard.
         /// </summary>
-        /// <returns>Guid?</returns>
-        public static System.Guid? GetFirstJoystickGuid() {
-            return Player.controllers.Joysticks.FirstOrDefault()?.hardwareTypeGuid;
+        public static bool IsJoystickLastActiveController {
+            get {
+                if (!IsJoystickConnected)
+                    return false;
+                return Player.controllers.GetLastActiveController() is Joystick;
+            }
         }
 
         /// <summary>
-        /// Gets the joystick style of the first listed connected joystick.  Returns null if no joysticks are connected.
+        /// Gets the last active joystick.
+        /// Returns null if no joysticks are connected.
+        /// </summary>
+        public static Joystick GetPrimaryJoystick() {
+            Joystick joystick = null;
+            foreach (Joystick j in Player.controllers.Joysticks) {
+                if (joystick == null || j.GetLastTimeActive() > joystick.GetLastTimeActive())
+                    joystick = j;
+            }
+            return joystick;
+        }
+
+        /// <summary>
+        /// Gets the Rewired hardware guid of the <see cref="GetPrimaryJoystick"/>.  Returns null if no joysticks are connected.
+        /// </summary>
+        /// <returns>Guid?</returns>
+        public static System.Guid? GetPrimaryJoystickGuid() {
+            return GetPrimaryJoystick()?.hardwareTypeGuid;
+        }
+
+        /// <summary>
+        /// Gets the joystick style of the <see cref="GetPrimaryJoystick"/>.  Returns null if no joysticks are connected.
         /// </summary>
         /// <returns>JoystickStyleID?</returns>
-        public static IJoystickStyle GetFirstJoystickStyle() {
-            System.Guid? guid = GetFirstJoystickGuid();
+        public static IJoystickStyle GetPrimaryJoystickStyle() {
+            System.Guid? guid = GetPrimaryJoystickGuid();
             if (guid == null) {
                 return null;
             } else {
