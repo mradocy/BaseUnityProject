@@ -11,7 +11,7 @@ set SOURCE_DIRECTORY=..\..\Libs\Core.CutScript
 set DESTINATION_DIRECTORY=%GAMEDEV_SOURCE_TOOLS%\CutScript\Core.CutScript
 
 :: The (only) types of files to merge.
-set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;*.md;
+set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;*.cginc;*.md;
 
 :: Directories to ignore:
 set DIR_IGNORE=Obj;obj;Bin;bin

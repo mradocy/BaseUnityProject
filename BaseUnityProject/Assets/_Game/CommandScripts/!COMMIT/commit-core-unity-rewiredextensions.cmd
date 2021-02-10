@@ -1,17 +1,17 @@
-:: Uses KDiff3 to commit the Core.Unity.RewiredExtensions namespace to the base unity project
+:: Uses KDiff3 to commit the Core.Unity.Rewired namespace to the base unity project
 
 @echo OFF
 setlocal
 pushd "%~dp0"
 
-:: Directory of Core.Unity.RewiredExtensions in this Unity project.
+:: Directory of Core.Unity.Rewired in this Unity project.
 set SOURCE_DIRECTORY=..\..\Libs\Core.Unity.RewiredExtensions
 
-:: Directory of Core.Unity.RewiredExtensions in BaseUnityProject:
+:: Directory of Core.Unity.Rewired in BaseUnityProject:
 set DESTINATION_DIRECTORY=%GAMEDEV_SOURCE_UNITY%\BaseUnityProject\BaseUnityProject\Assets\_Game\Libs\Core.Unity.RewiredExtensions
 
 :: The (only) types of files to merge.
-set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;
+set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;*.cginc;
 
 
 :: Calling KDiff3 (make sure KDiff3 is installed and contained in %PATH%)

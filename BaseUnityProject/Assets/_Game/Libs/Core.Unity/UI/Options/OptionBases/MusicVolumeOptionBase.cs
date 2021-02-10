@@ -22,7 +22,7 @@ namespace Core.Unity.UI.Options.OptionBases {
 
         public string DisplayValue {
             get {
-                return SoundSettings.MusicVolume.ToString("0.0");
+                return Mathf.RoundToInt(SoundSettings.MusicVolume * 100) + "%";
             }
         }
 

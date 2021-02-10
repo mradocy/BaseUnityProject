@@ -11,7 +11,7 @@ set SOURCE_DIRECTORY=%GAMEDEV_SOURCE_UNITY%\BaseUnityProject\BaseUnityProject\As
 set DESTINATION_DIRECTORY=..\..\Libs\Core.Unity.TextMeshPro
 
 :: The (only) types of files to merge.
-set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;
+set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;*.cginc;
 
 :: Directories to ignore:
 set DIR_IGNORE=.svn;.hg;.git;.vs;Library;library;Temp;temp;Obj;obj;Bin;bin

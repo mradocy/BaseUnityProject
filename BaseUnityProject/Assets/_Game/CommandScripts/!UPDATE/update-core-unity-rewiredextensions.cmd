@@ -7,11 +7,11 @@ pushd "%~dp0"
 :: Directory to update Core.Unity.RewiredExtensions from:
 set SOURCE_DIRECTORY=%GAMEDEV_SOURCE_UNITY%\BaseUnityProject\BaseUnityProject\Assets\_Game\Libs\Core.Unity.RewiredExtensions
 
-:: Directory of this Core.Unity folder:
+:: Directory of this Core.Unity.RewiredExtensions folder:
 set DESTINATION_DIRECTORY=..\..\Libs\Core.Unity.RewiredExtensions
 
 :: The (only) types of files to merge.
-set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;
+set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;*.cginc;
 
 :: Directories to ignore:
 set DIR_IGNORE=.svn;.hg;.git;.vs;Library;library;Temp;temp;Obj;obj;Bin;bin

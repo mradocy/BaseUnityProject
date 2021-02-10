@@ -5,13 +5,13 @@ setlocal
 pushd "%~dp0"
 
 :: Directory to update CutScript from:
-set SOURCE_DIRECTORY=%GAMEDEV_SOURCE_TOOLS%\Core.CutScript\Core.CutScript
+set SOURCE_DIRECTORY=%GAMEDEV_SOURCE_TOOLS%\CutScript\Core.CutScript
 
 :: Directory of this CutScript folder:
 set DESTINATION_DIRECTORY=..\..\Libs\Core.CutScript
 
 :: The (only) types of files to merge.
-set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;*.md;
+set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;*.cginc;*.md;
 
 :: Directories to ignore:
 set DIR_IGNORE=.svn;.hg;.git;.vs;Library;library;Temp;temp;Obj;obj;Bin;bin

@@ -11,7 +11,7 @@ set SOURCE_DIRECTORY=..\..\Libs\Core.Unity.TextMeshPro
 set DESTINATION_DIRECTORY=%GAMEDEV_SOURCE_UNITY%\BaseUnityProject\BaseUnityProject\Assets\_Game\Libs\Core.Unity.TextMeshPro
 
 :: The (only) types of files to merge.
-set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;
+set FILE_PATTERNS=*.cs;*.cmd;*.bat;*.exe;*.txt;*.shader;*.cginc;
 
 
 :: Calling KDiff3 (make sure KDiff3 is installed and contained in %PATH%)
