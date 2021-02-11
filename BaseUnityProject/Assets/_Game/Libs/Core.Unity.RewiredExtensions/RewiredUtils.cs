@@ -136,14 +136,27 @@ namespace Core.Unity.RewiredExtensions {
         /// <param name="elementIndex">The element index of the button pressed.</param>
         /// <returns>Any joystick button pressed.</returns>
         public static bool GetAnyJoystickButtonPressed(out int elementIndex) {
+            if (GetAnyJoystickButtonPressed(out ControllerPollingInfo pollingInfo)) {
+                elementIndex = pollingInfo.elementIndex;
+                return true;
+            }
+
             elementIndex = 0;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets if any joystick button has been pressed this frame.  If so, the polling info of the button pressed is outed as <paramref name="pollingInfo"/>.
+        /// </summary>
+        /// <returns>Any joystick button pressed.</returns>
+        public static bool GetAnyJoystickButtonPressed(out ControllerPollingInfo pollingInfo) {
             IEnumerable<ControllerPollingInfo> pollingInfos = Player.controllers.polling.PollAllControllersOfTypeForAllButtonsDown(ControllerType.Joystick);
             if (!pollingInfos.Any()) {
+                pollingInfo = new ControllerPollingInfo();
                 return false;
             }
 
-            ControllerPollingInfo pollingInfo = pollingInfos.First();
-            elementIndex = pollingInfo.elementIndex;
+            pollingInfo = pollingInfos.First();
             return true;
         }
 
@@ -154,31 +167,33 @@ namespace Core.Unity.RewiredExtensions {
         /// <param name="elementIndex">The element index of the axis pressed.</param>
         /// <param name="positive">If the axis was in the positive direction (false for negative direction).</param>
         /// <returns>Any joystick axis "pressed".</returns>
-        public static bool GetAnyJoystickAxisPressed(float axisThreshold, out int elementIndex, out bool positive) {
+        /// <remarks>Stupidly there's no way to detected if an axis is "pressed" with rewired controller polling.</remarks>
+        public static bool GetAnyJoystickAxisPressed(float axisThreshold, out int elementIndex, out bool positive, out string elementName) {
+            axisThreshold = Mathf.Abs(axisThreshold);
+
+            foreach (Joystick joystick in Player.controllers.Joysticks) {
+                foreach (ControllerElementIdentifier axisIdentifier in joystick.AxisElementIdentifiers) {
+                    int axisIdentifierId = axisIdentifier.id;
+                    float prevAxis = joystick.GetAxisPrevById(axisIdentifierId);
+                    float axis = joystick.GetAxisById(axisIdentifierId);
+                    if (axis >= axisThreshold && prevAxis < axisThreshold) {
+                        positive = true;
+                        elementIndex = axisIdentifierId;
+                        elementName = axisIdentifier.positiveName;
+                        return true;
+                    }
+                    if (axis <= -axisThreshold && prevAxis > -axisThreshold) {
+                        positive = false;
+                        elementIndex = axisIdentifierId;
+                        elementName = axisIdentifier.negativeName;
+                        return true;
+                    }
+                }
+            }
+
             elementIndex = 0;
             positive = false;
-            Joystick joystick = Player.controllers.Joysticks.FirstOrDefault();
-            if (joystick == null) {
-                return false;
-            }
-
-            axisThreshold = Mathf.Abs(axisThreshold);
-            int axisCount = joystick.axisCount;
-            for (int i=0; i < axisCount; i++) {
-                float prevAxis = joystick.GetAxisPrev(i);
-                float axis = joystick.GetAxis(i);
-                if (axis >= axisThreshold && prevAxis < axisThreshold) {
-                    positive = true;
-                    elementIndex = i;
-                    return true;
-                }
-                if (axis <= -axisThreshold && prevAxis > -axisThreshold) {
-                    positive = false;
-                    elementIndex = i;
-                    return true;
-                }
-            }
-
+            elementName = null;
             return false;
         }
 
@@ -195,7 +210,7 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
-        /// Gets a joystick style from its ID.  Returns the generic style if not found.
+        /// Gets a <see cref="IJoystickStyle"/> from its ID.  Returns the generic style if not found.
         /// </summary>
         /// <param name="joystickStyleID">ID of the joystick style.</param>
         /// <returns>Joystick style</returns>
@@ -212,7 +227,7 @@ namespace Core.Unity.RewiredExtensions {
         }
 
         /// <summary>
-        /// Gets a joystick style from its Rewired hardware guid.  Returns the generic style if not found.
+        /// Gets a <see cref="IJoystickStyle"/> from its Rewired hardware guid.  Returns the generic style if not found.
         /// </summary>
         /// <param name="rewiredHardwareGuid">Guid corresponding to the controller's hardware, as specified by Rewired.</param>
         /// <returns>Joystick style</returns>
@@ -226,6 +241,16 @@ namespace Core.Unity.RewiredExtensions {
             }
 
             return joystickStyle;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="IJoystickStyle"/> from a rewired <see cref="Joystick"/>.
+        /// </summary>
+        public static IJoystickStyle GetJoystickStyle(Joystick joystick) {
+            if (joystick == null)
+                return null;
+
+            return GetJoystickStyle(joystick.hardwareTypeGuid);
         }
 
         /// <summary>
@@ -306,7 +331,25 @@ namespace Core.Unity.RewiredExtensions {
         /// <param name="axisDirection">The direction of the action, if it's an axis action.</param>
         /// <returns>joystick ActionElementMap</returns>
         public static ActionElementMap GetFirstJoystickActionElementMap(InputAction action, Pole axisDirection) {
-            return GetJoystickActionElementMaps(action, axisDirection).FirstOrDefault();
+            IList<ActionElementMap> maps = GetJoystickActionElementMaps(action, axisDirection);
+
+            // simple cases
+            if (maps.Count == 0)
+                return null;
+            if (maps.Count == 1)
+                return maps[0];
+
+            // should only be at most 2 maps per action-direction
+            if (maps.Count > 2) {
+                Debug.LogWarning($"More then 2 maps for action {action.descriptiveName}, {axisDirection}");
+            }
+
+            // for consistency, list buttons before axes
+            ActionElementMap firstButtonMap = maps.FirstOrDefault(m => m.elementType == ControllerElementType.Button);
+            if (firstButtonMap != null)
+                return firstButtonMap;
+
+            return maps.First();
         }
 
         /// <summary>
@@ -317,11 +360,22 @@ namespace Core.Unity.RewiredExtensions {
         /// <returns>joystick ActionElementMap</returns>
         public static ActionElementMap GetAltJoystickActionElementMap(InputAction action, Pole axisDirection) {
             IList<ActionElementMap> maps = GetJoystickActionElementMaps(action, axisDirection);
-            if (maps.Count > 1) {
-                return maps[1];
+
+            // simple case
+            if (maps.Count <= 1)
+                return null;
+
+            // should only be at most 2 maps per action-direction
+            if (maps.Count > 2) {
+                Debug.LogWarning($"More then 2 maps for action {action.descriptiveName}, {axisDirection}");
             }
 
-            return null;
+            // consider first map
+            if (maps[0] == GetFirstJoystickActionElementMap(action, axisDirection)) {
+                return maps[1];
+            } else {
+                return maps[0];
+            }
         }
 
         /// <summary>
@@ -336,7 +390,9 @@ namespace Core.Unity.RewiredExtensions {
             if (action.type == InputActionType.Axis) {
                 // Each controller mapper row represents a button action, or an axis action in a specific direction.
                 // So if a joystick map represents the id of an axis action but not the direction specified in this row, it should not be included
-                joystickMaps = joystickMaps.Where(jm => jm.elementType == ControllerElementType.Axis || jm.axisContribution == axisDirection);
+                joystickMaps = joystickMaps.Where(jm =>
+                    jm.axisContribution == axisDirection ||
+                    (jm.elementType == ControllerElementType.Axis && (jm.axisRange == AxisRange.Full || jm.axisContribution == axisDirection)));
             }
 
             return joystickMaps.ToList();

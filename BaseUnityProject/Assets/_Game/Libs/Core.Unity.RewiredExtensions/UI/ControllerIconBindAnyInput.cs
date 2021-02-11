@@ -32,7 +32,7 @@ namespace Core.Unity.RewiredExtensions.UI {
             }
             int axisElementIndex;
             bool positive;
-            if (RewiredUtils.GetAnyJoystickAxisPressed(0.5f, out axisElementIndex, out positive)) {
+            if (RewiredUtils.GetAnyJoystickAxisPressed(0.5f, out axisElementIndex, out positive, out string _)) {
                 _controllerIcon.SetJoystickIcon(RewiredUtils.GetPrimaryJoystickStyle().ID, ControllerElementType.Axis, axisElementIndex, positive ? Pole.Positive : Pole.Negative);
             }
         }
