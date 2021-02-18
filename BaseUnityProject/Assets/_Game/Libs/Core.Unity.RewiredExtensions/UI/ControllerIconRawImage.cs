@@ -158,25 +158,13 @@ namespace Core.Unity.RewiredExtensions.UI {
             }
         }
 
-        /// <inheritdoc />
-        public InputMethod InputMethod {
-            get { return _inputMethod; }
-        }
+        public InputMethod InputMethod => _inputMethod;
 
-        /// <inheritdoc />
-        public KeyCode KeyboardKey {
-            get { return _keyboardKey; }
-        }
+        public KeyCode KeyboardKey => _keyboardKey;
 
-        /// <inheritdoc />
-        public JoystickStyleID JoystickStyle {
-            get { return _joystickStyleID; }
-        }
+        public JoystickStyleID JoystickStyle => _joystickStyleID;
 
-        /// <inheritdoc />
-        public Pole JoystickAxisDirection {
-            get { return _joystickAxisDirection; }
-        }
+        public Pole JoystickAxisDirection => _joystickAxisDirection;
 
         #endregion
 

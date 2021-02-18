@@ -11,25 +11,25 @@ namespace Core.Unity.RewiredExtensions.UI {
     /// </summary>
     public interface IControllerIcon {
 
-        /// <summary>
-        /// The input method for the icon (e.g. keyboard, joystick)
-        /// </summary>
-        InputMethod InputMethod { get; }
+        ///// <summary>
+        ///// The input method for the icon (e.g. keyboard, joystick)
+        ///// </summary>
+        //InputMethod InputMethod { get; }
 
-        /// <summary>
-        /// The <see cref="KeyCode"/> to display when <see cref="this.InputMethod"/> is <see cref="InputMethod.Keyboard"/>.
-        /// </summary>
-        KeyCode KeyboardKey { get; }
+        ///// <summary>
+        ///// The <see cref="KeyCode"/> to display when <see cref="this.InputMethod"/> is <see cref="InputMethod.Keyboard"/>.
+        ///// </summary>
+        //KeyCode KeyboardKey { get; }
 
-        /// <summary>
-        /// The <see cref="JoystickStyle"/> to display when <see cref="this.InputMethod"/> is <see cref="InputMethod.Joystick"/>.
-        /// </summary>
-        JoystickStyleID JoystickStyle { get; }
+        ///// <summary>
+        ///// The <see cref="JoystickStyle"/> to display when <see cref="this.InputMethod"/> is <see cref="InputMethod.Joystick"/>.
+        ///// </summary>
+        //JoystickStyleID JoystickStyle { get; }
 
-        /// <summary>
-        /// The direction of the joystick element, if it's an axis.
-        /// </summary>
-        Pole JoystickAxisDirection { get; }
+        ///// <summary>
+        ///// The direction of the joystick element, if it's an axis.
+        ///// </summary>
+        //Pole JoystickAxisDirection { get; }
 
         /// <summary>
         /// Gets or sets if the icon is pressed.
