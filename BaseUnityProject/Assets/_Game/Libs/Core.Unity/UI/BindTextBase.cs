@@ -14,15 +14,11 @@ namespace Core.Unity.UI {
 
         [SerializeField]
         [Tooltip("Localized text asset to bind to the content of the Text component.")]
-        private LocalizedText _text = null;
+        private LocalizedTextAsset _text = null;
 
         [SerializeField]
         [Tooltip("If given, text will instead be set to whatever value is to the right of \"property_key: \" in the source file.")]
         private string _propertyKey = null;
-
-        [SerializeField]
-        [Tooltip("If content of Text component should continuously be bound when the game is playing.")]
-        private bool _bindWhenPlaying = false;
 
         [SerializeField]
         [Tooltip("Forces a specific localization to be used, if a value other than None is specified.  Useful for debugging.")]
@@ -52,7 +48,7 @@ namespace Core.Unity.UI {
         /// Called by Unity every frame, if the MonoBehaviour is enabled.
         /// </summary>
         protected void Update() {
-            if (!Application.isPlaying || _bindWhenPlaying) {
+            if (!Application.isPlaying) {
                 this.UpdateText();
             }
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Core.Unity;
 using TMPro;
+using UnityEngine.Events;
 
 namespace Core.Unity.TextMeshPro {
 
@@ -19,6 +20,15 @@ namespace Core.Unity.TextMeshPro {
         /// The maximum number of characters to appear in a TMPro text component
         /// </summary>
         public const int MaxChars = 500;
+
+        #endregion
+
+        #region Events
+
+        /// <summary>
+        /// Event invoked when the text of the associated <see cref="TextComponent"/> changes, after the mesh has been updated and properties have been updated.
+        /// </summary>
+        public event UnityAction TextChanged;
 
         #endregion
 
@@ -45,6 +55,11 @@ namespace Core.Unity.TextMeshPro {
         /// Gets the length of <see cref="ParsedText"/>.
         /// </summary>
         public int ParsedTextLength { get; private set; }
+
+        /// <summary>
+        /// Gets the number of lines displayed when all characters are visible.
+        /// </summary>
+        public int LineCount { get; private set; }
 
         #endregion
 
@@ -329,8 +344,11 @@ namespace Core.Unity.TextMeshPro {
                 this.TextComponent.ForceMeshUpdate(true); // GetParsedText() will be a frame late unless this is called
                 this.ParsedText = this.TextComponent.GetParsedText();
                 this.ParsedTextLength = this.ParsedText == null ? 0 : this.ParsedText.Length;
+                this.LineCount = this.TextComponent.textInfo.lineCount;
 
                 this.OnTextChanged();
+
+                this.TextChanged?.Invoke();
             }
 
             this.ApplyVertexChanges();

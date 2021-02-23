@@ -10,14 +10,20 @@ using UnityEngine;
  */
 
 namespace Core.Unity.Assets {
-    [CreateAssetMenu(fileName = "New LocalizedText", menuName = "LocalizedText", order = 51)]
-    public class LocalizedText : ScriptableObject {
+    [CreateAssetMenu(fileName = "New LocalizedText", menuName = "Localization/LocalizedTextAsset", order = 51)]
+    public class LocalizedTextAsset : ScriptableObject {
 
+        #region Inspector Fields
+
+        [SerializeField]
         [Tooltip("TextAsset to use for the English - United States locale.")]
-        public TextAsset enUS;
+        private TextAsset _enUS;
 
+        [SerializeField]
         [Tooltip("TextAsset to use for the Japanese locale.")]
-        public TextAsset ja;
+        private TextAsset _ja;
+
+        #endregion
 
         /// <summary>
         /// Gets the text of the text asset for the current localization.
@@ -133,9 +139,9 @@ namespace Core.Unity.Assets {
         protected TextAsset GetTextAsset(LocalizationCode localization) {
             switch (localization) {
             case LocalizationCode.en_US:
-                return this.enUS;
+                return this._enUS;
             case LocalizationCode.ja:
-                return this.ja;
+                return this._ja;
             }
 
             Debug.LogError($"Localization {localization} not supported");

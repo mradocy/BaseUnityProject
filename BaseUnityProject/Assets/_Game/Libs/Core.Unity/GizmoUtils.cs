@@ -36,6 +36,31 @@ namespace Core.Unity {
         /// <summary>
         /// Draws a circle.
         /// </summary>
+        /// <param name="center">The center (offset) of the circle.</param>
+        /// <param name="radius">The radius of the circle.</param>
+        public static void DrawCircle(Vector2 center, float radius) {
+            Vector2[] circlePoints = new Vector2[CircleSteps];
+            for (int i = 0; i < CircleSteps; i++) {
+                float angle = Mathf.PI * 2 * i / CircleSteps;
+                circlePoints[i] = new Vector2(
+                    center.x + Mathf.Cos(angle) * radius,
+                    center.y + Mathf.Sin(angle) * radius);
+            }
+
+            Vector3 firstPt, pt = new Vector3(), prevPt;
+            firstPt = circlePoints[0];
+            prevPt = firstPt;
+            for (int i = 1; i < circlePoints.Length; i++) {
+                pt = circlePoints[i];
+                Gizmos.DrawLine(prevPt, pt);
+                prevPt = pt;
+            }
+            Gizmos.DrawLine(pt, firstPt);
+        }
+
+        /// <summary>
+        /// Draws a circle.
+        /// </summary>
         /// <param name="transform">Transforms the given circle.</param>
         /// <param name="center">The center (offset) of the circle.</param>
         /// <param name="radius">The radius of the circle.</param>
