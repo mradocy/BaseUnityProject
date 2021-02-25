@@ -6,13 +6,14 @@ namespace Core.Unity {
 
     /// <summary>
     /// Used for debugging.  Can display messages and input commands.
-    /// None of this works if IsEnabled == false.
+    /// None of this works if IsEnabled == false (i.e. RELEASE is included in the scripting define symbols).
     /// Press ` to toggle showing window.
     /// </summary>
     public static class UDeb {
 
         /// <summary>
         /// When false, all calls to UDeb do nothing.
+        /// UDeb is enabled iff RELEASE is not included in the scripting define symbols (can be set in Unity's player settings)
         /// </summary>
         public static bool IsEnabled {
             get {
@@ -258,32 +259,8 @@ namespace Core.Unity {
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnBeforeSceneLoadRuntimeMethod() {
-            Initialize();
-        }
-
-        private static void Initialize() {
-            if (!IsEnabled)
-                return;
-
-            GameObject mbGO = new GameObject("UDeb");
-            _mb = mbGO.AddComponent<MB>();
-        }
-
-        private static MB _mb = null;
-        private class MB : MonoBehaviour {
-            private void Awake() {
-                DontDestroyOnLoad(gameObject);
-            }
-            private void Update() {
-                UDeb.Update();
-            }
-            private void OnGUI() {
-                UDeb.OnGUI();
-            }
-            private void OnDestroy() {
-                if (_mb == this)
-                    _mb = null;
-            }
+            PersistantGameObject.UpdateEvent += Update;
+            PersistantGameObject.OnGUIEvent += OnGUI;
         }
 
         #endregion

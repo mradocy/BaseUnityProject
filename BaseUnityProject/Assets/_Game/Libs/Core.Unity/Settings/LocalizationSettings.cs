@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 namespace Core.Unity.Settings {
@@ -32,7 +33,8 @@ namespace Core.Unity.Settings {
             if (_isInitialized)
                 return;
 
-            string localizationStr = Initialization.Settings.GetString(_localizationInitializationKey, CodeToString(LocalizationCode.Default));
+            CultureInfo cultureInfo = CultureInfo.CurrentCulture;
+            string localizationStr = Initialization.Settings.GetString(_localizationInitializationKey, CodeToString(CultureInfoToCode(cultureInfo)));
             _localization = StringToCode(localizationStr);
 
             _isInitialized = true;
@@ -98,6 +100,22 @@ namespace Core.Unity.Settings {
 
             Debug.LogError($"String {str} is not recognized as a localization code yet.");
             return LocalizationCode.None;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="LocalizationCode"/> for the given culture.
+        /// </summary>
+        /// <remarks>Localization codes: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c </remarks>
+        public static LocalizationCode CultureInfoToCode(CultureInfo cultureInfo) {
+            if (string.Equals(cultureInfo.TwoLetterISOLanguageName, "en", System.StringComparison.OrdinalIgnoreCase)) {
+                return LocalizationCode.en_US;
+            }
+            if (string.Equals(cultureInfo.TwoLetterISOLanguageName, "ja", System.StringComparison.OrdinalIgnoreCase)) {
+                return LocalizationCode.ja;
+            }
+
+            Debug.LogWarning($"No localization code found for culture {cultureInfo.Name}.  Using default.");
+            return LocalizationCode.Default;
         }
 
         #endregion
