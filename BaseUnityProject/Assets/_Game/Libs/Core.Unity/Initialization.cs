@@ -19,7 +19,7 @@ namespace Core.Unity {
         /// If the game has already initialized, the function is called immediately.
         /// </summary>
         /// <param name="callback">Function to call on initialize.</param>
-        public static void CallOnInitialize(UnityAction callback) {
+        public static void CallWhenInitialized(UnityAction callback) {
             if (callback == null) {
                 throw new System.ArgumentNullException();
             }

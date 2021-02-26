@@ -45,7 +45,7 @@ namespace Core.Unity.Settings {
         /// </summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnBeforeSceneLoadRuntimeMethod() {
-            Initialization.CallOnInitialize(Initialize);
+            Initialization.CallWhenInitialized(Initialize);
         }
 
         private static void Initialize() {
