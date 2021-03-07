@@ -52,5 +52,14 @@ namespace Core.Unity {
             return new Vector3(vector2.x, vector2.y);
         }
 
+        /// <summary>
+        /// Gets if the values of this vector are approximately the values of the given vector.
+        /// </summary>
+        /// <param name="vector2">This Vector2</param>
+        /// <param name="other">The vector to compare.</param>
+        public static bool Approximately(this Vector2 vector2, Vector2 other) {
+            return Mathf.Approximately(vector2.x, other.x) && Mathf.Approximately(vector2.y, other.y);
+        }
+
     }
 }

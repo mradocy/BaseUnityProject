@@ -57,7 +57,7 @@ namespace Core.Unity {
             string valStr = this.GetString(key, defaultValue ? "true" : "false");
             if (valStr == null)
                 return defaultValue;
-            return !(string.IsNullOrEmpty(valStr) || valStr == "0" || valStr.ToLower() == "false");
+            return !(string.IsNullOrEmpty(valStr) || valStr == "0" || string.Equals(valStr, "false", System.StringComparison.OrdinalIgnoreCase));
         }
         /// <summary>
         /// Gets a property as an int.  If the property doesn't exist, it's created with the given defaultValue.
@@ -102,13 +102,13 @@ namespace Core.Unity {
         /// Sets an int property.
         /// </summary>
         public void SetInt(string key, int value) {
-            this.SetString(key, "" + value);
+            this.SetString(key, value.ToString());
         }
         /// <summary>
         /// Sets a float property.
         /// </summary>
         public void SetFloat(string key, float value) {
-            this.SetString(key, "" + value);
+            this.SetString(key, value.ToString());
         }
 
         #endregion
@@ -120,7 +120,7 @@ namespace Core.Unity {
         /// </summary>
         public string FileDirectory {
             get {
-                return Application.dataPath;
+                return Path.GetFullPath(Application.dataPath + "/..");
             }
         }
         /// <summary>
@@ -132,7 +132,7 @@ namespace Core.Unity {
         /// </summary>
         public string FilePath {
             get {
-                return Path.Combine(FileDirectory, FileName);
+                return Path.Combine(this.FileDirectory, FileName);
             }
         }
 
@@ -147,9 +147,9 @@ namespace Core.Unity {
             }
 
             try {
-                File.WriteAllText(FilePath, sb.ToString());
+                File.WriteAllText(this.FilePath, sb.ToString());
             } catch (System.Exception e) {
-                Debug.LogError($"Could not save initialization settings to \"{FilePath}\".  Exception: {e.Message}");
+                Debug.LogError($"Could not save initialization settings to \"{this.FilePath}\".  Exception: {e.Message}");
             }
 
         }
@@ -159,18 +159,18 @@ namespace Core.Unity {
         /// </summary>
         public void Load() {
 
-            if (!File.Exists(FilePath)) {
-                Debug.Log($"INI file \"{FilePath}\" does not exist, creating new file.");
-                Save();
+            if (!File.Exists(this.FilePath)) {
+                Debug.Log($"INI file \"{this.FilePath}\" does not exist, creating new file.");
+                this.Save();
                 return;
             }
 
             string[] lines;
             try {
-                lines = File.ReadAllLines(FilePath);
+                lines = File.ReadAllLines(this.FilePath);
             } catch (System.Exception e) {
-                Debug.LogError($"Error reading INI file \"{FilePath}\": {e.Message}");
-                Save();
+                Debug.LogError($"Error reading INI file \"{this.FilePath}\": {e.Message}");
+                this.Save();
                 return;
             }
 
