@@ -80,7 +80,7 @@ namespace Core.Unity.StateMachine {
         int IState.IdInt {
             get {
                 if (_idInt == 0) {
-                    _idInt = System.Convert.ToInt32(this.Id);
+                    _idInt = CastTo<int>.From(this.Id);
                     if (_idInt == 0) {
                         throw new System.Exception($"Cannot have state with a state with id \"{this.Id}\" because its integer value is 0.  This is reserved for the null state.");
                     }

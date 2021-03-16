@@ -19,7 +19,7 @@ namespace Core.Unity.SaveData {
         /// <param name="max">Max value of the enum that can be stored in this array.  Range is [0, max]</param>
         /// <param name="parent">Parent <see cref="SaveGroup"/></param>
         /// <param name="defaultValues">Value for the property to start with.</param>
-        public SaveEnumBitArray(string key, TEnum max, SaveGroup parent, IEnumerable<TEnum> defaultValues) : base(key, System.Convert.ToInt32(max), parent, null) {
+        public SaveEnumBitArray(string key, TEnum max, SaveGroup parent, IEnumerable<TEnum> defaultValues) : base(key, CastTo<int>.From(max), parent, null) {
             if (defaultValues != null) {
                 // set default values
                 foreach (TEnum enumVal in defaultValues) {
@@ -36,7 +36,7 @@ namespace Core.Unity.SaveData {
         /// </summary>
         /// <param name="item">Item to add.</param>
         public void Add(TEnum item) {
-            this.Add(System.Convert.ToInt32(item));
+            this.Add(CastTo<int>.From(item));
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Core.Unity.SaveData {
         /// </summary>
         /// <param name="item">Item to remove.</param>
         public void Remove(TEnum item) {
-            this.Remove(System.Convert.ToInt32(item));
+            this.Remove(CastTo<int>.From(item));
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Core.Unity.SaveData {
         /// <param name="item">Item to check.</param>
         /// <returns>Is contained.</returns>
         public bool Contains(TEnum item) {
-            return this.Contains(System.Convert.ToInt32(item));
+            return this.Contains(CastTo<int>.From(item));
         }
 
         /// <summary>

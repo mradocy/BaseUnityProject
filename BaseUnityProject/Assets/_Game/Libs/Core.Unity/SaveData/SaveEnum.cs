@@ -16,7 +16,7 @@ namespace Core.Unity.SaveData {
         /// <param name="key">Key to identify the group.</param>
         /// <param name="parent">Parent <see cref="SaveGroup"/></param>
         /// <param name="defaultValue">Value for the property to start with.</param>
-        public SaveEnum(string key, SaveGroup parent, TEnum defaultValue) : base(key, parent, System.Convert.ToInt32(defaultValue)) {
+        public SaveEnum(string key, SaveGroup parent, TEnum defaultValue) : base(key, parent, CastTo<int>.From(defaultValue)) {
             this.Value = defaultValue;
         }
 
@@ -26,7 +26,7 @@ namespace Core.Unity.SaveData {
         public TEnum Value {
             get { return _value; }
             set {
-                base.IntValue = System.Convert.ToInt32(value);
+                base.IntValue = CastTo<int>.From(value);
                 _value = value;
             }
         }

@@ -21,7 +21,7 @@ namespace Core.Unity.SaveData {
         public SaveEnumList(string key, SaveGroup parent, IEnumerable<TEnum> defaultValues) : base(key, parent, null) {
             if (defaultValues != null) {
                 foreach (TEnum enumVal in defaultValues) {
-                    int val = System.Convert.ToInt32(enumVal);
+                    int val = CastTo<int>.From(enumVal);
                     _defaultValues.Add(val);
                     _values.Add(val);
                 }
@@ -33,7 +33,7 @@ namespace Core.Unity.SaveData {
         /// </summary>
         /// <param name="item">Item to add.</param>
         public void Add(TEnum item) {
-            _values.Add(System.Convert.ToInt32(item));
+            _values.Add(CastTo<int>.From(item));
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Core.Unity.SaveData {
         /// <param name="index">Index</param>
         /// <param name="item">Value</param>
         public void SetAt(int index, TEnum item) {
-            this.SetAt(index, System.Convert.ToInt32(item));
+            this.SetAt(index, CastTo<int>.From(item));
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Core.Unity.SaveData {
         /// <param name="item">Item to remove.</param>
         /// <returns>Was removed</returns>
         public bool Remove(TEnum item) {
-            return _values.Remove(System.Convert.ToInt32(item));
+            return _values.Remove(CastTo<int>.From(item));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Core.Unity.SaveData {
         /// <param name="item">Item to check.</param>
         /// <returns>Index.</returns>
         public int IndexOf(TEnum item) {
-            return _values.IndexOf(System.Convert.ToInt32(item));
+            return _values.IndexOf(CastTo<int>.From(item));
         }
 
         /// <summary>

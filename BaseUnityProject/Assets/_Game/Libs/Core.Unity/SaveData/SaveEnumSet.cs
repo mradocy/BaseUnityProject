@@ -21,7 +21,7 @@ namespace Core.Unity.SaveData {
         public SaveEnumSet(string key, SaveGroup parent, IEnumerable<TEnum> defaultValues) : base(key, parent, null) {
             if (defaultValues != null) {
                 foreach (TEnum enumVal in defaultValues) {
-                    int val = System.Convert.ToInt32(enumVal);
+                    int val = CastTo<int>.From(enumVal);
                     _defaultValues.Add(val);
                     _values.Add(val);
                 }
@@ -34,7 +34,7 @@ namespace Core.Unity.SaveData {
         /// <param name="item">Item to add.</param>
         /// <returns>Was added</returns>
         public bool Add(TEnum item) {
-            return _values.Add(System.Convert.ToInt32(item));
+            return _values.Add(CastTo<int>.From(item));
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Core.Unity.SaveData {
         /// <param name="item">Item to remove.</param>
         /// <returns>Was removed</returns>
         public bool Remove(TEnum item) {
-            return _values.Remove(System.Convert.ToInt32(item));
+            return _values.Remove(CastTo<int>.From(item));
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Core.Unity.SaveData {
         /// <param name="item">Item to check.</param>
         /// <returns>Is contained.</returns>
         public bool Contains(TEnum item) {
-            return _values.Contains(System.Convert.ToInt32(item));
+            return _values.Contains(CastTo<int>.From(item));
         }
 
         /// <summary>
