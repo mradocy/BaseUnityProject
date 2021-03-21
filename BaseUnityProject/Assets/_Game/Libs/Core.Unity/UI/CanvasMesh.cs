@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Core.Unity.UI {
 
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     public class CanvasMesh : Graphic {
 
         #region Inspector Fields
