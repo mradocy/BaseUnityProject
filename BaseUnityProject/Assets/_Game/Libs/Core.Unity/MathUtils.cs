@@ -396,7 +396,7 @@ namespace Core.Unity {
         }
 
         /// <summary>
-        /// Given a line defined by p0 and p1, returns if the point is to the left of the line ("left" when facing p1 from p0).
+        /// Given a line defined by p0 and p1, returns if the point is to the left of the line ("left" when starting at p0, facing p1).
         /// </summary>
         /// <param name="lineP0">The first point that defines the line.</param>
         /// <param name="lineP1">The other point that defines the line.</param>
@@ -433,6 +433,33 @@ namespace Core.Unity {
         /// <param name="point">Point to consider.</param>
         public static Vector2 PointOnLineClosestToPoint(Vector2 lineP0, Vector2 lineP1, Vector2 point) {
             return lineP0 + VectorProject(point - lineP0, lineP1 - lineP0);
+        }
+
+        /// <summary>
+        /// Gets the distance from a point to a line defined by lineP0 and lineP1.
+        /// </summary>
+        /// <param name="lineP0">First point that defines the line.</param>
+        /// <param name="lineP1">Other point that defines the line.</param>
+        /// <param name="point">Point to consider.</param>
+        public static float DistanceFromLine(Vector2 lineP0, Vector2 lineP1, Vector2 point) {
+            Vector2 closestPoint = PointOnLineClosestToPoint(lineP0, lineP1, point);
+            return Vector2.Distance(closestPoint, point);
+        }
+
+        /// <summary>
+        /// Like getting the distance from a point to a line, but is negative if going to the right of the line.  
+        /// </summary>
+        /// <param name="lineP0">First point that defines the line.</param>
+        /// <param name="lineP1">Other point that defines the line.</param>
+        /// <param name="point">Point to consider.</param>
+        public static float DisplacementFromLine(Vector2 lineP0, Vector2 lineP1, Vector2 point) {
+            Vector2 closestPoint = PointOnLineClosestToPoint(lineP0, lineP1, point);
+            float distance = Vector2.Distance(closestPoint, point);
+            if (PointToLeft(lineP0, lineP1, closestPoint)) {
+                return distance;
+            } else {
+                return -distance;
+            }
         }
 
         /// <summary>
