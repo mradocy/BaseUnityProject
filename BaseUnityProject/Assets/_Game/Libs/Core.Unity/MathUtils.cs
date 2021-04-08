@@ -455,7 +455,7 @@ namespace Core.Unity {
         public static float DisplacementFromLine(Vector2 lineP0, Vector2 lineP1, Vector2 point) {
             Vector2 closestPoint = PointOnLineClosestToPoint(lineP0, lineP1, point);
             float distance = Vector2.Distance(closestPoint, point);
-            if (PointToLeft(lineP0, lineP1, closestPoint)) {
+            if (PointToLeft(lineP0, lineP1, point)) {
                 return distance;
             } else {
                 return -distance;

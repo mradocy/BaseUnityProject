@@ -31,7 +31,7 @@ if %numFiles% GTR 1 (
 )
 
 :: Directories to ignore:
-set DIR_IGNORE=Testing Sandbox CVS .deps .svn .hg .git .vs Library library Temp temp Obj obj ActionLogs actionLogs
+set DIR_IGNORE=Testing Sandbox CVS .deps .svn .hg .git .vs Library library Temp temp Obj obj Logs logs ActionLogs actionLogs
 
 :: Files to ignore:
 set FILE_IGNORE=Testing.meta Sandbox.meta README.txt README.txt.meta *.sln *.csproj *.unityproj
