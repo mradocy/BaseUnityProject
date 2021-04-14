@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace Core.Unity.UI {
 
     [ExecuteAlways]
-    public class CanvasMesh : Graphic {
+    public class CanvasMesh : MaskableGraphic {
 
         #region Inspector Fields
 
