@@ -10,43 +10,12 @@ namespace Core.Unity.Camera {
     [DefaultExecutionOrder(999)] // this script should execute late.  NOTE: This attribute works, despite not showing up in the Script Execution Order window
     public class CameraControl : MonoBehaviour {
 
-        #region Inspector Fields
-
-        [Header("Shake Constants")]
-
-        [SerializeField, LongLabel]
-        private float _shakeXSpringConstant = 4000;
-
-        [SerializeField, LongLabel]
-        private float _shakeYSpringConstant = 3000f;
-
-        [SerializeField, LongLabel]
-        private float _shakeRotSpringConstant = 1000f;
-
-        [SerializeField, LongLabel]
-        private float _shakeXDampeningConstant = 4f;
-
-        [SerializeField, LongLabel]
-        private float _shakeYDampeningConstant = 4f;
-
-        [SerializeField, LongLabel]
-        private float _shakeRotDampeningConstant = 4;
-
-        #endregion
-
         #region Static Events
 
         /// <summary>
         /// Event invoked when the camera's position is updated.
         /// </summary>
         public static event UnityAction CameraUpdate;
-
-        /// <summary>
-        /// Event invoked when <see cref="Shake(float, float)"/> is called.
-        /// arg0 is velocity of shake in x direction.
-        /// arg1 is velocity of shake in y direction.
-        /// </summary>
-        public static event UnityAction<float, float> ShakeStarted;
 
         #endregion
 
@@ -70,12 +39,12 @@ namespace Core.Unity.Camera {
         /// <summary>
         /// Gets camera position, ignoring shake offsets.
         /// </summary>
-        public Vector2 Position { get; set; }
+        public Vector2 Position { get; private set; }
 
         /// <summary>
-        /// Gets or sets camera rotation, ignoring shake offsets.
+        /// Gets camera rotation, ignoring shake offsets.
         /// </summary>
-        public float Rotation { get; set; }
+        public float Rotation { get; private set; }
 
         /// <summary>
         /// Gets orthographic size of the camera.  Is half the <see cref="Height"/>.
@@ -142,7 +111,7 @@ namespace Core.Unity.Camera {
         /// <summary>
         /// Gets the current offset to position from the camera shaking.
         /// </summary>
-        public Vector2 ShakeOffset => _shakeMagnitude * this.Size;
+        public Vector2 ShakeOffset => _shakeOffset * this.Size;
 
         #endregion
 
@@ -221,36 +190,21 @@ namespace Core.Unity.Camera {
         }
 
         /// <summary>
-        /// Starts a camera shake.
-        /// Good starter values: <paramref name="velocityX"/>: 1, <paramref name="velocityY"/>: 4
+        /// Adds the given <see cref="ICameraShaker"/> to the list of camera shakers that collectively determine the <see cref="ShakeOffset"/>.
         /// </summary>
-        /// <param name="velocityX">Velocity of shake in x direction.</param>
-        /// <param name="velocityY">Velocity of shake in y direction.</param>
-        public void Shake(float velocityX, float velocityY) {
-            _shakeVelocity.Set(velocityX, velocityY);
-            ShakeStarted?.Invoke(velocityX, velocityY);
+        public void AddShaker(ICameraShaker cameraShaker) {
+            if (_cameraShakers.Contains(cameraShaker)) {
+                Debug.LogError("CameraControl already contains the given camera shaker");
+                return;
+            }
+            _cameraShakers.Add(cameraShaker);
         }
 
         /// <summary>
-        /// Starts a camera shake.
-        /// Good starter values: <paramref name="velocityX"/>: 1, <paramref name="velocityY"/>: 4, <paramref name="rotVelocity"/>: 30
+        /// Removes the given <see cref="ICameraShaker"/> from the list of camera shakers.
         /// </summary>
-        /// <param name="velocityX">Velocity of shake in x direction.</param>
-        /// <param name="velocityY">Velocity of shake in y direction.</param>
-        /// <param name="rotVelocity">Rotational velocity (in degrees/s)</param>
-        public void Shake(float velocityX, float velocityY, float rotVelocity) {
-            this.Shake(velocityX, velocityY);
-            _shakeRotVelocity = rotVelocity;
-        }
-
-        /// <summary>
-        /// Stops all shaking.
-        /// </summary>
-        public void StopShaking() {
-            _shakeMagnitude.Set(0, 0);
-            _shakeVelocity.Set(0, 0);
-            _shakeRotMagnitude = 0;
-            _shakeRotVelocity = 0;
+        public void RemoveShaker(ICameraShaker cameraShaker) {
+            _cameraShakers.Remove(cameraShaker);
         }
 
         #endregion
@@ -270,33 +224,6 @@ namespace Core.Unity.Camera {
             Main = this;
 
             this.Camera = this.EnsureComponent<UnityEngine.Camera>();
-        }
-
-        private void Start() {
-
-        }
-
-        /// <summary>
-        /// Called by Unity every frame, if the MonoBehaviour is enabled.
-        /// </summary>
-        private void Update() {
-
-        }
-
-        private void FixedUpdate() {
-
-            // update shake
-            float dt = Time.fixedDeltaTime;
-            float accelX = -_shakeMagnitude.x * _shakeXSpringConstant - _shakeVelocity.x * _shakeXDampeningConstant;
-            float accelY = -_shakeMagnitude.y * _shakeYSpringConstant - _shakeVelocity.y * _shakeYDampeningConstant;
-            float accelRot = -_shakeRotMagnitude * _shakeRotSpringConstant - _shakeRotVelocity * _shakeRotDampeningConstant;
-            _shakeVelocity.x += accelX * dt;
-            _shakeVelocity.y += accelY * dt;
-            _shakeRotVelocity += accelRot * dt;
-            _shakeMagnitude.x += _shakeVelocity.x * dt;
-            _shakeMagnitude.y += _shakeVelocity.y * dt;
-            _shakeRotMagnitude += _shakeRotVelocity * dt;
-
         }
 
         /// <summary>
@@ -346,12 +273,20 @@ namespace Core.Unity.Camera {
             // update position
             this.Position = pos;
 
+            // update shake offset from shakers
+            _shakeOffset.Set(0, 0);
+            _shakeRotationOffset = 0;
+            foreach (ICameraShaker cameraShaker in _cameraShakers) {
+                _shakeOffset += cameraShaker.Offset;
+                _shakeRotationOffset += cameraShaker.RotationOffset;
+            }
+
             // update transform
             this.transform.position = new Vector3(
                 this.Position.x + this.ShakeOffset.x,
                 this.Position.y + this.ShakeOffset.y,
                 this.transform.position.z);
-            this.transform.localRotation = MathUtils.RotToQuat(this.Rotation + _shakeRotMagnitude);
+            this.transform.localRotation = MathUtils.RotToQuat(this.Rotation + _shakeRotationOffset);
 
             // invoke camera event
             CameraUpdate?.Invoke();
@@ -384,10 +319,9 @@ namespace Core.Unity.Camera {
 
         #region Private Shake Fields
 
-        private Vector2 _shakeVelocity = new Vector2();
-        private Vector2 _shakeMagnitude = new Vector2();
-        private float _shakeRotVelocity = 0;
-        private float _shakeRotMagnitude = 0;
+        private List<ICameraShaker> _cameraShakers = new List<ICameraShaker>();
+        private Vector2 _shakeOffset;
+        private float _shakeRotationOffset;
 
         #endregion
     }

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Core.Unity.RewiredExtensions.UI {
 
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     public class ControllerIconRawImage : MonoBehaviour, IControllerIcon {
 
         #region Inspector Fields
@@ -316,7 +316,7 @@ namespace Core.Unity.RewiredExtensions.UI {
         /// </summary>
         private void Update() {
 
-            if (Application.isEditor) {
+            if (!Application.isPlaying) {
 
                 // failsafe
                 _keyboardTextNumColumns = Mathf.Max(1, _keyboardTextNumColumns);

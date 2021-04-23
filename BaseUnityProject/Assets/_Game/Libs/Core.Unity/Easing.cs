@@ -116,6 +116,34 @@ namespace Core.Unity {
             t--;
             return (a - b) / 2 * (t * (t - 2) - 1) + a;
         }
+        /// <summary>
+        /// Quadratic ease in-out interpolation between a and b.  t is clamped between 0 and d.
+        /// </summary>
+        public static Vector3 QuadInOut(Vector3 a, Vector3 b, float t, float d = 1) {
+            return QuadInOutUnclamp(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+        /// <summary>
+        /// Quadratic ease in-out interpolation between a and b.  No clamping is done.
+        /// </summary>
+        public static Vector3 QuadInOutUnclamp(Vector3 a, Vector3 b, float t, float d = 1) {
+            t /= d / 2;
+            if (t < 1) return (b - a) / 2 * t * t + a;
+            t--;
+            return (a - b) / 2 * (t * (t - 2) - 1) + a;
+        }
+        /// <summary>
+        /// Quadratic ease in-out interpolation between a and b.  t is clamped between 0 and d.
+        /// </summary>
+        public static Quaternion QuadInOut(Quaternion a, Quaternion b, float t, float d = 1) {
+            return QuadInOutUnclamp(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+        /// <summary>
+        /// Quadratic ease in-out interpolation between a and b.  No clamping is done.
+        /// </summary>
+        public static Quaternion QuadInOutUnclamp(Quaternion a, Quaternion b, float t, float d = 1) {
+            float inter = QuadInOutUnclamp(0, 1, t, d);
+            return Quaternion.LerpUnclamped(a, b, inter);
+        }
 
         /// <summary>
         /// Cubic ease out interpolation between a and b.  t is clamped between 0 and d.
