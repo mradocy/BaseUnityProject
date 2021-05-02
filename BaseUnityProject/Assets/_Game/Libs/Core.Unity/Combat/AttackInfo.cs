@@ -142,6 +142,16 @@ namespace Core.Unity.Combat {
         }
 
         /// <summary>
+        /// Tries to get the value of the attribute with the given id.
+        /// </summary>
+        /// <param name="attributeId">Id of the attribute.</param>
+        /// <param name="value">Out param to be set to the value of the attribute.</param>
+        /// <returns>If the attribute was found.</returns>
+        public bool TryGetAttribute(int attributeId, out float value) {
+            return _attributes.TryGetValue(attributeId, out value);
+        }
+
+        /// <summary>
         /// Sets the value of the attribute with the given id.
         /// </summary>
         /// <param name="attributeId">Id of the attribute.</param>

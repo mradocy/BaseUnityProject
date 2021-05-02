@@ -89,16 +89,27 @@ namespace Core.Unity.Rendering {
         /// <param name="transitionDuration">duration of the crossfade.  Set to 0 to immediately start the given state.</param>
         /// <param name="normalizedTime">start time (normalized) of state.  Set to float.NegativeInfinity state will either be played from beginning or will continue playing from current time.</param>
         public static void PlaySmooth(this Animator animator, string stateName, float transitionDuration = .1f, float normalizedTime = float.NegativeInfinity) {
+            animator.PlaySmooth(Animator.StringToHash(stateName), transitionDuration, normalizedTime);
+        }
+
+        /// <summary>
+        /// A smoother way to play a state on the animator.  Uses a crossfade.  If a crossfade is already happening, the animation is interrupted.
+        /// </summary>
+        /// <param name="animator">This animator.</param>
+        /// <param name="stateNameHash">Hash of the name of the state to play.</param>
+        /// <param name="transitionDuration">duration of the crossfade.  Set to 0 to immediately start the given state.</param>
+        /// <param name="normalizedTime">start time (normalized) of state.  Set to float.NegativeInfinity state will either be played from beginning or will continue playing from current time.</param>
+        public static void PlaySmooth(this Animator animator, int stateNameHash, float transitionDuration = .1f, float normalizedTime = float.NegativeInfinity) {
 
             if (animator.IsInTransition(0)) {
                 animator.Rebind(); // need to do this, otherwise animation will be ignored thanks to an oversight of the crossfade.
-                animator.Play(stateName, 0, normalizedTime);
+                animator.Play(stateNameHash, 0, normalizedTime);
             } else {
                 if (transitionDuration == 0) {
                     animator.Rebind();
-                    animator.Play(stateName, 0, normalizedTime);
+                    animator.Play(stateNameHash, 0, normalizedTime);
                 } else {
-                    animator.CrossFade(stateName, transitionDuration, 0, normalizedTime);
+                    animator.CrossFade(stateNameHash, transitionDuration, 0, normalizedTime);
                 }
             }
         }
