@@ -7,6 +7,8 @@ namespace Core.Unity {
     /// </summary>
     public class Easing {
 
+        public delegate float EaseFunc(float a, float b, float t, float d);
+
         /// <summary>
         /// Linearly interpolates between a and b.  t is clamped between 0 and d.
         /// </summary>
@@ -334,6 +336,61 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Calculates the velocity (very similar to derivative) of any ease function listed here at the given time.
+        /// </summary>
+        /// <param name="easeFunc">The function to find the derivative of.  Probably better to use the "unclamped" version of an ease func here.</param>
+        /// <param name="dt">Time to divide the evaluations of <paramref name="easeFunc"/> by.</param>
+        /// <remarks>In practice, dividing by dt will be more accurate for movement than the actual derivative</remarks>
+        public static float Velocity(EaseFunc easeFunc, float dt, float a, float b, float t, float d = 1) {
+            dt = Mathf.Max(Mathf.Epsilon, dt);
+            float x0 = easeFunc(a, b, t, d);
+            float x1 = easeFunc(a, b, t + dt, d);
+            return (x1 - x0) / dt;
+        }
+
+        /// <summary>
+        /// Calculates the velocity (very similar to derivative) of an AnimationCurve at the given time.
+        /// </summary>
+        /// <param name="easeFunc">The function to find the derivative of.  Probably better to use the "unclamped" version of an ease func here.</param>
+        /// <param name="dt">Time to divide the evaluations of <paramref name="easeFunc"/> by.</param>
+        /// <remarks>In practice, dividing by dt will be more accurate for movement than the actual derivative</remarks>
+        public static float Velocity(AnimationCurve animationCurve, float dt, float a, float b, float t, float d = 1) {
+            dt = Mathf.Max(Mathf.Epsilon, dt);
+            float x0 = Mathf.Lerp(a, b, animationCurve.Evaluate(t / d));
+            float x1 = Mathf.Lerp(a, b, animationCurve.Evaluate((t + dt) / d));
+            return (x1 - x0) / dt;
+        }
+
+        /// <summary>
+        /// Smoothly interpolates between an object going at a linear velocity and an existing ease function.
+        /// </summary>
+        /// <param name="v0">Initial velocity of the object</param>
+        /// <param name="velocityLerpDuration">Duration of the lerp between the initial velocity and the ease function</param>
+        /// <param name="easeFunc">The ease function to lerp into</param>
+        public static float VelocityLerp(float v0, float velocityLerpDuration, EaseFunc easeFunc, float easeA, float easeB, float easeT, float easeD = 1) {
+            float easeVal = easeFunc(easeA, easeB, easeT, easeD);
+            if (velocityLerpDuration <= Mathf.Epsilon) {
+                return easeVal;
+            }
+            float velocityVal = easeA + v0 * easeT;
+            return Mathf.Lerp(velocityVal, easeVal, easeT / velocityLerpDuration);
+        }
+
+        /// <summary>
+        /// Calculates the velocity (very similar to derivative) of the <see cref="VelocityLerp(float, float, EaseFunc, float, float, float, float)"/> function listed here at the given time.
+        /// </summary>
+        /// <param name="v0">Initial velocity of the object</param>
+        /// <param name="velocityLerpDuration">Duration of the lerp between the initial velocity and the ease function</param>
+        /// <param name="easeFunc">The ease function to lerp into.  Probably better to use the "unclamped" version of an ease func here.</param>
+        /// <param name="dt">Time to divide the evaluations of <see cref="VelocityLerp(float, float, EaseFunc, float, float, float, float)"/> by.</param>
+        public static float VelocityOfVelocityLerp(float v0, float velocityLerpDuration, EaseFunc easeFunc, float dt, float easeA, float easeB, float easeT, float easeD = 1) {
+            dt = Mathf.Max(Mathf.Epsilon, dt);
+            float x0 = VelocityLerp(v0, velocityLerpDuration, easeFunc, easeA, easeB, easeT, easeD);
+            float x1 = VelocityLerp(v0, velocityLerpDuration, easeFunc, easeA, easeB, easeT + dt, easeD);
+            return (x1 - x0) / dt;
+        }
+
+        /// <summary>
         /// Given a bezier curve defined by a start point p0, control point, and end point p2, find the point on the curve at t in [0,1]
         /// </summary>
         /// /// <param name="t">in [0,1]</param>
@@ -436,6 +493,22 @@ namespace Core.Unity {
             float omega = 2 * Mathf.PI / oscillationPeriod;
             float zeta = Mathf.Log(reductionRatio) / (-omega * rrDuration);
             SpringFaster(ref value, ref velocity, targetValue, zeta, omega, dt);
+        }
+
+        /// <summary>
+        /// Given starting position <paramref name="x0"/>, starting velocity <paramref name="v0"/>, ending position <paramref name="x1"/>, ending velocity <paramref name="v1"/>,
+        /// calculate the position and velocity at the given time <paramref name="t"/> for duration <paramref name="d"/>.
+        /// Calculated position is out param <paramref name="x"/>, calculated velocity is out param <paramref name="v"/>.
+        /// </summary>
+        public static void PositionVelocityEase(float x0, float v0, float x1, float v1, float t, float d, out float x, out float v) {
+            t /= d;
+            float A = 2 * x0 - 2 * x1 + v0 + v1;
+            float B = -3 * x0 + 3 * x1 - 2 * v0 - v1;
+            float C = v0;
+            float D = x0;
+            x = A * t * t * t + B * t * t + C * t + D;
+            v = 3 * A * t * t + 2 * B * t + C;
+            v /= d;
         }
 
     }
