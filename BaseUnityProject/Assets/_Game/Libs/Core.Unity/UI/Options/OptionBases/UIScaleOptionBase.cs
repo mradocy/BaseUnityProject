@@ -55,7 +55,7 @@ namespace Core.Unity.UI.Options.OptionBases {
         public bool CanIncrement { get { return UISettings.UIScale < this.MaxScale; } }
 
         public void Increment() {
-            UISettings.UIScale = MathUtils.RoundTo(Mathf.Min(MaxScale, UISettings.UIScale + this.OptionStep), this.OptionStep);
+            UISettings.UIScale = MathUtils.RoundTo(Mathf.Min(this.MaxScale, UISettings.UIScale + this.OptionStep), this.OptionStep);
         }
 
         public bool CanDecrement { get { return UISettings.UIScale > this.MinScale; } }

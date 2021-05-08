@@ -111,7 +111,12 @@ namespace Core.Unity.Camera {
         /// <summary>
         /// Gets the current offset to position from the camera shaking.
         /// </summary>
-        public Vector2 ShakeOffset => _shakeOffset * this.Size;
+        public Vector2 ShakeOffset { get; private set; }
+
+        /// <summary>
+        /// Gets the current offset to rotation from the camera shaking.
+        /// </summary>
+        public float ShakeRotationOffset { get; private set; }
 
         #endregion
 
@@ -274,19 +279,35 @@ namespace Core.Unity.Camera {
             this.Position = pos;
 
             // update shake offset from shakers
-            _shakeOffset.Set(0, 0);
-            _shakeRotationOffset = 0;
+            Vector2 shakeOffset = Vector2.zero;
+            float shakeRotationOffset = 0;
             foreach (ICameraShaker cameraShaker in _cameraShakers) {
-                _shakeOffset += cameraShaker.Offset;
-                _shakeRotationOffset += cameraShaker.RotationOffset;
+                shakeOffset += cameraShaker.Offset;
+                shakeRotationOffset += cameraShaker.RotationOffset;
+            }
+
+            // affected by size
+            shakeOffset *= this.Size;
+
+            // threshold for small values
+            if (Mathf.Abs(shakeOffset.x) < 0.01f) {
+                shakeOffset.x = 0;
+            }
+            if (Mathf.Abs(shakeOffset.y) < 0.01f) {
+                shakeOffset.y = 0;
+            }
+            if (Mathf.Abs(shakeRotationOffset) < 0.01f) {
+                shakeRotationOffset = 0;
             }
 
             // update transform
+            this.ShakeOffset = shakeOffset;
+            this.ShakeRotationOffset = shakeRotationOffset;
             this.transform.position = new Vector3(
                 this.Position.x + this.ShakeOffset.x,
                 this.Position.y + this.ShakeOffset.y,
                 this.transform.position.z);
-            this.transform.localRotation = MathUtils.RotToQuat(this.Rotation + _shakeRotationOffset);
+            this.transform.localRotation = MathUtils.RotToQuat(this.Rotation + this.ShakeRotationOffset);
 
             // invoke camera event
             CameraUpdate?.Invoke();
@@ -320,8 +341,6 @@ namespace Core.Unity.Camera {
         #region Private Shake Fields
 
         private List<ICameraShaker> _cameraShakers = new List<ICameraShaker>();
-        private Vector2 _shakeOffset;
-        private float _shakeRotationOffset;
 
         #endregion
     }
