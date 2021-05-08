@@ -86,6 +86,24 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Rounds the given value to the given number of decimal places.  e.g. Round(1.23, 1) = 1.2
+        /// </summary>
+        /// <param name="value">The value to round.</param>
+        /// <param name="decimalPlaces">Number of decimal places to round to.</param>
+        public static float Round(float value, int decimalPlaces) {
+            return (float)System.Math.Round(value, decimalPlaces);
+        }
+
+        /// <summary>
+        /// Rounds the given value to the given number of decimal places.  e.g. Round(1.23, 1) = 1.2
+        /// </summary>
+        /// <param name="value">The value to round.</param>
+        /// <param name="decimalPlaces">Number of decimal places to round to.</param>
+        public static float Round(double value, int decimalPlaces) {
+            return (float)System.Math.Round(value, decimalPlaces);
+        }
+
+        /// <summary>
         /// Rounds the given value to the given place.  e.g. RoundTo(1.23, 0.1) = 1.2
         /// </summary>
         /// <param name="value">The value to round.</param>
