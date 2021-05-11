@@ -272,6 +272,18 @@ namespace Core.Unity {
             t = t / d - 1;
             return (b - a) * (t * t * ((s + 1) * t + s) + 1) + a;
         }
+        /// <summary>
+        /// Ease out interpolation between a and b where the value overshoots a bit before returning to b.  t is clamped between 0 and d.
+        /// </summary>
+        public static Vector2 BackOut(Vector2 a, Vector2 b, float t, float d = 1) {
+            return BackOutUnclamp(a, b, Mathf.Clamp(t, 0, d), d);
+        }
+        /// <summary>
+        /// Ease out interpolation between a and b where the value overshoots a bit before returning to b.
+        /// </summary>
+        public static Vector2 BackOutUnclamp(Vector2 a, Vector2 b, float t, float d = 1) {
+            return new Vector2(BackOutUnclamp(a.x, b.x, t, d), BackOutUnclamp(a.y, b.y, t, d));
+        }
 
         /// <summary>
         /// Elastic ease out interpolation between a and b.  t is clamped between 0 and d.

@@ -73,9 +73,12 @@ namespace Core.Unity.Camera {
         /// Stops the shaking of this shaker.
         /// </summary>
         public void StopShaking() {
-            this.Offset.Set(0, 0);
+            _offsetTime = 0;
+            _offset.Set(0, 0);
+            this.Offset = _offset;
             _velocity.Set(0, 0);
-            this.RotationOffset = 0;
+            _rotationOffset = 0;
+            this.RotationOffset = _rotationOffset;
             _rotVelocity = 0;
             _easeInDuration = 0;
         }
