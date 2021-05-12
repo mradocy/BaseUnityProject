@@ -115,8 +115,11 @@ namespace Core.Unity.Assets {
             return true;
         }
 
+        [System.NonSerialized]
         private bool _isParsed = false;
+        [System.NonSerialized]
         protected List<string[]> _rows = new List<string[]>();
+        [System.NonSerialized]
         private int _tableWidth = -1;
     }
 }

@@ -47,6 +47,20 @@ namespace Core.Unity.TextMeshPro {
         }
 
         /// <summary>
+        /// Gets or sets the text of the <see cref="TextComponent"/>.
+        /// The parsed text is updated and <see cref="TextChanged"/> events are invoked immediately when setting text this way, setting the text of the component directly may take a frame to update.
+        /// </summary>
+        public string Text {
+            get => _textComponent.text;
+            set {
+                if (value == _textComponent.text)
+                    return;
+                _textComponent.text = value;
+                this.OnTextChangedInner();
+            }
+        }
+
+        /// <summary>
         /// Gets the parsed text of the text component.
         /// </summary>
         public string ParsedText { get; private set; }
@@ -179,7 +193,7 @@ namespace Core.Unity.TextMeshPro {
             _prevText = this.TextComponent.text;
             this.TextComponent.ForceMeshUpdate(true);
             this.RefreshCache();
-            TMPro_EventManager.TEXT_CHANGED_EVENT.Add(this.OnTextChangedInner);
+            TMPro_EventManager.TEXT_CHANGED_EVENT.Add(this.TextChangedEventReceiver);
 
             this.OnAwake();
         }
@@ -200,7 +214,7 @@ namespace Core.Unity.TextMeshPro {
         protected void OnDestroy() {
             this.OnDerivedDestroy();
 
-            TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(this.OnTextChangedInner);
+            TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(this.TextChangedEventReceiver);
             _textComponent = null;
             _vertexChanges.Clear();
         }
@@ -331,10 +345,14 @@ namespace Core.Unity.TextMeshPro {
         /// Method called when any TMPro text object changes.
         /// </summary>
         /// <param name="text">The text object changed.</param>
-        private void OnTextChangedInner(object text) {
+        private void TextChangedEventReceiver(object text) {
             if (!ReferenceEquals(text, this.TextComponent))
                 return;
 
+            this.OnTextChangedInner();
+        } 
+
+        private void OnTextChangedInner() {
             this.RefreshCache();
 
             if (this.TextComponent.text != _prevText) {
