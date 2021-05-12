@@ -1,25 +1,22 @@
-﻿using Core.Unity.Assets;
+using Core.Unity;
+using Core.Unity.Assets;
 using Core.Unity.Settings;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-
-// TODO: delete this
 
 namespace Core.Unity.UI {
 
     [ExecuteAlways]
-    public abstract class BindTextBase : MonoBehaviour {
+    public abstract class BindTextToPropertyBase : MonoBehaviour {
 
         #region Inspector Fields
 
         [SerializeField]
-        [Tooltip("Localized text asset to bind to the content of the Text component.")]
-        private LocalizedTextAsset _text = null;
+        [Tooltip("Localized property table asset to bind to the content of the text component.")]
+        private LocalizedPropertyTableAsset _propertyTableAsset = null;
 
         [SerializeField]
-        [Tooltip("If given, text will instead be set to whatever value is to the right of \"property_key: \" in the source file.")]
         private string _propertyKey = null;
 
         [SerializeField]
@@ -60,8 +57,8 @@ namespace Core.Unity.UI {
         /// </summary>
         /// <returns>text</returns>
         protected string GetComponentText() {
-            if (_text == null) {
-                return $"<Localized text asset not defined>";
+            if (_propertyTableAsset == null) {
+                return $"<Property table asset not defined>";
             }
 
             LocalizationCode localization = _forceLocalization;
@@ -69,13 +66,9 @@ namespace Core.Unity.UI {
                 localization = LocalizationSettings.Localization;
             }
 
-            if (string.IsNullOrEmpty(_propertyKey)) {
-                return _text.GetText(localization);
-            }
-
-            string value = _text.GetPropertyValue(localization, _propertyKey);
+            string value = _propertyTableAsset.GetValue(_propertyKey, localization);
             if (string.IsNullOrEmpty(value)) {
-                return $"<String \"{_propertyKey}:\" not found for localization \"{LocalizationSettings.CodeToString(localization)}\">";
+                return $"<Property \"{_propertyKey}:\" not found for localization \"{LocalizationSettings.CodeToString(localization)}\">";
             }
 
             return value;

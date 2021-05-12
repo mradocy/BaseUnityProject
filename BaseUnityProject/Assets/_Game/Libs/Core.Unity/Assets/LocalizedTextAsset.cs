@@ -6,6 +6,8 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
+// TODO: delete this
+
 /* Implementation of LocalizedText may change.  But the Text getter and GetText() should stay.
  */
 

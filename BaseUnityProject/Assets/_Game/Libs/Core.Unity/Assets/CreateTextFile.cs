@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,15 +11,9 @@ namespace Core.Unity.Assets {
 
     public static class CreateTextFile {
 
-        /// <summary>
-        /// A menu item that creates an empty text file.
-        /// </summary>
-        [MenuItem("Assets/Create/Text File", priority = 50)]
-        public static void Create() {
-
-            // get file name
-            string fileName = "New Text File.txt";
-            string path = null;
+        public static void CreateFile(string fileName) {
+            // get file path
+            string path;
             if (Selection.activeObject == null) {
                 path = "Assets";
             } else {
@@ -30,11 +25,19 @@ namespace Core.Unity.Assets {
             string newFile = AssetDatabase.GenerateUniqueAssetPath(path + "/" + fileName);
 
             // create file (and close stream)
-            File.WriteAllText(Application.dataPath.Replace("Assets", newFile), "");
+            Encoding encoding = new UTF8Encoding(false);
+            File.WriteAllText(Application.dataPath.Replace("Assets", newFile), string.Empty, encoding);
 
             // import to Unity
             AssetDatabase.ImportAsset(newFile);
+        }
 
+        /// <summary>
+        /// A menu item that creates an empty .txt file.
+        /// </summary>
+        [MenuItem("Assets/Create/File/.txt", priority = 50)]
+        public static void Create() {
+            CreateFile("New Text File.txt");
         }
     }
 

@@ -38,7 +38,7 @@ namespace Core.Unity.SaveData {
         /// <summary>
         /// Encoding used for file operations.
         /// </summary>
-        public static System.Text.Encoding Encoding => System.Text.Encoding.Unicode;
+        public static readonly System.Text.Encoding Encoding = new System.Text.UTF8Encoding(false);
 
         /// <summary>
         /// The full path of the directory reserved for save files.  Is contained in Unity's <see cref="Application.persistentDataPath"/>.

@@ -1,22 +1,22 @@
 ﻿using Core.Unity.Assets;
+using Core.Unity.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 // TODO: delete this
 
-namespace Core.Unity.UI {
+namespace Core.Unity.TextMeshPro {
 
     [ExecuteAlways]
-    [RequireComponent(typeof(Text))]
-    public class BindText : BindTextBase {
+    [RequireComponent(typeof(TMPro.TMP_Text))]
+    public class BindTMProText : BindTextBase {
 
         /// <summary>
         /// Updates the text in the text component.
         /// </summary>
         protected override void UpdateText() {
-            Text textComponent = this.GetComponent<Text>();
+            TMPro.TMP_Text textComponent = this.GetComponent<TMPro.TMP_Text>();
             if (textComponent == null)
                 return;
 

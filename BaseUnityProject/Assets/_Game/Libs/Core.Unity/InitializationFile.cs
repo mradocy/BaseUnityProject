@@ -21,6 +21,11 @@ namespace Core.Unity {
             _instance = this;
         }
 
+        /// <summary>
+        /// Encoding used for file operations.
+        /// </summary>
+        public static readonly Encoding Encoding = new UTF8Encoding(false);
+
         #region Properties
 
         /// <summary>
@@ -147,7 +152,7 @@ namespace Core.Unity {
             }
 
             try {
-                File.WriteAllText(this.FilePath, sb.ToString());
+                File.WriteAllText(this.FilePath, sb.ToString(), Encoding);
             } catch (System.Exception e) {
                 Debug.LogError($"Could not save initialization settings to \"{this.FilePath}\".  Exception: {e.Message}");
             }

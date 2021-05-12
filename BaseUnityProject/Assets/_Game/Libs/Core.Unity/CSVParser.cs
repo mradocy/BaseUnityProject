@@ -35,7 +35,6 @@ namespace Core.Unity {
         /// <param name="csvText">The content of a csv file, all in one string</param>
         /// <param name="args">Additional args for the parser.</param>
         /// <param name="rows">This list will be filled with the rows of the csv file.</param>
-        /// <returns>If parsing was a success</returns>
         public static void ParseCSV(string csvText, ParseCSVArgs args, List<string[]> rows) {
             using (StringReader sr = new StringReader(csvText)) {
                 ParseCSV(sr, args, rows);
