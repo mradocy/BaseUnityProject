@@ -65,7 +65,7 @@ namespace Core.Unity.Assets {
         /// <summary>
         /// Gets if the csv asset was parsed.
         /// </summary>
-        protected bool IsParsed { get; private set; }
+        protected bool IsParsed => _isParsed;
 
         /// <summary>
         /// Parse implementation.  Can be overridden.
@@ -111,10 +111,11 @@ namespace Core.Unity.Assets {
             }
             _tableWidth = maxWidth;
 
-            this.IsParsed = true;
+            _isParsed = true;
             return true;
         }
 
+        private bool _isParsed = false;
         protected List<string[]> _rows = new List<string[]>();
         private int _tableWidth = -1;
     }
