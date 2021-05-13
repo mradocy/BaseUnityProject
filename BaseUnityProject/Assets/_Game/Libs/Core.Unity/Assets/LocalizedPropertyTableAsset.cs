@@ -24,35 +24,62 @@ namespace Core.Unity.Assets {
         }
 
         /// <summary>
-        /// Gets the value for the given property key and localization.
-        /// Null is returned only if the key or localization couldn't be found.
+        /// Gets the value for the given property key and localization.  If the <paramref name="propertyKey"/> can't be found, an error is displayed.
         /// This can be used by the editor without parsing the text asset.
         /// </summary>
         public string GetValue(string propertyKey, LocalizationCode localizationCode) {
+            if (this.TryGetValue(propertyKey, localizationCode, out string value)) {
+                return value;
+            } else {
+                if (!_propertyToRowMap.ContainsKey(propertyKey)) {
+                    Debug.LogError($"Could not find property key \"{propertyKey}\" in table");
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to get the value for the given property key with the current localization.  No error is displayed if the <paramref name="propertyKey"/> couldn't be found.
+        /// Null is returned only if the key or localization couldn't be found.
+        /// This can be used by the editor without parsing the text asset.
+        /// </summary>
+        public bool TryGetValue(string propertyKey, out string value) {
+            return this.TryGetValue(propertyKey, LocalizationSettings.Localization, out value);
+        }
+
+        /// <summary>
+        /// Attempts to get the value for the given property key and localization.  No error is displayed if the <paramref name="propertyKey"/> couldn't be found.
+        /// Null is returned only if the key or localization couldn't be found.
+        /// This can be used by the editor without parsing the text asset.
+        /// </summary>
+        public bool TryGetValue(string propertyKey, LocalizationCode localizationCode, out string value) {
+            value = null;
             if (Application.isPlaying) {
                 // in game.  Parse once, then quickly get the values
                 if (!this.ParseIfNotParsed())
-                    return null;
+                    return false;
 
                 // get column from localization
                 int col = this.GetLocalizationColumn(localizationCode);
                 if (col <= 0)
-                    return null;
+                    return false;
 
                 if (_propertyToRowMap.TryGetValue(propertyKey, out int row)) {
                     string[] rowValues = _rows[row];
                     if (col >= rowValues.Length) {
-                        return string.Empty;
+                        value = string.Empty;
+                        return true;
                     }
-                    return rowValues[col];
+                    value = rowValues[col];
+                    return true;
                 } else {
-                    Debug.LogError($"Could not find property key \"{propertyKey}\" in table");
-                    return null;
+                    return false;
                 }
 
             } else {
                 // in editor.  Attempt to get value without caching the properties
-                return this.GetValueFromTextAsset(propertyKey, localizationCode);
+                value = this.GetValueFromTextAsset(propertyKey, localizationCode);
+                return value != null;
             }
         }
 

@@ -9,9 +9,25 @@ namespace Core.Unity.Assets {
 
 #if UNITY_EDITOR
 
-    public static class CreateTextFile {
+    public static class CreateTextFiles {
 
-        public static void CreateFile(string fileName) {
+        /// <summary>
+        /// A menu item that creates an empty .txt file.
+        /// </summary>
+        [MenuItem("Assets/Create/File/.txt", priority = 50)]
+        public static void CreateTextFile() {
+            CreateFile("New Text File.txt");
+        }
+
+        /// <summary>
+        /// A menu item that creates an empty .csv file.
+        /// </summary>
+        [MenuItem("Assets/Create/File/.csv", priority = 51)]
+        public static void CreateCSVFile() {
+            CreateFile("New CSV File.csv");
+        }
+
+        private static void CreateFile(string fileName) {
             // get file path
             string path;
             if (Selection.activeObject == null) {
@@ -30,14 +46,6 @@ namespace Core.Unity.Assets {
 
             // import to Unity
             AssetDatabase.ImportAsset(newFile);
-        }
-
-        /// <summary>
-        /// A menu item that creates an empty .txt file.
-        /// </summary>
-        [MenuItem("Assets/Create/File/.txt", priority = 50)]
-        public static void Create() {
-            CreateFile("New Text File.txt");
         }
     }
 
