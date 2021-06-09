@@ -12,7 +12,9 @@ namespace Core.Unity.Camera {
         #region Inspector Fields
 
         [SerializeField, LongLabel]
-        private float _updatePeriod = 1 / 60f;
+        private float _periodX = 5 / 60f;
+        [SerializeField, LongLabel]
+        private float _periodY = 3 / 60f;
 
         #endregion
 
@@ -31,7 +33,6 @@ namespace Core.Unity.Camera {
             _maxOffset1.Set(maxOffsetX, maxOffsetY);
             _easeTime = 0;
             _easeDuration = easeDuration;
-            this.UpdateOffset();
         }
 
         public void StopShake(float easeDuration) {
@@ -39,7 +40,6 @@ namespace Core.Unity.Camera {
             _maxOffset1.Set(0, 0);
             _easeTime = 0;
             _easeDuration = easeDuration;
-            this.UpdateOffset();
         }
 
         /// <summary>
@@ -47,19 +47,8 @@ namespace Core.Unity.Camera {
         /// </summary>
         /// <param name="dt">Amount of time passed.</param>
         public void Update(float dt) {
+            // get max offset
             _easeTime += dt;
-            _offsetTime += dt;
-            if (_offsetTime >= _updatePeriod) {
-                _offsetTime = 0;
-                this.UpdateOffset();
-            }
-        }
-
-        #endregion
-
-        #region Private
-
-        private void UpdateOffset() {
             Vector2 maxOffset;
             if (_easeDuration <= 0) {
                 maxOffset = _maxOffset1;
@@ -69,18 +58,54 @@ namespace Core.Unity.Camera {
             maxOffset.x = Mathf.Abs(maxOffset.x);
             maxOffset.y = Mathf.Abs(maxOffset.y);
 
-            if (maxOffset.x == 0 && maxOffset.y == 0) {
-                this.Offset = Vector2.zero;
-            } else {
-                this.Offset = new Vector2(Random.Range(-maxOffset.x, maxOffset.x), Random.Range(-maxOffset.y, maxOffset.y));
+            // update offset x
+            _xTime += dt;
+            if (_xTime >= _periodX) {
+                _xTime = 0;
+
+                // update offset target
+                _offset0x = _offset1x;
+                if (_offset1x < 0) {
+                    _offset1x = Random.Range(maxOffset.x / 2, maxOffset.x);
+                } else {
+                    _offset1x = Random.Range(-maxOffset.x, -maxOffset.x / 2);
+                }
             }
+            float offsetX = Easing.QuadInOut(_offset0x, _offset0y, _xTime, _periodX);
+
+            // update offset y
+            _yTime += dt;
+            if (_yTime >= _periodY) {
+                _yTime = 0;
+
+                // update offset target
+                _offset0y = _offset1y;
+                if (_offset1y < 0) {
+                    _offset1y = Random.Range(maxOffset.y / 2, maxOffset.y);
+                } else {
+                    _offset1y = Random.Range(-maxOffset.y, -maxOffset.y / 2);
+                }
+            }
+            float offsetY = Easing.QuadInOut(_offset1x, _offset1y, _yTime, _periodY);
+
+            this.Offset = new Vector2(offsetX, offsetY);
         }
 
-        private float _offsetTime;
+        #endregion
+
+        #region Private
+
         private Vector2 _maxOffset0;
         private Vector2 _maxOffset1;
         private float _easeTime;
         private float _easeDuration;
+
+        private float _xTime;
+        private float _yTime;
+        private float _offset0x;
+        private float _offset0y;
+        private float _offset1x;
+        private float _offset1y;
 
         #endregion
     }

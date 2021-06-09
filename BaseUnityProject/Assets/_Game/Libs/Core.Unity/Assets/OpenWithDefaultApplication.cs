@@ -11,7 +11,7 @@ namespace Core.Unity.Assets {
 
     public static class OpenWithDefaultApplication {
 
-        [MenuItem("Assets/Open with Default Application...")]
+        [MenuItem("Assets/Open with Default Application...", priority = 61)]
         static void OpenWithDefaultApplicationMenuItem() {
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), AssetDatabase.GetAssetPath(Selection.activeObject));
             System.Diagnostics.Process.Start(filePath);

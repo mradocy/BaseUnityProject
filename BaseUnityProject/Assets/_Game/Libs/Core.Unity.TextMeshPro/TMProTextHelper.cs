@@ -292,7 +292,7 @@ namespace Core.Unity.TextMeshPro {
         /// Applies color-related changes to the text characters specified in <see cref="_colorChanges"/>.
         /// </summary>
         private void ApplyColorChanges() {
-            if (!this.TextComponent.enabled)
+            if (!this.TextComponent.isActiveAndEnabled)
                 return;
 
             // change colors of each character

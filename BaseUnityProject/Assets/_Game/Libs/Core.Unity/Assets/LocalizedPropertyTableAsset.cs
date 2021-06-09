@@ -31,8 +31,10 @@ namespace Core.Unity.Assets {
             if (this.TryGetValue(propertyKey, localizationCode, out string value)) {
                 return value;
             } else {
-                if (!_propertyToRowMap.ContainsKey(propertyKey)) {
-                    Debug.LogError($"Could not find property key \"{propertyKey}\" in table");
+                if (Application.isPlaying) {
+                    if (_propertyToRowMap == null || !_propertyToRowMap.ContainsKey(propertyKey)) {
+                        Debug.LogError($"Could not find property key \"{propertyKey}\" in table");
+                    }
                 }
                 return null;
             }
