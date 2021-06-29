@@ -9,6 +9,7 @@ namespace Core.Unity.Collision {
     /// Performs short shape casts to check collision with nearby objects.  Triggers are not detected.
     /// Shapes are defined by non-trigger colliders attached to the gameObject and its children.
     /// </summary>
+    [DefaultExecutionOrder(-999)] // this script should execute early.  NOTE: This attribute works, despite not showing up in the Script Execution Order window
     public class CollisionCaster : MonoBehaviour {
 
         #region Inspector Fields

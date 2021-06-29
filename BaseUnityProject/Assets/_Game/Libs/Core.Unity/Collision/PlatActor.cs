@@ -125,38 +125,35 @@ namespace Core.Unity.Collision {
         /// <para/>
         /// Returns true the object was already on the ground or if a snap down occurred.  Returns false if object is not on the ground and couldn't be snapped down.
         /// </summary>
-        /// <param name="distance"></param>
         public bool SnapDown(float distance) {
+            return this.SnapDirection(distance, Direction.Down);
+        }
 
-            Vector2 pos = this.transform.position;
+        /// <summary>
+        /// If there's a ceiling a given distance above, will snap up to it so they're touching.
+        /// <para/>
+        /// Returns true the object was already on the ceiling or if a snap up occurred.  Returns false if object is not on the ceiling and couldn't be snapped up.
+        /// </summary>
+        public bool SnapUp(float distance) {
+            return this.SnapDirection(distance, Direction.Up);
+        }
 
-            // check raycast from bottom center first
-            bool prevQSIC = Physics2D.queriesStartInColliders;
-            Physics2D.queriesStartInColliders = false;
-            RaycastHit2D raycastResult = _collisionCaster.Cast(Vector2.down, distance, Vector2.zero, Direction.Up);
-            Physics2D.queriesStartInColliders = prevQSIC;
+        /// <summary>
+        /// If there's a wall a given distance to the left, will snap left to it so they're touching.
+        /// <para/>
+        /// Returns true the object was already on the left wall or if a snap left occurred.  Returns false if object is not on the wall and couldn't be snapped.
+        /// </summary>
+        public bool SnapLeft(float distance) {
+            return this.SnapDirection(distance, Direction.Left);
+        }
 
-            if (raycastResult.collider != null) {
-                // need to cast with all the colliders for a better diff
-                RaycastHit2D rh2d = _collisionCaster.Cast(Vector2.down, distance, Vector2.zero, Direction.Up);
-                if (rh2d.collider != null) {
-                    // only apply snap down if distance away isn't trivial
-                    Vector2 diff = Vector2.down * distance * rh2d.fraction;
-                    if (diff.sqrMagnitude > _collisionCaster.TouchCastDistance * _collisionCaster.TouchCastDistance) {
-                        // .01 added so that collider isn't intersecting the platform below
-                        this.transform.position = pos + diff + new Vector2(0, .01f);
-                    }
-
-                    return true;
-                }
-            }
-
-            // return true if touching down anyway
-            if (_collisionCaster.Touch(Direction.Down)) {
-                return true;
-            }
-
-            return false;
+        /// <summary>
+        /// If there's a wall a given distance to the right, will snap right to it so they're touching.
+        /// <para/>
+        /// Returns true the object was already on the right wall or if a snap right occurred.  Returns false if object is not on the wall and couldn't be snapped.
+        /// </summary>
+        public bool SnapRight(float distance) {
+            return this.SnapDirection(distance, Direction.Right);
         }
 
         /// <summary>
@@ -316,6 +313,60 @@ namespace Core.Unity.Collision {
 
             // applying position
             _rb2d.MovePosition(pos);
+        }
+
+        /// <summary>
+        /// If there's a wall the given distance away in the given direction, will snap to it so they're touching.
+        /// <para/>
+        /// Returns true the object was already on the wall or if a snap in the direction occurred.  Returns false if object is not on the wall and couldn't be snapped in the direction.
+        /// </summary>
+        private bool SnapDirection(float distance, Direction direction) {
+            Vector2 pos = this.transform.position;
+            Vector2 directionVec;
+            Direction oppositeDirection;
+            switch (direction) {
+            case Direction.Left:
+                directionVec = Vector2.left;
+                oppositeDirection = Direction.Right;
+                break;
+            case Direction.Right:
+                directionVec = Vector2.right;
+                oppositeDirection = Direction.Left;
+                break;
+            case Direction.Up:
+                directionVec = Vector2.up;
+                oppositeDirection = Direction.Down;
+                break;
+            case Direction.Down:
+            default:
+                directionVec = Vector2.down;
+                oppositeDirection = Direction.Up;
+                break;
+            }
+
+            // check raycast
+            bool prevQSIC = Physics2D.queriesStartInColliders;
+            Physics2D.queriesStartInColliders = false;
+            RaycastHit2D raycastResult = _collisionCaster.Cast(directionVec, distance, Vector2.zero, oppositeDirection);
+            Physics2D.queriesStartInColliders = prevQSIC;
+
+            if (raycastResult.collider != null) {
+                // only apply snap if distance away isn't trivial
+                Vector2 diff = directionVec * distance * raycastResult.fraction;
+                if (diff.sqrMagnitude > _collisionCaster.TouchCastDistance * _collisionCaster.TouchCastDistance) {
+                    // .01 added so that collider isn't intersecting the platform below
+                    this.transform.position = pos + diff - (directionVec * 0.01f);
+                }
+
+                return true;
+            }
+
+            // return true if touching down anyway
+            if (_collisionCaster.Touch(Direction.Down)) {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

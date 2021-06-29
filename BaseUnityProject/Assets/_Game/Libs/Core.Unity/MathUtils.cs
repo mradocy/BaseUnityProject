@@ -132,6 +132,32 @@ namespace Core.Unity {
         }
 
         /// <summary>
+        /// Linearly interpolates between a and b by t.
+        /// </summary>
+        public static Vector2 Lerp(Vector2 a, Vector2 b, float t) {
+            return LerpUnclamped(a, b, Mathf.Clamp01(t));
+        }
+
+        /// <summary>
+        /// Linearly interpolates between a and b by t with no limit on t.
+        /// </summary>
+        public static Vector2 LerpUnclamped(Vector2 a, Vector2 b, float t) {
+            return a + (b - a) * t;
+        }
+
+        /// <summary>
+        /// Calculates the linear parameter t that produces the interpolant value in-between the points <paramref name="a"/> and <paramref name="b"/>.
+        /// <paramref name="a"/>, <paramref name="b"/>, <paramref name="value"/> are all assumed to be on the same line.
+        /// </summary>
+        public static float InverseLerp(Vector2 a, Vector2 b, Vector2 value) {
+            if (Mathf.Approximately(a.x, b.x)) {
+                return (value.y - a.y) / (b.y - a.y);
+            } else {
+                return (value.x - a.x) / (b.x - a.x);
+            }
+        }
+
+        /// <summary>
         /// Gets the point along a bezier curve with 3 control points.
         /// </summary>
         /// <param name="p0">Start point.</param>

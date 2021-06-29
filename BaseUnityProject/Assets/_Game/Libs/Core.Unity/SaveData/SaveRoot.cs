@@ -92,7 +92,7 @@ namespace Core.Unity.SaveData {
         public event UnityAction<SaveRoot> PreLoad;
 
         /// <summary>
-        /// Event that's invoked immediately after xml is sucessfully loaded and parsed.
+        /// Event that's invoked immediately after a source is sucessfully loaded and parsed.
         /// </summary>
         public event UnityAction<SaveRoot> Loaded;
 

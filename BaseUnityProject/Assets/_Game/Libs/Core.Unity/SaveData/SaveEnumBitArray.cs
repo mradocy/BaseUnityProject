@@ -32,19 +32,19 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Adds the given enum to the bit array of values.
+        /// Adds the given enum to the bit array of values.  Returns if the array changed.
         /// </summary>
         /// <param name="item">Item to add.</param>
-        public void Add(TEnum item) {
-            this.Add(CastTo<int>.From(item));
+        public bool Add(TEnum item) {
+            return this.Add(CastTo<int>.From(item));
         }
 
         /// <summary>
-        /// Removes the given enum from the bit array.
+        /// Removes the given enum from the bit array.  Returns if the array changed.
         /// </summary>
         /// <param name="item">Item to remove.</param>
-        public void Remove(TEnum item) {
-            this.Remove(CastTo<int>.From(item));
+        public bool Remove(TEnum item) {
+            return this.Remove(CastTo<int>.From(item));
         }
 
         /// <summary>

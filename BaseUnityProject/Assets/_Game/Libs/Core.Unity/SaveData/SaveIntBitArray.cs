@@ -56,26 +56,32 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
-        /// Adds the given int to the bit array of values.
+        /// Adds the given int to the bit array of values.  Returns if the array changed.
         /// </summary>
         /// <param name="item">Item to add.</param>
-        public void Add(int item) {
+        public bool Add(int item) {
             if (item < 0 || item > this.Max) {
                 throw new System.ArgumentException($"Value {item} cannot be added to this bit array.  Range is [0, {this.Max}]", nameof(item));
             }
+            if (this.Contains(item))
+                return false;
 
             _bits[item / 8] |= (byte)(1 << (item % 8));
+            return true;
         }
 
         /// <summary>
-        /// Removes the given int from the bit array.
+        /// Removes the given int from the bit array.  Returns if the array changed.
         /// </summary>
         /// <param name="item">Item to remove.</param>
-        public void Remove(int item) {
+        public bool Remove(int item) {
             if (item < 0 || item > this.Max)
-                return;
+                return false;
+            if (!this.Contains(item))
+                return false;
 
             _bits[item / 8] &= (byte)~(1 << (item % 8));
+            return true;
         }
 
         /// <summary>
