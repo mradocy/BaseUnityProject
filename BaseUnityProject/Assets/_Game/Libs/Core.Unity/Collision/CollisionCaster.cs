@@ -62,14 +62,28 @@ namespace Core.Unity.Collision {
 
         /// <summary>
         /// Returns a mask combining all the layers that collide with the given layer.
+        /// For performance reasons, layer masks are cached.  To reset the cache, call <see cref="ResetLayerMaskCache"/>.  This is required if interactions between physics layers ever changes.
         /// </summary>
         public static int LayerMaskFromLayer(int layer) {
+            if (_layerMaskCache.TryGetValue(layer, out int cachedMask)) {
+                return cachedMask;
+            }
+
             int mask = 0;
             for (int i = 0; i < 32; i++) {
                 if (!Physics2D.GetIgnoreLayerCollision(layer, i)) mask |= (1 << i);
             }
+            _layerMaskCache.Add(layer, mask);
             return mask;
         }
+
+        /// <summary>
+        /// Resets the layer mask cache.  This is required if interactions between physics layers ever changes.
+        /// </summary>
+        public static void ResetLayerMaskCache() {
+            _layerMaskCache.Clear();
+        }
+
         #endregion
 
         #region Public Methods
@@ -616,6 +630,8 @@ namespace Core.Unity.Collision {
         /// List of instance IDs of colliders to ignore when checking casts.
         /// </summary>
         private HashSet<int> _ignoreCollisionColliders = new HashSet<int>();
+
+        private static Dictionary<int, int> _layerMaskCache = new Dictionary<int, int>();
 
         #endregion
 

@@ -23,5 +23,14 @@ namespace Core.Unity.UI {
             return shader;
         }
 
+        /// <summary>
+        /// Updates the color of this graphic to the given alpha value.
+        /// </summary>
+        public static void SetAlpha(this Graphic graphic, float alpha) {
+            Color c = graphic.color;
+            c.a = alpha;
+            graphic.color = c;
+        }
+
     }
 }

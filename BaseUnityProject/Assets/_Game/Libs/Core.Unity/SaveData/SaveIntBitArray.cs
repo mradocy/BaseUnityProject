@@ -106,6 +106,22 @@ namespace Core.Unity.SaveData {
         }
 
         /// <summary>
+        /// Gets the number of 1 bits in the array.
+        /// </summary>
+        public int Count {
+            get {
+                int count = 0;
+                for (int i = 0; i < _bits.Length; i++) {
+                    for (int b = 0; b < 8; b++) {
+                        if ((_bits[i] & (byte)(1 << b)) != 0)
+                            count++;
+                    }
+                }
+                return count;
+            }
+        }
+
+        /// <summary>
         /// Max value that can be added to this bit array.  Min is 0.
         /// </summary>
         public int Max { get; }
